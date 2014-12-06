@@ -103,12 +103,33 @@ Sometimes, we store complex data, but in JSON it must be represented by single v
     System.out.println(foo.name); // prints "Mike"
     System.out.println(foo.action); // prints "FIRST" enum
 
+If you don't want to expose class name when converting objects to JSON, user Configuration:
+
+    package mypackage;
+    public class Foo {
+       String str = "Hello";
+       int num = 1;
+    }
+    StringBuilder sb = new StringBuilder();
+    try {
+      Configuration c = new Configuration();
+      c.setProperty(Configuration.EXCLUDE_CLASS_PROPERTY, "true")
+      JsonWriter.write(new Foo(), sb, c);
+      System.out.println(sb.toString());
+      // {"str":"Hello","num":1}
+    } catch (Exception ignore) {}
+
+*Note:* reading such JSON without 'class', will cause Map as output:
+
+    String json = "{\"num\": 1,\"str\":\"Hello\"}";
+    Map map = JsonReader.read(json, Map.class);
+    System.out.println(map.get("str"); // prints "Mike"
+    System.out.println(map.get("num")); // prints "1"
 
 Oh, installation?
 ------------------------
-
 1. Download Jsonable project
-2. Take jsonable.jar into you own project path
+2. Take jsonable.jar into your own project path
 3. Don't forget about another 2 libs: common-logging and common-lang3
 
 Bugs, changes requests
