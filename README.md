@@ -42,7 +42,7 @@ Sometimes, you want to avoid some of variables to be serialized to JSON:
        int num = 1;
     }
 
-In this case you can use java *transient* modifier or add @IgnoreJson annotation, like this:
+In this case you can use java *transient* modifier or add **@IgnoreJson** annotation, like this:
 
     package mypackage;
     public class Foo {
@@ -56,7 +56,7 @@ In this case you can use java *transient* modifier or add @IgnoreJson annotation
       // {"num":1,"class":"mypackage.Foo"}
     } catch (Exception ignore) {}
 
-Other way to define Object and specific fields to be converted to JSON, it's to use @JsonClass and @JsonField annotations. If you defined class with @JsonClass, you'll need to define every field you want to be converted into JSON
+Other way to define Object and specific fields to be converted to JSON, it's to use **@JsonClass** and **@JsonField** annotations. If you defined class with **@JsonClass**, you'll need to define every field you want to be converted into JSON
 
     package mypackage;
     @JsonCLass
@@ -71,7 +71,7 @@ Other way to define Object and specific fields to be converted to JSON, it's to 
       // {"name":"Mike","class":"mypackage.Foo"}
     } catch (Exception ignore) {}
 
-Sometimes, we store complex data, but in JSON it must be represented by single value, so in this case you can use @CustomField annotation (despite of its name, this annotation is for methods):
+Sometimes, we store complex data, but in JSON it must be represented by single value, so in this case you can use **@CustomField** annotation (despite of its name, this annotation is for methods):
 
     package mypackage;
 	public enum Action {
@@ -103,7 +103,7 @@ Sometimes, we store complex data, but in JSON it must be represented by single v
     System.out.println(foo.name); // prints "Mike"
     System.out.println(foo.action); // prints "FIRST" enum
 
-If you don't want to expose class name when converting objects to JSON, user Configuration:
+If you don't want to expose class name when converting objects to JSON, user **Configuration**:
 
     package mypackage;
     public class Foo {
