@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
  * @author Grinfeld Mikhail
  * @since 12/6/2014.
  */
-public class JsonReaderTest {
+public class JsonTest {
 
     public static class SimpleObj {
         String str;
@@ -185,7 +185,7 @@ public class JsonReaderTest {
             simpleObj.str = "Hello";
             simpleObj.num = 1;
             JsonWriter.write(simpleObj, sb);
-            assertEquals("Failed simple object test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.parser.JsonReaderTest$SimpleObj\"}", sb.toString());
+            assertEquals("Failed simple object test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.parser.JsonTest$SimpleObj\"}", sb.toString());
         } catch (Exception ignore) {}
     }
 
@@ -205,7 +205,7 @@ public class JsonReaderTest {
             simpleObjAnot.num = 1;
             simpleObjAnot.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnot, sb);
-            assertEquals("Failed simple object with annotation test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.parser.JsonReaderTest$SimpleObjAnnot\"}", sb.toString());
+            assertEquals("Failed simple object with annotation test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.parser.JsonTest$SimpleObjAnnot\"}", sb.toString());
         } catch (Exception ignore) {}
     }
 
@@ -227,7 +227,7 @@ public class JsonReaderTest {
             simpleObjAnotExtend.extended = "Extended";
             simpleObjAnotExtend.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnotExtend, sb);
-            assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":\"Extended\",\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.parser.JsonReaderTest$SimpleObjAnnotExtend\"}", sb.toString());
+            assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":\"Extended\",\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.parser.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
         } catch (Exception ignore) {}
     }
 
@@ -238,7 +238,7 @@ public class JsonReaderTest {
             simpleObjIgnore.num = 1;
             simpleObjIgnore.ignore = "Ignore me";
             JsonWriter.write(simpleObjIgnore, sb);
-            assertEquals("Failed simple object extended with ignore test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.parser.JsonReaderTest$SimpleObjIgnore\"}", sb.toString());
+            assertEquals("Failed simple object extended with ignore test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.parser.JsonTest$SimpleObjIgnore\"}", sb.toString());
         } catch (Exception ignore) {}
     }
 
@@ -249,7 +249,7 @@ public class JsonReaderTest {
             simpleObjCustom.num = 1;
             simpleObjCustom.custom = "Custom me";
             JsonWriter.write(simpleObjCustom, sb);
-            assertEquals("Failed simple object with custom test " + sb.toString(), "{\"custom\":\"Custom me\",\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.parser.JsonReaderTest$SimpleObjCustom\"}", sb.toString());
+            assertEquals("Failed simple object with custom test " + sb.toString(), "{\"custom\":\"Custom me\",\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.parser.JsonTest$SimpleObjCustom\"}", sb.toString());
         } catch (Exception ignore) {}
     }
 

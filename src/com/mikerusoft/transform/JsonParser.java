@@ -1,6 +1,8 @@
 package com.mikerusoft.transform;
 
 import com.mikerusoft.annotations.CustomField;
+import com.mikerusoft.utils.Configuration;
+import com.mikerusoft.utils.ContextManager;
 import com.mikerusoft.utils.ReflectionCache;
 import com.sun.istack.internal.NotNull;
 import org.apache.commons.lang3.EnumUtils;
@@ -104,7 +106,8 @@ public class JsonParser {
     }
 
     private Object createClass(Map<String, Object> possible) {
-        String className = (String)possible.get("class");
+        String cl = Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
+        String className = (String)possible.get(cl);
         if (StringUtils.isEmpty(className))
             return possible;
         Class<?> clazz = null;
@@ -225,7 +228,8 @@ public class JsonParser {
                 c = parseMap(bf, m);
                 if (c == END_MAP) {
                     m = (Map<String,Object>)queue.pollLast();
-                    if (m.containsKey("class")) {
+                    String cl = Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
+                    if (m.containsKey(cl)) {
                         Object o = createClass(m);
                         int r = bf.read();
                         return new ImmutablePair<Character, Object>(r != -1 ? (char)r : c, o);

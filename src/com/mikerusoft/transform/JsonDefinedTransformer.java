@@ -41,9 +41,12 @@ public class JsonDefinedTransformer implements Transformer {
             count = count + write(o, inherit.getDeclaredFields(), inherit.getDeclaredMethods(), out, count);
         } while ((inherit = inherit.getSuperclass()) != null);
         if (count > 0) {
-            boolean excludeClass = Configuration.getBooleanProperty(ContextManager.get(Configuration.class), Configuration.EXCLUDE_CLASS_PROPERTY, false);
-            if (!excludeClass)
-                out.write((",\"class\":\"" + o.getClass().getName() + "\""));
+            Configuration c = ContextManager.get(Configuration.class);
+            boolean excludeClass = Configuration.getBooleanProperty(c, Configuration.EXCLUDE_CLASS_PROPERTY, false);
+            if (!excludeClass) {
+                String cl = Configuration.getStringProperty(c, Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
+                out.write((",\"" + cl + "\":\"" + o.getClass().getName() + "\""));
+            }
         }
         out.write("}");
     }
