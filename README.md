@@ -1,7 +1,7 @@
 jsonable
 ========
 
-Small library to convert Java pure objects to and from JSON
+Small library to convert Java POJO to and from JSON
 
     OutputStream out = ....
     try {
