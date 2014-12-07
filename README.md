@@ -103,7 +103,7 @@ Sometimes, we store complex data, but in JSON it must be represented by single v
     System.out.println(foo.name); // prints "Mike"
     System.out.println(foo.action); // prints "FIRST" enum
 
-If you don't want to expose class name when converting objects to JSON, user **Configuration**:
+If you don't want to expose class name when converting objects to JSON, use **Configuration**:
 
     package mypackage;
     public class Foo {
