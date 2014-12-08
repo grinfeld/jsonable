@@ -273,4 +273,13 @@ public class JsonTest {
             assertEquals("stringWriteReadTest", sb1.toString(), sb.toString());
         } catch (Exception ignore) {}
     }
+
+    @Test public void numberWriteReadTest() {
+        try {
+            JsonWriter.write(1, sb);
+            Object o = JsonReader.read(sb.toString());
+            JsonWriter.write(o, sb1);
+            assertEquals("numberWriteReadTest", sb1.toString(), sb.toString());
+        } catch (Exception ignore) {}
+    }
 }

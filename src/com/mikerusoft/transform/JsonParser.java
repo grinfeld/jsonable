@@ -263,10 +263,13 @@ public class JsonParser {
                 queue.offer(sb);
                 c = parseNumber(bf, sb);
                 pn = sb.toString().trim();
+                Object o = pn;
+                if (pn.replaceAll("[0-9]", "").equals(""))
+                    o = Long.valueOf(pn);
                 queue.pollLast();
                 if (pn.equalsIgnoreCase("null"))
                     return new ImmutablePair<Character, Object>(c, "");
-                return new ImmutablePair<Character, Object>(c, pn);
+                return new ImmutablePair<Character, Object>(c, o);
         }
 
         return new ImmutablePair<Character, Object>(c, null);
