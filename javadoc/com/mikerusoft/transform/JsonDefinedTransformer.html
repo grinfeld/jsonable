@@ -35,8 +35,8 @@
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../com/mikerusoft/transform/EnumTransformer.html" title="class in com.mikerusoft.transform"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../com/mikerusoft/transform/JsonParser.html" title="class in com.mikerusoft.transform"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../com/mikerusoft/transform/EnumTransformer.html" title="class in com.mikerusoft.jsonable.transform"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../com/mikerusoft/transform/JsonParser.html" title="class in com.mikerusoft.jsonable.transform"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?com/mikerusoft/transform/JsonDefinedTransformer.html" target="_top">Frames</a></li>
@@ -78,7 +78,7 @@
 <!-- ========= END OF TOP NAVBAR ========= -->
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="subTitle">com.mikerusoft.transform</div>
+<div class="subTitle">com.mikerusoft.jsonable.transform</div>
 <h2 title="Class JsonDefinedTransformer" class="title">Class JsonDefinedTransformer</h2>
 </div>
 <div class="contentContainer">
@@ -86,7 +86,7 @@
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>com.mikerusoft.transform.JsonDefinedTransformer</li>
+<li>com.mikerusoft.jsonable.transform.JsonDefinedTransformer</li>
 </ul>
 </li>
 </ul>
@@ -95,13 +95,13 @@
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><a href="../../../com/mikerusoft/transform/Transformer.html" title="interface in com.mikerusoft.transform">Transformer</a></dd>
+<dd><a href="../../../com/mikerusoft/transform/Transformer.html" title="interface in com.mikerusoft.jsonable.transform">Transformer</a></dd>
 </dl>
 <hr>
 <br>
 <pre>public class <span class="strong">JsonDefinedTransformer</span>
 extends java.lang.Object
-implements <a href="../../../com/mikerusoft/transform/Transformer.html" title="interface in com.mikerusoft.transform">Transformer</a></pre>
+implements <a href="../../../com/mikerusoft/transform/Transformer.html" title="interface in com.mikerusoft.jsonable.transform">Transformer</a></pre>
 <div class="block">Transformer for classes defined with annotation @JsonClass</div>
 <dl><dt><span class="strong">Since:</span></dt>
   <dd>5/25/2014.</dd></dl>
@@ -121,7 +121,7 @@ implements <a href="../../../com/mikerusoft/transform/Transformer.html" title="i
 <li class="blockList"><a name="fields_inherited_from_class_com.mikerusoft.transform.Transformer">
 <!--   -->
 </a>
-<h3>Fields inherited from interface&nbsp;com.mikerusoft.transform.<a href="../../../com/mikerusoft/transform/Transformer.html" title="interface in com.mikerusoft.transform">Transformer</a></h3>
+<h3>Fields inherited from interface&nbsp;com.mikerusoft.transform.<a href="../../../com/mikerusoft/transform/Transformer.html" title="interface in com.mikerusoft.jsonable.transform">Transformer</a></h3>
 <code><a href="../../../com/mikerusoft/transform/Transformer.html#HIGH_PRIORITY">HIGH_PRIORITY</a>, <a href="../../../com/mikerusoft/transform/Transformer.html#LOW_PRIORITY">LOW_PRIORITY</a></code></li>
 </ul>
 </li>
@@ -170,7 +170,7 @@ implements <a href="../../../com/mikerusoft/transform/Transformer.html" title="i
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../com/mikerusoft/transform/JsonDefinedTransformer.html#transform(java.lang.Object, com.mikerusoft.utils.Outputter)">transform</a></strong>(java.lang.Object&nbsp;o,
-         <a href="../../../com/mikerusoft/utils/Outputter.html" title="interface in com.mikerusoft.utils">Outputter</a>&lt;java.lang.String&gt;&nbsp;out)</code>
+         <a href="../../../com/mikerusoft/utils/Outputter.html" title="interface in com.mikerusoft.jsonable.utils">Outputter</a>&lt;java.lang.String&gt;&nbsp;out)</code>
 <div class="block">Transforms Object to JSON and writes into OutputStream</div>
 </td>
 </tr>
@@ -224,7 +224,7 @@ implements <a href="../../../com/mikerusoft/transform/Transformer.html" title="i
 <div class="block">Tests if Object matches current Transformer</div>
 <dl>
 <dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../com/mikerusoft/transform/Transformer.html#match(java.lang.Object)">match</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/mikerusoft/transform/Transformer.html" title="interface in com.mikerusoft.transform">Transformer</a></code></dd>
+<dd><code><a href="../../../com/mikerusoft/transform/Transformer.html#match(java.lang.Object)">match</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/mikerusoft/transform/Transformer.html" title="interface in com.mikerusoft.jsonable.transform">Transformer</a></code></dd>
 <dt><span class="strong">Parameters:</span></dt><dd><code>o</code> - object to test</dd>
 <dt><span class="strong">Returns:</span></dt><dd>return true if object matches current Transofrmer</dd></dl>
 </li>
@@ -236,7 +236,7 @@ implements <a href="../../../com/mikerusoft/transform/Transformer.html" title="i
 <li class="blockList">
 <h4>transform</h4>
 <pre>public&nbsp;void&nbsp;transform(java.lang.Object&nbsp;o,
-             <a href="../../../com/mikerusoft/utils/Outputter.html" title="interface in com.mikerusoft.utils">Outputter</a>&lt;java.lang.String&gt;&nbsp;out)
+             <a href="../../../com/mikerusoft/utils/Outputter.html" title="interface in com.mikerusoft.jsonable.utils">Outputter</a>&lt;java.lang.String&gt;&nbsp;out)
                throws java.io.IOException,
                       java.lang.IllegalAccessException,
                       java.lang.reflect.InvocationTargetException</pre>
@@ -244,7 +244,7 @@ implements <a href="../../../com/mikerusoft/transform/Transformer.html" title="i
 <div class="block">Transforms Object to JSON and writes into OutputStream</div>
 <dl>
 <dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../com/mikerusoft/transform/Transformer.html#transform(java.lang.Object, com.mikerusoft.utils.Outputter)">transform</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/mikerusoft/transform/Transformer.html" title="interface in com.mikerusoft.transform">Transformer</a></code></dd>
+<dd><code><a href="../../../com/mikerusoft/transform/Transformer.html#transform(java.lang.Object, com.mikerusoft.utils.Outputter)">transform</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/mikerusoft/transform/Transformer.html" title="interface in com.mikerusoft.jsonable.transform">Transformer</a></code></dd>
 <dt><span class="strong">Parameters:</span></dt><dd><code>o</code> - Object to transform to JSON</dd><dd><code>out</code> - StringBuilder to write into</dd>
 <dt><span class="strong">Throws:</span></dt>
 <dd><code>java.io.IOException</code></dd>
@@ -263,7 +263,7 @@ implements <a href="../../../com/mikerusoft/transform/Transformer.html" title="i
 <div class="block">Defines match priority, i.e. when 2 or more Transformers matches Object, defines order between them. Lower, means match better</div>
 <dl>
 <dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../com/mikerusoft/transform/Transformer.html#matchPriority()">matchPriority</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/mikerusoft/transform/Transformer.html" title="interface in com.mikerusoft.transform">Transformer</a></code></dd>
+<dd><code><a href="../../../com/mikerusoft/transform/Transformer.html#matchPriority()">matchPriority</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/mikerusoft/transform/Transformer.html" title="interface in com.mikerusoft.jsonable.transform">Transformer</a></code></dd>
 <dt><span class="strong">Returns:</span></dt><dd>priority</dd></dl>
 </li>
 </ul>
@@ -292,8 +292,8 @@ implements <a href="../../../com/mikerusoft/transform/Transformer.html" title="i
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../com/mikerusoft/transform/EnumTransformer.html" title="class in com.mikerusoft.transform"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../com/mikerusoft/transform/JsonParser.html" title="class in com.mikerusoft.transform"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../com/mikerusoft/transform/EnumTransformer.html" title="class in com.mikerusoft.jsonable.transform"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../com/mikerusoft/transform/JsonParser.html" title="class in com.mikerusoft.jsonable.transform"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?com/mikerusoft/transform/JsonDefinedTransformer.html" target="_top">Frames</a></li>

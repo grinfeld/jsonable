@@ -1,4 +1,4 @@
-com.mikerusoft.annotations
-com.mikerusoft.parser
-com.mikerusoft.transform
-com.mikerusoft.utils
+com.mikerusoft.jsonable.annotations
+com.mikerusoft.jsonable.parser
+com.mikerusoft.jsonable.transform
+com.mikerusoft.jsonable.utils
