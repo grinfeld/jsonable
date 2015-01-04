@@ -70,14 +70,14 @@ public class JsonTest {
 
     @JsonClass
     public static class SimpleObjAnnot {
-        @JsonField String str;
+        @JsonField(name = "str", groups = {"mygroup"}) String str1;
         @JsonField int num;
         String ignore;
 
         @Override
         public String toString() {
             return "{" +
-                    "str:\"" + str + '\"' +
+                    "str:\"" + str1 + '\"' +
                     ", num:" + num +
                     '}';
         }
@@ -201,7 +201,7 @@ public class JsonTest {
 
     @Test public void simpleObjectAnotTest() {
         try {
-            simpleObjAnot.str = "Hello";
+            simpleObjAnot.str1 = "Hello";
             simpleObjAnot.num = 1;
             simpleObjAnot.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnot, sb);
@@ -209,9 +209,23 @@ public class JsonTest {
         } catch (Exception ignore) {}
     }
 
+    @Test public void simpleObjectAnotWithGroupTest() {
+        try {
+            simpleObjAnot.str1 = "Hello";
+            simpleObjAnot.num = 1;
+            simpleObjAnot.ignore = "Ignore me";
+            JsonWriter.write(simpleObjAnot, sb, "mygroup");
+
+            Object o = JsonReader.read(sb.toString(), "mygroup");
+            JsonWriter.write(o, sb1);
+
+            assertEquals("Failed object with mygroup" + sb.toString(), "{\"str\":\"Hello\",\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnot\"}", sb.toString());
+        } catch (Exception ignore) {}
+    }
+
     @Test public void simpleObjectAnotExcludeClassTest() {
         try {
-            simpleObjAnot.str = "Hello";
+            simpleObjAnot.str1 = "Hello";
             simpleObjAnot.num = 1;
             c.setProperty(Configuration.EXCLUDE_CLASS_PROPERTY, "true");
             JsonWriter.write(simpleObjAnot, sb, c);
@@ -222,7 +236,7 @@ public class JsonTest {
 
     @Test public void simpleObjectExtendedTest() {
         try {
-            simpleObjAnotExtend.str = "Hello";
+            simpleObjAnotExtend.str1 = "Hello";
             simpleObjAnotExtend.num = 1;
             simpleObjAnotExtend.extended = "Extended";
             simpleObjAnotExtend.ignore = "Ignore me";

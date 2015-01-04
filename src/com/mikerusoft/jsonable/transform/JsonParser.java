@@ -1,6 +1,8 @@
 package com.mikerusoft.jsonable.transform;
 
 import com.mikerusoft.jsonable.annotations.CustomField;
+import com.mikerusoft.jsonable.annotations.JsonClass;
+import com.mikerusoft.jsonable.annotations.JsonField;
 import com.mikerusoft.jsonable.utils.Configuration;
 import com.mikerusoft.jsonable.utils.ContextManager;
 import com.mikerusoft.jsonable.utils.ReflectionCache;
@@ -43,13 +45,14 @@ public class JsonParser {
         EMPTY_CHAR = '\0';
 
     LinkedList<Object> queue = null;
-
-    @NotNull public static JsonParser get() {
-        return new JsonParser();
+    List<String> groups;
+    @NotNull public static JsonParser get(String...groups) {
+        return new JsonParser(groups);
     }
 
-    private JsonParser() {
-        queue = new LinkedList<Object>();
+    private JsonParser(String...groups) {
+        this.queue = new LinkedList<Object>();
+        this.groups = groups == null? null : new ArrayList<String>(Arrays.asList(groups));
     }
 
     public Object parse(BufferedReader bf) throws IOException, IllegalArgumentException, InstantiationException, IllegalAccessException {
@@ -105,6 +108,14 @@ public class JsonParser {
         return new ImmutablePair<Character, Object>(c, null);
     }
 
+    private boolean inGroup(String[] groups) {
+        if (this.groups == null || this.groups.size() == 0)
+            return true;
+        if (groups == null)
+            return false;
+        return new ArrayList<String>(Arrays.asList(groups)).removeAll(this.groups);
+    }
+
     private Object createClass(Map<String, Object> possible) {
         String cl = Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
         String className = (String)possible.get(cl);
@@ -141,19 +152,28 @@ public class JsonParser {
                 methods.addAll(ReflectionCache.getMethodsByAnnotation(inherit, CustomField.class));
             }
             for (Field f : fields) {
-                Object data = possible.get(f.getName());
-                if (data != null) {
-                    f.setAccessible(true);
-                    fill(f, o, data);
+                JsonField an = f.getAnnotation(JsonField.class);
+                String name = an != null && !StringUtils.isEmpty(an.name()) ? an.name() : f.getName();
+                String[] groups = an != null ? an.groups() : null;
+                if (inGroup(groups)) {
+                    Object data = possible.get(name);
+                    if (data != null) {
+                        f.setAccessible(true);
+                        fill(f, o, data);
+                    }
                 }
             }
 
             for (Method m : methods) {
-                String customName = m.getAnnotation(CustomField.class).name();
-                Object data = possible.get(customName);
-                if (data != null) {
-                    m.setAccessible(true);
-                    m.invoke(o, data);
+                CustomField an = m.getAnnotation(CustomField.class);
+                String customName = an.name();
+                String[] groups = an.groups();
+                if (inGroup(groups)) {
+                    Object data = possible.get(customName);
+                    if (data != null) {
+                        m.setAccessible(true);
+                        m.invoke(o, data);
+                    }
                 }
             }
 

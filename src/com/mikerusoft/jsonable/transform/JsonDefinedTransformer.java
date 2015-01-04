@@ -5,6 +5,7 @@ import com.mikerusoft.jsonable.utils.Configuration;
 import com.mikerusoft.jsonable.utils.ContextManager;
 import com.mikerusoft.jsonable.utils.Outputter;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -12,6 +13,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Transformer for classes defined with annotation @JsonClass
@@ -28,12 +31,12 @@ public class JsonDefinedTransformer implements Transformer {
     }
 
     @Override
-    public void transform(Object o, Outputter<String> out) throws IOException, IllegalAccessException, InvocationTargetException {
+    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException {
         Class<?> inherit = o.getClass();
         out.write("{");
         int count = 0;
         do {
-            count = count + write(o, inherit.getDeclaredFields(), inherit.getDeclaredMethods(), out, count);
+            count = count + write(o, inherit.getDeclaredFields(), inherit.getDeclaredMethods(), out, count, groups);
         } while ((inherit = inherit.getSuperclass()) != null);
         if (count > 0) {
             Configuration c = ContextManager.get(Configuration.class);
@@ -46,28 +49,39 @@ public class JsonDefinedTransformer implements Transformer {
         out.write("}");
     }
 
-    private int write(Object o, Field[] fields, Method[] methods, Outputter<String> out, int count) throws IllegalAccessException, IOException, InvocationTargetException {
+    private boolean inGroup(String[] requestedGroups, String[] dataGroups) {
+        if (requestedGroups == null || requestedGroups.length == 0)
+            return true;
+        if (dataGroups == null)
+            return false;
+        return new ArrayList<String>(Arrays.asList(requestedGroups)).removeAll(Arrays.asList(dataGroups));
+    }
+
+    private int write(Object o, Field[] fields, Method[] methods, Outputter<String> out, int count, String... groups) throws IllegalAccessException, IOException, InvocationTargetException {
         for (Field f : fields) {
-            String name = f.getName();
-            f.setAccessible(true);
-            Object part = f.get(o);
-            if (part != null && f.getAnnotation(JsonField.class) != null) {
-                if (count != 0) {
-                    out.write(",");
+            JsonField an = f.getAnnotation(JsonField.class);
+            if (an != null && inGroup(groups, an.groups())) {
+                f.setAccessible(true);
+                Object part = f.get(o);
+                if (part != null) {
+                    String name = StringUtils.isEmpty(an.name()) ? f.getName() : an.name();
+                    if (count != 0) {
+                        out.write(",");
+                    }
+                    out.write("\"");
+                    out.write(name);
+                    out.write("\":");
+                    TransformerFactory.get(part).transform(part, out);
+                    count++;
                 }
-                out.write("\"");
-                out.write(name);
-                out.write("\":");
-                TransformerFactory.get(part).transform(part, out);
-                count++;
             }
         }
 
         for (Method m : methods) {
-            CustomField annotation = m.getAnnotation(CustomField.class);
+            CustomField an = m.getAnnotation(CustomField.class);
             // actually we want "getters" to use, but we allow any name.
-            if (annotation != null && ArrayUtils.isEmpty(m.getParameterTypes())) {
-                String customName = annotation.name();
+            if (an != null && ArrayUtils.isEmpty(m.getParameterTypes()) && inGroup(groups, an.groups())) {
+                String customName = an.name();
                 m.setAccessible(true);
                 Object part = m.invoke(o);
                 if (part != null) {

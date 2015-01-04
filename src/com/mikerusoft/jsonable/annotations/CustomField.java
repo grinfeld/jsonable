@@ -12,4 +12,5 @@ import java.lang.annotation.ElementType;
 @java.lang.annotation.Target({ElementType.METHOD})
 public @interface CustomField {
     String name();
+    String[] groups() default {};
 }

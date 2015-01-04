@@ -23,7 +23,7 @@ public class MapTransformer implements Transformer {
     }
 
     @Override
-    public void transform(Object o, Outputter<String> out) throws IOException, InvocationTargetException, IllegalAccessException {
+    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
         Map<?, ?> m = (Map<?, ?>)o;
         int i=0;
         out.write("{");

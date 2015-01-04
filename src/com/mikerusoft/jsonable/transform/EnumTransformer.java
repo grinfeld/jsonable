@@ -16,7 +16,7 @@ public class EnumTransformer implements Transformer {
     public boolean match(Object o) { return o.getClass().isEnum(); }
 
     @Override
-    public void transform(Object o, Outputter<String> out) throws IOException, InvocationTargetException, IllegalAccessException {
+    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
         out.write("{");
         out.write("\"name");
         out.write("\": \"");

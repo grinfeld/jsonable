@@ -20,21 +20,21 @@ public class JsonWriter {
 
     private Log log = LogFactory.getLog(JsonWriter.class);
 
-    public static void write (Object o, OutputStream out) throws IOException, InvocationTargetException, IllegalAccessException {
-        write(o, out, null);
+    public static void write (Object o, OutputStream out, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
+        write(o, out, null, groups);
     }
 
-    public static void write (Object o, StringBuilder out) throws IOException, InvocationTargetException, IllegalAccessException {
-        write(o, out, null);
+    public static void write (Object o, StringBuilder out, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
+        write(o, out, null, groups);
     }
 
-    public static void write (Object o, OutputStream out, Configuration c) throws IOException, InvocationTargetException, IllegalAccessException {
+    public static void write (Object o, OutputStream out, Configuration c, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
         ContextManager.set(c);
-        TransformerFactory.get(o).transform(o, new OutputStreamOutputter(out));
+        TransformerFactory.get(o).transform(o, new OutputStreamOutputter(out), groups);
     }
 
-    public static void write (Object o, StringBuilder out, Configuration c) throws IOException, InvocationTargetException, IllegalAccessException {
+    public static void write (Object o, StringBuilder out, Configuration c, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
         ContextManager.set(c);
-        TransformerFactory.get(o).transform(o, new StringBuilderOutputter(out));
+        TransformerFactory.get(o).transform(o, new StringBuilderOutputter(out), groups);
     }
 }

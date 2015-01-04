@@ -32,7 +32,7 @@ public class ObjectTransformer implements Transformer {
     }
 
     @Override
-    public void transform(Object o, Outputter<String> out) throws IOException, IllegalAccessException, InvocationTargetException {
+    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException {
         Class<?> inherit = o.getClass();
         out.write("{");
         int count = 0;

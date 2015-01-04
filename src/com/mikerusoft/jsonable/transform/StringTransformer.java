@@ -22,7 +22,7 @@ public class StringTransformer implements Transformer {
     }
 
     @Override
-    public void transform(Object o, Outputter<String> out) throws IOException, InvocationTargetException, IllegalAccessException {
+    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
         out.write(("\"" + StringEscapeUtils.escapeEcmaScript((String) o) + "\""));
     }
 
