@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -28,10 +29,15 @@ public class TransformerFactory {
 
     private static final Transformer[] transformers = all();
 
+    private static Map<String, Transformer> cache = new ConcurrentHashMap<String, Transformer>();
+
     public static Transformer get(Object o) {
         Map<Integer, Transformer> matched = new TreeMap<Integer, Transformer>();
         if (Null.match(o))
             return Null;
+        Transformer transformer = cache.get(o.getClass().getName());
+        if (transformer != null)
+            return transformer;
         for (Transformer t : transformers) {
             if (t.match(o))
                 matched.put(t.matchPriority(), t);
@@ -39,7 +45,9 @@ public class TransformerFactory {
         if (matched.size() <= 0)
             return null;
 
-        return (Transformer)matched.values().toArray()[0];
+        transformer = (Transformer)matched.values().toArray()[0];
+        cache.put(o.getClass().getName(), transformer);
+        return transformer;
     }
 
     private static Transformer[] all() {
