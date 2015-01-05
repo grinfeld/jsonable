@@ -1,15 +1,14 @@
 package com.mikerusoft.jsonable.parser;
 
-import com.mikerusoft.jsonable.annotations.CustomField;
-import com.mikerusoft.jsonable.annotations.IgnoreJson;
-import com.mikerusoft.jsonable.annotations.JsonClass;
-import com.mikerusoft.jsonable.annotations.JsonField;
+import com.mikerusoft.jsonable.annotations.*;
+import com.mikerusoft.jsonable.transform.DateTransformer;
 import com.mikerusoft.jsonable.utils.Configuration;
 import com.mikerusoft.jsonable.utils.ContextManager;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,6 +85,7 @@ public class JsonTest {
     @JsonClass
     public static class SimpleObjAnnotExtend  extends SimpleObjAnnot {
         @JsonField String extended;
+        @JsonField @DateField(type = DateTransformer.TIMESTAMP_TYPE) long time;
     }
 
     StringBuilder sb = new StringBuilder();
@@ -240,8 +240,10 @@ public class JsonTest {
             simpleObjAnotExtend.num = 1;
             simpleObjAnotExtend.extended = "Extended";
             simpleObjAnotExtend.ignore = "Ignore me";
+            long t = new Date().getTime();
+            simpleObjAnotExtend.time = t;
             JsonWriter.write(simpleObjAnotExtend, sb);
-            assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":\"Extended\",\"str\":\"Hel\"lo\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
+            assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":\"Extended\",\"time\":" + t + ",\"str\":\"Hel\"lo\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
         } catch (Exception ignore) {}
     }
 
@@ -253,7 +255,7 @@ public class JsonTest {
             simpleObjAnotExtend.extended = null;
             simpleObjAnotExtend.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnotExtend, sb);
-            assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":null,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
+            assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":null,\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
         } catch (Exception ignore) {}
     }
 
@@ -264,7 +266,7 @@ public class JsonTest {
             simpleObjAnotExtend.extended = "";
             simpleObjAnotExtend.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnotExtend, sb);
-            assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":\"\",\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
+            assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":\"\",\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
         } catch (Exception ignore) {}
     }
 
