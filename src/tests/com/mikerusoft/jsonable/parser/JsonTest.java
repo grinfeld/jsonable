@@ -236,12 +236,12 @@ public class JsonTest {
 
     @Test public void simpleObjectExtendedTest() {
         try {
-            simpleObjAnotExtend.str1 = "Hello";
+            simpleObjAnotExtend.str1 = "Hel\"lo";
             simpleObjAnotExtend.num = 1;
             simpleObjAnotExtend.extended = "Extended";
             simpleObjAnotExtend.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnotExtend, sb);
-            assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":\"Extended\",\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
+            assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":\"Extended\",\"str\":\"Hel\"lo\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
         } catch (Exception ignore) {}
     }
 

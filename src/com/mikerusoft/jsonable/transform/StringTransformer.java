@@ -23,7 +23,8 @@ public class StringTransformer implements Transformer {
 
     @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
-        out.write(("\"" + StringEscapeUtils.escapeEcmaScript((String) o) + "\""));
+        String str = (String)o;
+        out.write(("\"" + str.replaceAll("\"", "\\\"") + "\""));
     }
 
     @Override public int matchPriority() { return Transformer.HIGH_PRIORITY + 1; }
