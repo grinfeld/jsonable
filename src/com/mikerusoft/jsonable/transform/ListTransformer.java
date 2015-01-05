@@ -28,7 +28,7 @@ public class ListTransformer implements Transformer {
         out.write("[");
         for (int i=0; i<l.size(); i++) {
             Object p = l.get(i);
-            TransformerFactory.get(p).transform(p, out);
+            TransformerFactory.get(p).transform(p, out, groups);
             if (i != l.size() - 1)
                 out.write(",");
         }

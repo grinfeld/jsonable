@@ -32,7 +32,7 @@ public class MapTransformer implements Transformer {
             out.write(key);
             out.write(":");
             Object p = entry.getValue();
-            TransformerFactory.get(p).transform(p, out);
+            TransformerFactory.get(p).transform(p, out, groups);
             if (i != m.size() - 1)
                 out.write(",");
             i++;

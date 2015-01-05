@@ -14,6 +14,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Transforms any object fields to JSON, except those which annotated with {@link com.mikerusoft.jsonable.annotations.IgnoreJson}
@@ -50,27 +52,38 @@ public class ObjectTransformer implements Transformer {
         out.write("}");
     }
 
+
+    private boolean inGroup(String[] requestedGroups, String[] dataGroups) {
+        if (requestedGroups == null || requestedGroups.length == 0)
+            return true;
+        if (dataGroups == null)
+            return false;
+        return new ArrayList<String>(Arrays.asList(requestedGroups)).removeAll(Arrays.asList(dataGroups));
+    }
+
     private int write(Object o, Field[] fields, Method[] methods, Outputter<String> out, int counter, String...groups) throws IllegalAccessException, IOException, InvocationTargetException {
-        for (Field f : fields) {
-            if (f.getAnnotation(IgnoreJson.class) == null && !Modifier.isTransient(f.getModifiers())) {
-                String name = f.getName();
-                f.setAccessible(true);
-                Object part = f.get(o);
-                if (counter != 0) {
-                    out.write(",");
+        if (ArrayUtils.isEmpty(groups)) {
+            for (Field f : fields) {
+                if (f.getAnnotation(IgnoreJson.class) == null && !Modifier.isTransient(f.getModifiers())) {
+                    String name = f.getName();
+                    f.setAccessible(true);
+                    Object part = f.get(o);
+                    if (counter != 0) {
+                        out.write(",");
+                    }
+                    out.write("\"");
+                    out.write(name);
+                    out.write("\":");
+                    TransformerFactory.get(part).transform(part, out, groups);
+                    counter++;
                 }
-                out.write("\"");
-                out.write(name);
-                out.write("\":");
-                TransformerFactory.get(part).transform(part, out, groups);
-                counter++;
             }
         }
         for (Method m : methods) {
-            CustomField annotation = m.getAnnotation(CustomField.class);
+            CustomField an = m.getAnnotation(CustomField.class);
             // actually we want "getters" to use, but we allow any name.
-            if (annotation != null && ArrayUtils.isEmpty(m.getParameterTypes())) {
-                String customName = annotation.name();
+            if (an != null && ArrayUtils.isEmpty(m.getParameterTypes()) && inGroup(groups, an.groups())) {
+                String customName = an.name();
                 m.setAccessible(true);
                 Object part = m.invoke(o);
                 if (counter != 0) {

@@ -26,7 +26,7 @@ public class ArrayTransformer implements Transformer {
         int length = Array.getLength(o);
         for (int i=0; i<length; i++) {
             Object p = Array.get(o, i);
-            TransformerFactory.get(p).transform(p, out);
+            TransformerFactory.get(p).transform(p, out, groups);
             if (i != length - 1)
                 out.write(",");
         }
