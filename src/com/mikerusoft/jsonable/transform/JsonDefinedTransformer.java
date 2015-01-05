@@ -63,17 +63,15 @@ public class JsonDefinedTransformer implements Transformer {
             if (an != null && inGroup(groups, an.groups())) {
                 f.setAccessible(true);
                 Object part = f.get(o);
-                if (part != null) {
-                    String name = StringUtils.isEmpty(an.name()) ? f.getName() : an.name();
-                    if (count != 0) {
-                        out.write(",");
-                    }
-                    out.write("\"");
-                    out.write(name);
-                    out.write("\":");
-                    TransformerFactory.get(part).transform(part, out);
-                    count++;
+                String name = StringUtils.isEmpty(an.name()) ? f.getName() : an.name();
+                if (count != 0) {
+                    out.write(",");
                 }
+                out.write("\"");
+                out.write(name);
+                out.write("\":");
+                TransformerFactory.get(part).transform(part, out, groups);
+                count++;
             }
         }
 
@@ -84,16 +82,14 @@ public class JsonDefinedTransformer implements Transformer {
                 String customName = an.name();
                 m.setAccessible(true);
                 Object part = m.invoke(o);
-                if (part != null) {
-                    if (count != 0) {
-                        out.write(",");
-                    }
-                    out.write("\"");
-                    out.write(customName);
-                    out.write("\":");
-                    TransformerFactory.get(part).transform(part, out);
-                    count++;
+                if (count != 0) {
+                    out.write(",");
                 }
+                out.write("\"");
+                out.write(customName);
+                out.write("\":");
+                TransformerFactory.get(part).transform(part, out, groups);
+                count++;
             }
         }
 

@@ -246,6 +246,28 @@ public class JsonTest {
     }
 
 
+    @Test public void simpleObjectExtendedWithNullTest() {
+        try {
+            simpleObjAnotExtend.str1 = "Hello";
+            simpleObjAnotExtend.num = 1;
+            simpleObjAnotExtend.extended = null;
+            simpleObjAnotExtend.ignore = "Ignore me";
+            JsonWriter.write(simpleObjAnotExtend, sb);
+            assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":null,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
+        } catch (Exception ignore) {}
+    }
+
+    @Test public void simpleObjectExtendedWithEmptStringTest() {
+        try {
+            simpleObjAnotExtend.str1 = "Hello";
+            simpleObjAnotExtend.num = 1;
+            simpleObjAnotExtend.extended = "";
+            simpleObjAnotExtend.ignore = "Ignore me";
+            JsonWriter.write(simpleObjAnotExtend, sb);
+            assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":\"\",\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
+        } catch (Exception ignore) {}
+    }
+
     @Test public void simpleObjectIgnoreTest() {
         try {
             simpleObjIgnore.str = "Hello";

@@ -37,7 +37,7 @@ public class ObjectTransformer implements Transformer {
         out.write("{");
         int count = 0;
         do {
-            count = count + write(o, inherit.getDeclaredFields(), inherit.getDeclaredMethods(), out, count);
+            count = count + write(o, inherit.getDeclaredFields(), inherit.getDeclaredMethods(), out, count, groups);
         } while ((inherit = inherit.getSuperclass()) != null);
         if (count > 0) {
             Configuration c = ContextManager.get(Configuration.class);
@@ -50,22 +50,20 @@ public class ObjectTransformer implements Transformer {
         out.write("}");
     }
 
-    private int write(Object o, Field[] fields, Method[] methods, Outputter<String> out, int counter) throws IllegalAccessException, IOException, InvocationTargetException {
+    private int write(Object o, Field[] fields, Method[] methods, Outputter<String> out, int counter, String...groups) throws IllegalAccessException, IOException, InvocationTargetException {
         for (Field f : fields) {
             if (f.getAnnotation(IgnoreJson.class) == null && !Modifier.isTransient(f.getModifiers())) {
                 String name = f.getName();
                 f.setAccessible(true);
                 Object part = f.get(o);
-                if (part != null) {
-                    if (counter != 0) {
-                        out.write(",");
-                    }
-                    out.write("\"");
-                    out.write(name);
-                    out.write("\":");
-                    TransformerFactory.get(part).transform(part, out);
-                    counter++;
+                if (counter != 0) {
+                    out.write(",");
                 }
+                out.write("\"");
+                out.write(name);
+                out.write("\":");
+                TransformerFactory.get(part).transform(part, out, groups);
+                counter++;
             }
         }
         for (Method m : methods) {
@@ -75,16 +73,14 @@ public class ObjectTransformer implements Transformer {
                 String customName = annotation.name();
                 m.setAccessible(true);
                 Object part = m.invoke(o);
-                if (part != null) {
-                    if (counter != 0) {
-                        out.write(",");
-                    }
-                    out.write("\"");
-                    out.write(customName);
-                    out.write("\":");
-                    TransformerFactory.get(part).transform(part, out);
-                    counter++;
+                if (counter != 0) {
+                    out.write(",");
                 }
+                out.write("\"");
+                out.write(customName);
+                out.write("\":");
+                TransformerFactory.get(part).transform(part, out, groups);
+                counter++;
             }
         }
 

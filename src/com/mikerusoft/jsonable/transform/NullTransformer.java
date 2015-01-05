@@ -22,7 +22,7 @@ public class NullTransformer implements Transformer {
 
     @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
-        out.write("\"\"");
+        out.write("null");
     }
 
     @Override public int matchPriority() { return Transformer.LOW_PRIORITY; }
