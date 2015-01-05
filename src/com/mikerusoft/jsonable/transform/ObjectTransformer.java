@@ -16,6 +16,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Transforms any object fields to JSON, except those which annotated with {@link com.mikerusoft.jsonable.annotations.IgnoreJson}
@@ -28,6 +30,9 @@ public class ObjectTransformer implements Transformer {
 
     private Log log = LogFactory.getLog(ObjectTransformer.class);
 
+    private Map<String, Field[]> fieldCache = new ConcurrentHashMap<String, Field[]>();
+    private Map<String, Method[]> methodCache = new ConcurrentHashMap<String, Method[]>();
+
     @Override
     public boolean match(Object o) {
         return !(o == null || o.getClass().isPrimitive() || o.getClass().isEnum() || o.getClass().isArray());
@@ -39,7 +44,17 @@ public class ObjectTransformer implements Transformer {
         out.write("{");
         int count = 0;
         do {
-            count = count + write(o, inherit.getDeclaredFields(), inherit.getDeclaredMethods(), out, count, groups);
+            Field[] fields = fieldCache.get(inherit.getName());
+            if (fields == null) {
+                fields = inherit.getDeclaredFields();
+                fieldCache.put(inherit.getName(), fields);
+            }
+            Method[] methods = methodCache.get(inherit.getName());
+            if (methods == null){
+                methods = inherit.getDeclaredMethods();
+                methodCache.put(inherit.getName(), methods);
+            }
+            count = count + write(o, fields, methods, out, count, groups);
         } while ((inherit = inherit.getSuperclass()) != null);
         if (count > 0) {
             Configuration c = ContextManager.get(Configuration.class);
