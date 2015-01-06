@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -67,7 +68,7 @@ public class JsonDefinedTransformer implements Transformer {
     private boolean inGroup(String[] requestedGroups, String[] dataGroups) {
         if (requestedGroups == null || requestedGroups.length == 0)
             return true;
-        if (dataGroups == null)
+        if (dataGroups == null || dataGroups.length == 0)
             return true;
         return new ArrayList<String>(Arrays.asList(requestedGroups)).removeAll(Arrays.asList(dataGroups));
     }

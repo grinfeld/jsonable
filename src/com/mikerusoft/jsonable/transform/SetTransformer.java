@@ -31,6 +31,6 @@ public class SetTransformer implements Transformer {
 
     @Override
     public int matchPriority() {
-        return Transformer.HIGH_PRIORITY;
+        return Transformer.HIGH_PRIORITY + 1;
     }
 }

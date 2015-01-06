@@ -35,5 +35,5 @@ public class ListTransformer implements Transformer {
         out.write("]");
     }
 
-    @Override public int matchPriority() { return Transformer.HIGH_PRIORITY; }
+    @Override public int matchPriority() { return Transformer.HIGH_PRIORITY + 1; }
 }

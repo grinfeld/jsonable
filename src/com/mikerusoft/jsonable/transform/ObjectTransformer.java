@@ -71,7 +71,7 @@ public class ObjectTransformer implements Transformer {
     private boolean inGroup(String[] requestedGroups, String[] dataGroups) {
         if (requestedGroups == null || requestedGroups.length == 0)
             return true;
-        if (dataGroups == null)
+        if (dataGroups == null || dataGroups.length == 0)
             return true;
         return new ArrayList<String>(Arrays.asList(requestedGroups)).removeAll(Arrays.asList(dataGroups));
     }

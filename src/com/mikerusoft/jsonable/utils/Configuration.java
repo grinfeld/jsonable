@@ -30,4 +30,18 @@ public class Configuration extends Properties implements ContextData {
             return def;
         return Boolean.valueOf(value.toLowerCase());
     }
+
+    public static Integer getIntegerProperty(Configuration c, String name, Integer def) {
+        String value = getStringProperty(c, name, null);
+        if (value == null)
+            return def;
+        return Integer.valueOf(value.toLowerCase());
+    }
+
+    public static Long getLongProperty(Configuration c, String name, Long def) {
+        String value = getStringProperty(c, name, null);
+        if (value == null)
+            return def;
+        return Long.valueOf(value.toLowerCase());
+    }
 }

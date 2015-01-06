@@ -111,7 +111,7 @@ public class JsonParser {
     private boolean inGroup(String[] groups) {
         if (this.groups == null || this.groups.size() == 0)
             return true;
-        if (groups == null)
+        if (groups == null || groups.length == 0)
             return true;
         return new ArrayList<String>(Arrays.asList(groups)).removeAll(this.groups);
     }
