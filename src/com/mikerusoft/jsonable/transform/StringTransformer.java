@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 /**
+ * Transforms String into Json. Double quot is escaped
  * @author Grinfeld Mikhail
  * @since 5/25/2014.
  */

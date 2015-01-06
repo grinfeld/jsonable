@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 /**
+ * Transforms Null
  * @author Grinfeld Mikhail
  * @since 5/25/2014.
  */

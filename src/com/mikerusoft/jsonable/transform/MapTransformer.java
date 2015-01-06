@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 /**
+ * Transforms Java Map to Json map
  * @author Grinfeld Mikhail
  * @since 5/25/2014.
  */

@@ -1,6 +1,7 @@
 package com.mikerusoft.jsonable.transform;
 
 import com.mikerusoft.jsonable.annotations.CustomField;
+import com.mikerusoft.jsonable.annotations.DateField;
 import com.mikerusoft.jsonable.annotations.JsonClass;
 import com.mikerusoft.jsonable.annotations.JsonField;
 import com.mikerusoft.jsonable.utils.Configuration;
@@ -20,6 +21,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -208,13 +211,27 @@ public class JsonParser {
         } else if (f.getType().equals(Short.class) || f.getType().equals(Short.TYPE)) {
             f.setShort(owner, Short.parseShort((String) data));
         } else if (f.getType().equals(Integer.class) || f.getType().equals(Integer.TYPE)) {
-            f.setInt(owner, Integer.parseInt((String)data));
+            f.setInt(owner, Integer.parseInt((String) data));
         }else if (f.getType().equals(Long.class) || f.getType().equals(Long.TYPE)) {
             f.setLong(owner, Long.parseLong((String) data));
         } else if (f.getType().equals(Double.class) || f.getType().equals(Double.TYPE)) {
             f.setDouble(owner, Double.parseDouble((String) data));
         } else if (f.getType().equals(Float.class) || f.getType().equals(Float.TYPE)) {
             f.setFloat(owner, Float.parseFloat((String) data));
+        } else if (Date.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(DateField.class)) {
+            int type = f.getAnnotation(DateField.class).type();
+            switch (type) {
+                case DateTransformer.TIMESTAMP_TYPE:
+                    f.set(owner, new Date((Long)data));
+                    break;
+                case DateTransformer.STRING_TYPE:
+                    try {
+                        f.set(owner, new SimpleDateFormat().parse((String) data));
+                    } catch (ParseException e) {
+                        throw new IllegalArgumentException("Incompatible types for " + f.getName(), e);
+                    }
+                    break;
+            }
         } else if (f.getType().equals(String.class)) {
             f.set(owner, data);
         } else if (f.getType().isArray() && data != null && data instanceof List) {
@@ -222,6 +239,15 @@ public class JsonParser {
             Object ar = Array.newInstance(f.getType().getComponentType(), l.size());
             System.arraycopy(l.toArray(), 0, ar, 0, l.size());
             f.set(owner, ar);
+        } else if (List.class.isAssignableFrom(f.getType()) && data != null && data instanceof List) {
+            List<?> l = ((List) data);
+            f.set(owner, l);
+        } else if (Set.class.isAssignableFrom(f.getType()) && data != null && data instanceof List) {
+            List l = ((List) data);
+            f.set(owner, new HashSet(l));
+        } else if (Collection.class.isAssignableFrom(f.getType()) && data != null && data instanceof List) {
+            List<?> l = ((List) data);
+            f.set(owner, l);
         } else {
             f.set(owner, f.getType().cast(data));
         }

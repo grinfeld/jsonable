@@ -8,6 +8,11 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 /**
+ * Converts enum into Json Object in following syntax:
+ * {
+ *  'name': this.name(),
+ *  'class': getClass().name()  // in case there is not set {@link Configuration.EXCLUDE_CLASS_PROPERTY}
+ * }
  * @author Grinfeld Mikhail
  * @since 12/5/2014.
  */

@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
+/**
+ * Converts Collection into Json array. It's has low priority, so if found more appropriate Transformer, it will be used instead of this.
+ */
 public class CollectionTransformer implements Transformer {
 
     @Override

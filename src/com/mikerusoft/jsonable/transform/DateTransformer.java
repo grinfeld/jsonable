@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
 /**
+ * Transforms Date field defined by {@link com.mikerusoft.jsonable.annotations.DateField} annotation
  * @author Grinfeld Mikhail
  * @since 1/5/2015.
  */
