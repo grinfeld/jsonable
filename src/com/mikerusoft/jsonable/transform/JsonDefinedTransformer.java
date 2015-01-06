@@ -68,7 +68,7 @@ public class JsonDefinedTransformer implements Transformer {
         if (requestedGroups == null || requestedGroups.length == 0)
             return true;
         if (dataGroups == null)
-            return false;
+            return true;
         return new ArrayList<String>(Arrays.asList(requestedGroups)).removeAll(Arrays.asList(dataGroups));
     }
 

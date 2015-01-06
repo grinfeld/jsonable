@@ -9,13 +9,22 @@ import java.io.OutputStream;
  */
 public class OutputStreamOutputter implements Outputter<String> {
     OutputStream out;
+    String charset = null;
 
     public OutputStreamOutputter(OutputStream out) {
         this.out = out;
     }
 
+    public OutputStreamOutputter(OutputStream out, String charset) {
+        this.out = out;
+        this.charset = charset;
+    }
+
     @Override
     public void write(String data) throws IOException {
-        out.write(data.getBytes());
+        if (charset == null)
+            out.write(data.getBytes());
+        else
+            out.write(data.getBytes(charset));
     }
 }

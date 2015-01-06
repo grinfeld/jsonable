@@ -21,16 +21,24 @@ public class JsonWriter {
     private Log log = LogFactory.getLog(JsonWriter.class);
 
     public static void write (Object o, OutputStream out, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
-        write(o, out, null, groups);
+        write(o, out, null, null, groups);
+    }
+
+    public static void write (Object o, OutputStream out, String charset,  String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
+        write(o, out, null, null, groups);
+    }
+
+    public static void write (Object o, OutputStream out, Configuration c, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
+        write(o, out, c, null, groups);
+    }
+
+    public static void write (Object o, OutputStream out, Configuration c, String charset, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
+        ContextManager.set(c);
+        TransformerFactory.get(o).transform(o, new OutputStreamOutputter(out, charset), groups);
     }
 
     public static void write (Object o, StringBuilder out, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
         write(o, out, null, groups);
-    }
-
-    public static void write (Object o, OutputStream out, Configuration c, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
-        ContextManager.set(c);
-        TransformerFactory.get(o).transform(o, new OutputStreamOutputter(out), groups);
     }
 
     public static void write (Object o, StringBuilder out, Configuration c, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {

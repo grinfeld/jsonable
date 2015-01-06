@@ -112,7 +112,7 @@ public class JsonParser {
         if (this.groups == null || this.groups.size() == 0)
             return true;
         if (groups == null)
-            return false;
+            return true;
         return new ArrayList<String>(Arrays.asList(groups)).removeAll(this.groups);
     }
 
