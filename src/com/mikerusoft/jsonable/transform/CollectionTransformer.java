@@ -4,20 +4,18 @@ import com.mikerusoft.jsonable.utils.Outputter;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Set;
+import java.util.Collection;
 
-/**
- * Transforms Set into Json array
- */
-public class SetTransformer implements Transformer {
+public class CollectionTransformer implements Transformer {
+
     @Override
     public boolean match(Object o) {
-        return Set.class.isAssignableFrom(o.getClass());
+        return Collection.class.isAssignableFrom(o.getClass());
     }
 
     @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException {
-        Set<?> l = (Set<?>)o;
+        Collection<?> l = (Collection<?>) o;
         out.write("[");
         int i = 0;
         for (Object p : l) {
@@ -31,6 +29,6 @@ public class SetTransformer implements Transformer {
 
     @Override
     public int matchPriority() {
-        return Transformer.HIGH_PRIORITY;
+        return Transformer.LOW_PRIORITY - 1;
     }
 }
