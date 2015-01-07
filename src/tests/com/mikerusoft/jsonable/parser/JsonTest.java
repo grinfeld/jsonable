@@ -20,9 +20,10 @@ import static org.junit.Assert.*;
  */
 public class JsonTest {
 
+    @JsonClass
     public static class SimpleObj {
-        String str;
-        int num;
+        @JsonField String str;
+        @JsonField int num;
 
         @Override
         public String toString() {
@@ -33,21 +34,9 @@ public class JsonTest {
         }
     }
 
-    public static class SimpleObjIgnore extends SimpleObj {
-        @IgnoreJson String ignore;
-
-        @Override
-        public String toString() {
-            return "{" +
-                "str:\"" + str + '\"' +
-                ", num:" + num +
-                "ignore:\"" + ignore + '\"' +
-            '}';
-        }
-    }
-
+    @JsonClass
     public static class SimpleObjCustom extends SimpleObj {
-        @IgnoreJson Object custom;
+        Object custom;
 
         @CustomField(name="custom") public Object getCustom() {
             return custom;
@@ -93,7 +82,6 @@ public class JsonTest {
     SimpleObj simpleObj = new SimpleObj();
     SimpleObjAnnot simpleObjAnot = new SimpleObjAnnot();
     SimpleObjAnnotExtend simpleObjAnotExtend = new SimpleObjAnnotExtend();
-    SimpleObjIgnore simpleObjIgnore = new SimpleObjIgnore();
     SimpleObjCustom simpleObjCustom = new SimpleObjCustom();
     Configuration c = new Configuration();
 
@@ -103,7 +91,6 @@ public class JsonTest {
         simpleObj = new SimpleObj();
         simpleObjAnot = new SimpleObjAnnot();
         simpleObjAnotExtend = new SimpleObjAnnotExtend();
-        simpleObjIgnore = new SimpleObjIgnore();
         simpleObjCustom = new SimpleObjCustom();
         sb1 = new StringBuilder();
         ContextManager.unset();
@@ -270,24 +257,13 @@ public class JsonTest {
         } catch (Exception ignore) {}
     }
 
-    @Test public void simpleObjectIgnoreTest() {
-        try {
-            simpleObjIgnore.str = "Hello";
-            simpleObjIgnore.num = 1;
-            simpleObjIgnore.ignore = "Ignore me";
-            JsonWriter.write(simpleObjIgnore, sb);
-            assertEquals("Failed simple object extended with ignore test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjIgnore\"}", sb.toString());
-        } catch (Exception ignore) {}
-    }
-
-
     @Test public void simpleObjectCustomTest() {
         try {
             simpleObjCustom.str = "Hello";
             simpleObjCustom.num = 1;
             simpleObjCustom.custom = "Custom me";
             JsonWriter.write(simpleObjCustom, sb);
-            assertEquals("Failed simple object with custom test " + sb.toString(), "{\"custom\":\"Custom me\",\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjCustom\"}", sb.toString());
+            assertEquals("Failed simple object with custom test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"custom\":\"Custom me\",\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjCustom\"}", sb.toString());
         } catch (Exception ignore) {}
     }
 

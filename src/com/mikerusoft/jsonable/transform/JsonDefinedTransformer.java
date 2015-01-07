@@ -56,7 +56,7 @@ public class JsonDefinedTransformer implements Transformer {
                 if (methods != null)
                     allMethods.addAll(Arrays.asList(methods));
                 inherit = inherit.getSuperclass();
-            } while (inherit != null && inherit.isAnnotationPresent(JsonClass.class) && Object.class.equals(inherit));
+            } while (inherit != null && inherit.isAnnotationPresent(JsonClass.class) && !Object.class.equals(inherit));
             cache.put(clazz.getName(), new ImmutablePair<List<Field>, List<Method>>(allFields, allMethods));
         } else {
             allFields = metadata.getLeft();
