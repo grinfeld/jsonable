@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 
 /**
@@ -31,6 +32,14 @@ public class JsonWriter {
 
     public static void write (Object o, OutputStream out, Configuration c, String charset, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
         write(o, new OutputStreamOutputter(out, charset), c, groups);
+    }
+
+    public static void write (Object o, Writer out, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
+        write(o, out, null, groups);
+    }
+
+    public static void write (Object o, Writer out, Configuration c, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
+        write(o, new WriterOutputter(out), c, groups);
     }
 
     public static void write (Object o, StringBuilder out, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
