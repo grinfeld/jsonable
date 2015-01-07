@@ -25,7 +25,7 @@ public class StringTransformer implements Transformer {
     @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
         String str = (String)o;
-        out.write(("\"" + str.replaceAll("\"", "\\\"") + "\""));
+        out.write(("\"" + StringEscapeUtils.escapeJson(str) + "\""));
     }
 
     @Override public int matchPriority() { return Transformer.HIGH_PRIORITY + 1; }
