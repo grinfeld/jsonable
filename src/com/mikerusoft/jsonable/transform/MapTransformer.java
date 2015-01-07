@@ -1,7 +1,6 @@
 package com.mikerusoft.jsonable.transform;
 
 import com.mikerusoft.jsonable.utils.Outputter;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -29,7 +28,7 @@ public class MapTransformer implements Transformer {
         int i=0;
         out.write("{");
         for (Map.Entry<?, ?> entry : m.entrySet()) {
-            String key = "\"" + StringEscapeUtils.escapeEcmaScript(String.valueOf(entry.getKey())) + "\"";
+            String key = "\"" + String.valueOf(entry.getKey()).replaceAll("\"", "\\\"") + "\"";
             out.write(key);
             out.write(":");
             Object p = entry.getValue();

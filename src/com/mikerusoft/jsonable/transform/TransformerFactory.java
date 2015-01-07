@@ -43,7 +43,7 @@ public class TransformerFactory {
                 matched.put(t.matchPriority(), t);
         }
         if (matched.size() <= 0)
-            return null;
+            return Null;
 
         transformer = (Transformer)matched.values().toArray()[0];
         cache.put(o.getClass().getName(), transformer);

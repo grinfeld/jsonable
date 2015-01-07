@@ -6,15 +6,19 @@ import com.mikerusoft.jsonable.utils.ContextManager;
 import com.mikerusoft.jsonable.utils.Outputter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,8 +31,7 @@ public class JsonDefinedTransformer implements Transformer {
 
     private Log log = LogFactory.getLog(JsonDefinedTransformer.class);
 
-    private Map<String, Field[]> fieldCache = new ConcurrentHashMap<String, Field[]>();
-    private Map<String, Method[]> methodCache = new ConcurrentHashMap<String, Method[]>();
+    private Map<String, Pair<List<Field>, List<Method>>> cache = new ConcurrentHashMap<String, Pair<List<Field>, List<Method>>>();
 
     @Override
     public boolean match(Object o) {
@@ -37,22 +40,29 @@ public class JsonDefinedTransformer implements Transformer {
 
     @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException {
-        Class<?> inherit = o.getClass();
+        Class<?> clazz = o.getClass();
+        Class<?> inherit = clazz;
         out.write("{");
-        int count = 0;
-        do {
-            Field[] fields = fieldCache.get(inherit.getName());
-            if (fields == null) {
-                fields = inherit.getDeclaredFields();
-                fieldCache.put(inherit.getName(), fields);
-            }
-            Method[] methods = methodCache.get(inherit.getName());
-            if (methods == null){
-                methods = inherit.getDeclaredMethods();
-                methodCache.put(inherit.getName(), methods);
-            }
-            count = count + write(o, fields, methods, out, count, groups);
-        } while ((inherit = inherit.getSuperclass()) != null);
+
+        Pair<List<Field>, List<Method>> metadata = cache.get(clazz.getName());
+        List<Method> allMethods = new ArrayList<Method>();
+        List<Field> allFields = new ArrayList<Field>();
+        if (metadata == null) {
+            do {
+                Field[] fields = inherit.getDeclaredFields();
+                if (fields != null)
+                    allFields.addAll(Arrays.asList(fields));
+                Method[] methods = inherit.getDeclaredMethods();
+                if (methods != null)
+                    allMethods.addAll(Arrays.asList(methods));
+                inherit = inherit.getSuperclass();
+            } while (inherit != null && inherit.isAnnotationPresent(JsonClass.class) && Object.class.equals(inherit));
+            cache.put(clazz.getName(), new ImmutablePair<List<Field>, List<Method>>(allFields, allMethods));
+        } else {
+            allFields = metadata.getLeft();
+            allMethods = metadata.getRight();
+        }
+        int count = write(o, allFields, allMethods, out, groups);
         if (count > 0) {
             Configuration c = ContextManager.get(Configuration.class);
             boolean excludeClass = Configuration.getBooleanProperty(c, Configuration.EXCLUDE_CLASS_PROPERTY, false);
@@ -72,7 +82,8 @@ public class JsonDefinedTransformer implements Transformer {
         return new ArrayList<String>(Arrays.asList(requestedGroups)).removeAll(Arrays.asList(dataGroups));
     }
 
-    private int write(Object o, Field[] fields, Method[] methods, Outputter<String> out, int count, String... groups) throws IllegalAccessException, IOException, InvocationTargetException {
+    private int write(Object o, List<Field> fields, List<Method> methods, Outputter<String> out, String... groups) throws IllegalAccessException, IOException, InvocationTargetException {
+        int count = 0;
         for (Field f : fields) {
             JsonField an = f.getAnnotation(JsonField.class);
             if (an != null && inGroup(groups, an.groups())) {
@@ -83,7 +94,7 @@ public class JsonDefinedTransformer implements Transformer {
                     out.write(",");
                 }
                 out.write("\"");
-                out.write(name);
+                out.write(name.replaceAll("\"", "\\\""));
                 out.write("\":");
                 TransformerFactory.get(part).transform(part, out, groups);
                 count++;
@@ -101,7 +112,7 @@ public class JsonDefinedTransformer implements Transformer {
                     out.write(",");
                 }
                 out.write("\"");
-                out.write(customName);
+                out.write(customName.replaceAll("\"", "\\\""));
                 out.write("\":");
                 TransformerFactory.get(part).transform(part, out, groups);
                 count++;

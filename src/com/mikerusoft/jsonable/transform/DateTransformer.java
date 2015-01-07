@@ -32,7 +32,7 @@ public class DateTransformer implements Transformer {
                 out.write(String.valueOf(((Date) o).getTime()));
                 break;
             case STRING_TYPE:
-                out.write(o.toString());
+                out.write(o.toString().replaceAll("\"", "\\\""));
                 break;
         }
     }

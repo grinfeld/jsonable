@@ -1,7 +1,6 @@
 package com.mikerusoft.jsonable.transform;
 
 import com.mikerusoft.jsonable.utils.Outputter;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,7 +24,7 @@ public class StringTransformer implements Transformer {
     @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
         String str = (String)o;
-        out.write(("\"" + StringEscapeUtils.escapeJson(str) + "\""));
+        out.write(("\"" + str.replaceAll("\"", "\\\"") + "\""));
     }
 
     @Override public int matchPriority() { return Transformer.HIGH_PRIORITY + 1; }

@@ -12,6 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 public interface Transformer {
     public static final int HIGH_PRIORITY = 0;
     public static final int LOW_PRIORITY = Integer.MAX_VALUE;
+    public static final int MAX_INHERITANCE_DEPTH = 20;
 
     /**
      * Tests if Object matches current Transformer
