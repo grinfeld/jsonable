@@ -22,6 +22,11 @@ public class NullTransformer implements Transformer {
     }
 
     @Override
+    public boolean matchClass(Class<?> clazz) {
+        return false;
+    }
+
+    @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
         out.write("null");
     }

@@ -35,7 +35,12 @@ public class JsonDefinedTransformer implements Transformer {
 
     @Override
     public boolean match(Object o) {
-        return o.getClass().getAnnotation(JsonClass.class) != null;
+        return matchClass(o.getClass());
+    }
+
+    @Override
+    public boolean matchClass(Class<?> clazz) {
+        return clazz.getAnnotation(JsonClass.class) != null;
     }
 
     @Override

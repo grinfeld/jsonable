@@ -13,7 +13,12 @@ public class CollectionTransformer implements Transformer {
 
     @Override
     public boolean match(Object o) {
-        return Collection.class.isAssignableFrom(o.getClass());
+        return matchClass(o.getClass());
+    }
+
+    @Override
+    public boolean matchClass(Class<?> clazz) {
+        return Collection.class.isAssignableFrom(clazz);
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 
 /**
  * @author Grinfeld Mikhail
@@ -17,11 +18,15 @@ public class PrimitiveTransformer implements Transformer {
 
     @Override
     public boolean match(Object o) {
-        Class<?> clazz = o.getClass();
+        return matchClass(o.getClass());
+    }
+
+    @Override
+    public boolean matchClass(Class<?> clazz) {
         return clazz.isPrimitive() || Boolean.class.equals(clazz) || Byte.class.equals(clazz) ||
             Short.class.equals(clazz) || Character.class.equals(clazz) ||
             Integer.class.equals(clazz) || Long.class.equals(clazz) ||
-            Double.class.equals(clazz) || Float.class.equals(clazz);
+            Double.class.equals(clazz) || Float.class.equals(clazz) || clazz.equals(BigDecimal.class);
     }
 
     @Override

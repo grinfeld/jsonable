@@ -19,7 +19,12 @@ public class MapTransformer implements Transformer {
 
     @Override
     public boolean match(Object o) {
-        return Map.class.isAssignableFrom(o.getClass());
+        return matchClass(o.getClass());
+    }
+
+    @Override
+    public boolean matchClass(Class<?> clazz) {
+        return Map.class.isAssignableFrom(clazz);
     }
 
     @Override

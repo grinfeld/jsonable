@@ -19,7 +19,12 @@ public class ListTransformer implements Transformer {
 
     @Override
     public boolean match(Object o) {
-        return List.class.isAssignableFrom(o.getClass());
+        return matchClass(o.getClass());
+    }
+
+    @Override
+    public boolean matchClass(Class<?> clazz) {
+        return List.class.isAssignableFrom(clazz);
     }
 
     @Override

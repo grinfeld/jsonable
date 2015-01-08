@@ -18,7 +18,12 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class EnumTransformer implements Transformer {
     @Override
-    public boolean match(Object o) { return o.getClass().isEnum(); }
+    public boolean match(Object o) { return matchClass(o.getClass()); }
+
+    @Override
+    public boolean matchClass(Class<?> clazz) {
+        return clazz.isEnum();
+    }
 
     @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {

@@ -12,7 +12,12 @@ import java.util.Set;
 public class SetTransformer implements Transformer {
     @Override
     public boolean match(Object o) {
-        return Set.class.isAssignableFrom(o.getClass());
+        return matchClass(o.getClass());
+    }
+
+    @Override
+    public boolean matchClass(Class<?> clazz) {
+        return Set.class.isAssignableFrom(clazz);
     }
 
     @Override

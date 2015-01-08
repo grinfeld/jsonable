@@ -18,7 +18,12 @@ public class ArrayTransformer implements Transformer {
     private Log log = LogFactory.getLog(ArrayTransformer.class);
 
     @Override
-    public boolean match(Object o) { return o.getClass().isArray(); }
+    public boolean match(Object o) { return matchClass(o.getClass()); }
+
+    @Override
+    public boolean matchClass(Class<?> clazz) {
+        return clazz.isArray();
+    }
 
     @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {

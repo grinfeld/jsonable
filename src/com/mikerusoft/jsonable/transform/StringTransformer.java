@@ -19,7 +19,12 @@ public class StringTransformer implements Transformer {
 
     @Override
     public boolean match(Object o) {
-        return o.getClass().equals(CharSequence.class) || o.getClass().equals(String.class);
+        return matchClass(o.getClass());
+    }
+
+    @Override
+    public boolean matchClass(Class<?> clazz) {
+        return clazz.equals(CharSequence.class) || clazz.equals(String.class);
     }
 
     @Override

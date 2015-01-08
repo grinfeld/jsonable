@@ -21,6 +21,8 @@ public interface Transformer {
      */
     boolean match(Object o);
 
+    boolean matchClass(Class<?> clazz);
+
     /**
      * Transforms Object to JSON and writes into OutputStream
      * @param o Object to transform to JSON

@@ -19,7 +19,11 @@ public class DateTransformer implements Transformer {
 
     @Override
     public boolean match(Object o) {
-        Class<?> clazz = o.getClass();
+        return matchClass(o.getClass());
+    }
+
+    @Override
+    public boolean matchClass(Class<?> clazz) {
         DateField an = clazz.getAnnotation(DateField.class);
         return (Date.class.isAssignableFrom(clazz) && an != null);
     }
