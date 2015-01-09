@@ -2,13 +2,13 @@ package com.mikerusoft.jsonable.transform;
 
 import com.mikerusoft.jsonable.annotations.CustomField;
 import com.mikerusoft.jsonable.annotations.DateField;
-import com.mikerusoft.jsonable.annotations.JsonClass;
 import com.mikerusoft.jsonable.annotations.JsonField;
 import com.mikerusoft.jsonable.utils.Configuration;
 import com.mikerusoft.jsonable.utils.ContextManager;
 import com.mikerusoft.jsonable.utils.ReflectionCache;
 import com.sun.istack.internal.NotNull;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -203,21 +203,46 @@ public class JsonParser {
         if (f.getType().isPrimitive() && data == null) {
             throw new IllegalArgumentException("Incompatible types for " + f.getName());
         }
+        if (data == null) {
+            return;
+        }
         if (f.getType().equals(Boolean.class) || f.getType().equals(Boolean.TYPE)) {
-            String value = (String)data;
-            f.setBoolean(owner, !("".equals(value) || "0".equals(value) || "false".equalsIgnoreCase(value)));
+            if (data instanceof String) {
+                String value = (String) data;
+                f.setBoolean(owner, !("".equals(value) || "0".equals(value) || "false".equalsIgnoreCase(value)));
+            } else {
+                f.set (owner, cast(Boolean.class, data));
+            }
         } else if (f.getType().equals(Byte.class) || f.getType().equals(Byte.TYPE)) {
-            f.setByte(owner, Byte.parseByte((String) data));
+            if (data instanceof String)
+                f.setByte(owner, Byte.parseByte((String) data));
+            else
+                f.setByte(owner, ((Long) data).byteValue());
         } else if (f.getType().equals(Short.class) || f.getType().equals(Short.TYPE)) {
-            f.setShort(owner, Short.parseShort((String) data));
+            if (data instanceof String)
+                f.setShort(owner, Short.parseShort((String) data));
+            else
+                f.setShort(owner, ((Long) data).shortValue());
         } else if (f.getType().equals(Integer.class) || f.getType().equals(Integer.TYPE)) {
-            f.setInt(owner, Integer.parseInt((String) data));
+            if (data instanceof String)
+                f.setInt(owner, Integer.parseInt((String) data));
+            else
+                f.setInt(owner, ((Long) data).intValue());
         }else if (f.getType().equals(Long.class) || f.getType().equals(Long.TYPE)) {
-            f.setLong(owner, Long.parseLong((String) data));
+            if (data instanceof String)
+                f.setLong(owner, Long.parseLong((String) data));
+            else
+                f.setLong(owner, ((Long) data));
         } else if (f.getType().equals(Double.class) || f.getType().equals(Double.TYPE)) {
-            f.setDouble(owner, Double.parseDouble((String) data));
+            if (data instanceof String)
+                f.setDouble(owner, Double.parseDouble((String) data));
+            else
+                f.setDouble(owner, (Double) data);
         } else if (f.getType().equals(Float.class) || f.getType().equals(Float.TYPE)) {
-            f.setFloat(owner, Float.parseFloat((String) data));
+            if (data instanceof String)
+                f.setFloat(owner, Float.parseFloat((String) data));
+            else
+                f.setFloat(owner, ((Double) data).floatValue());
         } else if (Date.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(DateField.class)) {
             int type = f.getAnnotation(DateField.class).type();
             switch (type) {
@@ -233,25 +258,28 @@ public class JsonParser {
                     break;
             }
         } else if (f.getType().equals(String.class)) {
-            f.set(owner, data);
-        } else if (f.getType().isArray() && data != null && data instanceof List) {
+            f.set(owner, StringEscapeUtils.unescapeJson((String)data));
+        } else if (f.getType().isArray() && data instanceof List) {
             List<?> l = ((List) data);
             Object ar = Array.newInstance(f.getType().getComponentType(), l.size());
             System.arraycopy(l.toArray(), 0, ar, 0, l.size());
             f.set(owner, ar);
-        } else if (List.class.isAssignableFrom(f.getType()) && data != null && data instanceof List) {
+        } else if (List.class.isAssignableFrom(f.getType()) && data instanceof List) {
             List<?> l = ((List) data);
             f.set(owner, l);
-        } else if (Set.class.isAssignableFrom(f.getType()) && data != null && data instanceof List) {
+        } else if (Set.class.isAssignableFrom(f.getType()) && data instanceof List) {
             List l = ((List) data);
             f.set(owner, new HashSet(l));
-        } else if (Collection.class.isAssignableFrom(f.getType()) && data != null && data instanceof List) {
+        } else if (Collection.class.isAssignableFrom(f.getType()) && data instanceof List) {
             List<?> l = ((List) data);
             f.set(owner, l);
         } else {
             f.set(owner, f.getType().cast(data));
         }
+    }
 
+    public <T> T cast(Class<T> clazz, Object value) {
+        return clazz.cast(value);
     }
 
     /**
@@ -312,6 +340,8 @@ public class JsonParser {
                 Object o = pn;
                 if (pn.replaceAll("[0-9]", "").equals(""))
                     o = Long.valueOf(pn);
+                if (pn.replaceAll("[0-9]", "").equals("."))
+                    o = Double.valueOf(pn);
                 queue.pollLast();
                 if (pn.equalsIgnoreCase("null"))
                     return new ImmutablePair<Character, Object>(c, "");
