@@ -16,6 +16,7 @@ Small library to convert Java POJO to and from JSON
 When you convert java pure object, 'class' parameter will be added into JSON object:
 
     package mypackage;
+    @JsonClass
     public class Foo {
        String str = "Hello";
        int num = 1;
@@ -34,41 +35,20 @@ So, if you want to read data into appropriate object, do following:
     System.out.println(foo.str); // prints "Hello"
     System.out.println(foo.num); // prints "1"
 
-Sometimes, you want to avoid some of variables to be serialized to JSON:
+Sometimes, you want to avoid some of variables to be serialized to JSON, so simply, don't add annotation to field, you don't want to be serialized:
 
     package mypackage;
     public class Foo {
-       String password = "My Password";
+       @JsonField String password = "Hello";
        int num = 1;
     }
 
-In this case you can use java *transient* modifier or add **@IgnoreJson** annotation, like this:
 
-    package mypackage;
-    public class Foo {
-       @IgnoreJson String password = "My Password";
-       int num = 1;
-    }
     StringBuilder sb = new StringBuilder();
     try {
       JsonWriter.write(new Foo(), sb);
       System.out.println(sb.toString());
-      // {"num":1,"class":"mypackage.Foo"}
-    } catch (Exception ignore) {}
-
-Other way to define Object and specific fields to be converted to JSON, it's to use **@JsonClass** and **@JsonField** annotations. If you defined class with **@JsonClass**, you'll need to define every field you want to be converted into JSON
-
-    package mypackage;
-    @JsonCLass
-    public class Foo {
-       @JsonField String name= "Mike";
-       int num = 1;
-    }
-    StringBuilder sb = new StringBuilder();
-    try {
-      JsonWriter.write(new Foo(), sb);
-      System.out.println(sb.toString());
-      // {"name":"Mike","class":"mypackage.Foo"}
+      // {"str":"Hello", "class":"mypackage.Foo"}
     } catch (Exception ignore) {}
 
 Sometimes, we store complex data, but in JSON it must be represented by single value, so in this case you can use **@CustomField** annotation (despite of its name, this annotation is for methods):
@@ -106,6 +86,7 @@ Sometimes, we store complex data, but in JSON it must be represented by single v
 If you don't want to expose class name when converting objects to JSON, use **Configuration**:
 
     package mypackage;
+    @JsonClass
     public class Foo {
        String str = "Hello";
        int num = 1;
@@ -125,6 +106,31 @@ If you don't want to expose class name when converting objects to JSON, use **Co
     Map map = JsonReader.read(json, Map.class);
     System.out.println(map.get("str"); // prints "Mike"
     System.out.println(map.get("num")); // prints "1"
+
+Sometimes you need to expose different fields in different cases. For such use I added groups() attribute for @JsonField and @CustomField. For example: you have administrator who manages other users, but you don't want to show user's password - only user itself could see his own password.
+
+    package mypackage;
+    @JsonClass
+    public class User {
+	   @JsonField (groups = {"user", "admin"}
+       String username = "Mike";
+       @JsonField (groups = {"user"}
+       String password = "1234"; // never use such password
+       @JsonField (groups = {"girlfriend"}
+       String nickname = "Honey";
+    }
+    
+    StringBuilder sb = new StringBuilder();
+    try {
+      JsonWriter.write(new User(), sb, "user", "girlfriend");
+      System.out.println(sb.toString());
+      // {"username":"Mike","password":"1234", "nickname": "Honey", "class": "mypackage.User"}
+      
+      JsonWriter.write(new User(), sb, "admin", "girlfriend");
+      System.out.println(sb.toString());
+      // {"username":"Mike","nickname": "Honey", "class": "mypackage.User"}
+    } catch (Exception ignore) {}
+
 
 Oh, installation?
 ------------------------

@@ -7,10 +7,7 @@ import com.mikerusoft.jsonable.utils.ContextManager;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -99,72 +96,72 @@ public class JsonTest {
     @Test public void stringTest() {
         try {
             JsonWriter.write("Hello", sb);
-            assertEquals("Failed StringTest" + sb.toString(), "\"Hello\"", sb.toString());
         } catch (Exception ignore) {}
+        assertEquals("Failed StringTest" + sb.toString(), "\"Hello\"", sb.toString());
     }
 
     @Test public void integerTest() {
         try {
             JsonWriter.write(1, sb);
-            assertEquals("Failed integer test " + sb.toString(), "1", sb.toString());
         } catch (Exception ignore) {}
+        assertEquals("Failed integer test " + sb.toString(), "1", sb.toString());
     }
 
     @Test public void longTest() {
         try {
             JsonWriter.write(1l, sb);
-            assertEquals("Failed long test " + sb.toString(), "1", sb.toString());
         } catch (Exception ignore) {}
+        assertEquals("Failed long test " + sb.toString(), "1", sb.toString());
     }
 
     @Test public void shortTest() {
         try {
             JsonWriter.write((short)1, sb);
-            assertEquals("Failed short test " + sb.toString(), "1", sb.toString());
         } catch (Exception ignore) {}
+        assertEquals("Failed short test " + sb.toString(), "1", sb.toString());
     }
 
     @Test public void booleanFalseTest() {
         try {
             JsonWriter.write(false, sb);
-            assertEquals("Failed boolean false test " + sb.toString(), "false", sb.toString());
         } catch (Exception ignore) {}
+        assertEquals("Failed boolean false test " + sb.toString(), "false", sb.toString());
     }
 
     @Test public void booleanTrueTest() {
         try {
             JsonWriter.write(true, sb);
-            assertEquals("Failed boolean true test " + sb.toString(), "true", sb.toString());
         } catch (Exception ignore) {}
+        assertEquals("Failed boolean true test " + sb.toString(), "true", sb.toString());
     }
 
     @Test public void simpleArrayStringTest() {
         try {
             JsonWriter.write(new String[] {"hello", "bye"}, sb);
-            assertEquals("Failed simple array string test " + sb.toString(), "[\"hello\",\"bye\"]", sb.toString());
         } catch (Exception ignore) {}
+        assertEquals("Failed simple array string test " + sb.toString(), "[\"hello\",\"bye\"]", sb.toString());
     }
 
     @Test public void simpleArrayNumberTest() {
         try {
             JsonWriter.write(new int[] {1, 2}, sb);
-            assertEquals("Failed simple array number test " + sb.toString(), "[1,2]", sb.toString());
         } catch (Exception ignore) {}
+        assertEquals("Failed simple array number test " + sb.toString(), "[1,2]", sb.toString());
     }
 
 
     @Test public void simpleListStringTest() {
         try {
             JsonWriter.write(Arrays.asList("hello", "bye"), sb);
-            assertEquals("Failed simple array string test " + sb.toString(), "[\"hello\",\"bye\"]", sb.toString());
         } catch (Exception ignore) {}
+        assertEquals("Failed simple array string test " + sb.toString(), "[\"hello\",\"bye\"]", sb.toString());
     }
 
     @Test public void simpleListNumberTest() {
         try {
             JsonWriter.write(Arrays.asList(1, 2), sb);
-            assertEquals("Failed simple array number test " + sb.toString(), "[1,2]", sb.toString());
         } catch (Exception ignore) {}
+        assertEquals("Failed simple array number test " + sb.toString(), "[1,2]", sb.toString());
     }
 
     @Test public void simpleObjectTest() {
@@ -172,8 +169,8 @@ public class JsonTest {
             simpleObj.str = "Hello";
             simpleObj.num = 1;
             JsonWriter.write(simpleObj, sb);
-            assertEquals("Failed simple object test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObj\"}", sb.toString());
         } catch (Exception ignore) {}
+        assertEquals("Failed simple object test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObj\"}", sb.toString());
     }
 
     @Test public void simpleObjectExcludeClassTest() {
@@ -182,8 +179,8 @@ public class JsonTest {
             simpleObj.num = 1;
             c.setProperty(Configuration.EXCLUDE_CLASS_PROPERTY, "true");
             JsonWriter.write(simpleObj, sb, c);
-            assertEquals("Failed simple object exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());  ;
         } catch (Exception ignore) {}
+        assertEquals("Failed simple object exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());  ;
     }
 
     @Test public void simpleObjectAnotTest() {
@@ -192,8 +189,8 @@ public class JsonTest {
             simpleObjAnot.num = 1;
             simpleObjAnot.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnot, sb);
-            assertEquals("Failed simple object with annotation test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnot\"}", sb.toString());
         } catch (Exception ignore) {}
+        assertEquals("Failed simple object with annotation test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnot\"}", sb.toString());
     }
 
     @Test public void simpleObjectAnotWithGroupTest() {
@@ -205,9 +202,8 @@ public class JsonTest {
 
             Object o = JsonReader.read(sb.toString(), "mygroup");
             JsonWriter.write(o, sb1);
-
-            assertEquals("Failed object with mygroup" + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnot\"}", sb.toString());
         } catch (Exception ignore) {}
+        assertEquals("Failed object with mygroup" + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnot\"}", sb.toString());
     }
 
     @Test public void simpleObjectAnotExcludeClassTest() {
@@ -306,6 +302,27 @@ public class JsonTest {
             Object o = JsonReader.read(sb.toString());
             JsonWriter.write(o, sb1);
         } catch (Exception ignore) {}
-        assertEquals("numberWriteReadTest", sb1.toString(), sb.toString());
+        assertEquals("readWriteSimpleAnotTest", sb1.toString(), sb.toString());
+    }
+
+    @Test public void numberArrayTest() {
+        try {
+            JsonWriter.write(new Object[] {1,2,3}, sb);
+        } catch (Exception ignore) {}
+        assertEquals("numberArrayTest", "[1,2,3]", sb.toString());
+    }
+
+    @Test public void numberListTest() {
+        try {
+            JsonWriter.write(Arrays.asList(new Integer[] {1,2,3}), sb);
+        } catch (Exception ignore) {}
+        assertEquals("numberListTest", "[1,2,3]", sb.toString());
+    }
+
+    @Test public void numberSetTest() {
+        try {
+            JsonWriter.write(new HashSet<Integer>(Arrays.asList(new Integer[] {1,2,3})), sb);
+        } catch (Exception ignore) {}
+        assertEquals("numberListTest", "[1,2,3]", sb.toString());
     }
 }
