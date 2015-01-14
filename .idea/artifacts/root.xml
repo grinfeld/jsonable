@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="root">
-    <output-path>$PROJECT_DIR$</output-path>
-    <root id="archive" name="jsonable.jar">
-      <element id="module-output" name="jsonable" />
-    </root>
-  </artifact>
-</component>
