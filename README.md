@@ -100,6 +100,41 @@ If you don't want to expose class name when converting objects to JSON, use **Co
       // {"str":"Hello","num":1}
     } catch (Exception ignore) {}
 
+Another use for Configuration: if you need to include NULL values in Map or annotated by @JsonClass Object, use Configuration.INCLUDE_NULL_PROPERTY
+*Note:* default behavior will not include NULLs
+
+default behavior:
+
+    package mypackage;
+    @JsonClass
+    public class Foo {
+       String str = null;
+       int num = 1;
+    }
+    StringBuilder sb = new StringBuilder();
+    try {
+      JsonWriter.write(new Foo(), sb);
+      System.out.println(sb.toString());
+      // {"num":1, "class": "mypackage.Foo"}
+    } catch (Exception ignore) {}
+
+using include NULL configuration:
+
+    package mypackage;
+    @JsonClass
+    public class Foo {
+       String str = null;
+       int num = 1;
+    }
+    StringBuilder sb = new StringBuilder();
+    try {
+      Configuration c = new Configuration();
+      c.setProperty(Configuration.INCLUDE_NULL_PROPERTY, "true")
+      JsonWriter.write(new Foo(), sb, c);
+      System.out.println(sb.toString());
+      // {"str":null,"num":1, "class": "mypackage.Foo"}
+    } catch (Exception ignore) {}
+
 *Note:* reading such JSON without 'class', will cause Map as output:
 
     String json = "{\"num\": 1,\"str\":\"Hello\"}";
