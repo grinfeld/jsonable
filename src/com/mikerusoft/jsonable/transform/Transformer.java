@@ -27,8 +27,7 @@ public interface Transformer {
      * Transforms Object to JSON and writes into OutputStream
      * @param o Object to transform to JSON
      * @param out StringBuilder to write into
-     * @param groups list of groups to use for current conversion
-     * @throws IOException
+     * @param groups list of groups to use for current conversion  @throws IOException
      */
     void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException;
 

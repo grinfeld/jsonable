@@ -90,6 +90,7 @@ public class JsonTest {
         simpleObjAnotExtend = new SimpleObjAnnotExtend();
         simpleObjCustom = new SimpleObjCustom();
         sb1 = new StringBuilder();
+        c = new Configuration();
         ContextManager.unset();
     }
 
@@ -231,7 +232,7 @@ public class JsonTest {
     }
 
 
-    @Test public void simpleObjectExtendedWithNullTest() {
+    @Test public void simpleObjectExtendedWithIgnoreNullTest() {
         try {
             simpleObjAnotExtend.str1 = "Hello";
             simpleObjAnotExtend.num = 1;
@@ -239,8 +240,21 @@ public class JsonTest {
             simpleObjAnotExtend.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnotExtend, sb);
         } catch (Exception ignore) {}
+        assertEquals("Failed simple object extended test " + sb.toString(), "{\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
+    }
+
+    @Test public void simpleObjectExtendedWithNullTest() {
+        try {
+            c.setProperty(Configuration.INCLUDE_NULL_PROPERTY, "true");
+            simpleObjAnotExtend.str1 = "Hello";
+            simpleObjAnotExtend.num = 1;
+            simpleObjAnotExtend.extended = null;
+            simpleObjAnotExtend.ignore = "Ignore me";
+            JsonWriter.write(simpleObjAnotExtend, sb, c);
+        } catch (Exception ignore) {}
         assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":null,\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.parser.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
     }
+
 
     @Test public void simpleObjectExtendedWithEmptStringTest() {
         try {

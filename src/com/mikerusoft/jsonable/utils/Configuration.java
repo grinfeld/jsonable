@@ -12,6 +12,8 @@ public class Configuration extends Properties implements ContextData {
     public static final String CLASS_PROPERTY = "class_property";
     public static final String DEFAULT_CLASS_PROPERTY_VALUE = "class";
 
+    public static final String INCLUDE_NULL_PROPERTY = "include_null";
+
     public Configuration() {
     }
 

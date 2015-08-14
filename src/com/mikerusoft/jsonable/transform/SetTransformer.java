@@ -10,6 +10,7 @@ import java.util.Set;
  * Transforms Set into Json array
  */
 public class SetTransformer implements Transformer {
+
     @Override
     public boolean match(Object o) {
         return matchClass(o.getClass());

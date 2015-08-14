@@ -12,7 +12,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -88,21 +87,26 @@ public class JsonDefinedTransformer implements Transformer {
     }
 
     private int write(Object o, List<Field> fields, List<Method> methods, Outputter<String> out, String... groups) throws IllegalAccessException, IOException, InvocationTargetException {
+        Configuration c = ContextManager.get(Configuration.class);
+        boolean includeNull = Configuration.getBooleanProperty(c, Configuration.INCLUDE_NULL_PROPERTY, false);
+
         int count = 0;
         for (Field f : fields) {
             JsonField an = f.getAnnotation(JsonField.class);
             if (an != null && inGroup(groups, an.groups())) {
                 f.setAccessible(true);
                 Object part = f.get(o);
-                String name = StringUtils.isEmpty(an.name()) ? f.getName() : an.name();
-                if (count != 0) {
-                    out.write(",");
+                if (includeNull || part != null) {
+                    String name = StringUtils.isEmpty(an.name()) ? f.getName() : an.name();
+                    if (count != 0) {
+                        out.write(",");
+                    }
+                    out.write("\"");
+                    out.write(name.replaceAll("\"", "\\\""));
+                    out.write("\":");
+                    TransformerFactory.get(part).transform(part, out, groups);
+                    count++;
                 }
-                out.write("\"");
-                out.write(name.replaceAll("\"", "\\\""));
-                out.write("\":");
-                TransformerFactory.get(part).transform(part, out, groups);
-                count++;
             }
         }
 
@@ -113,14 +117,16 @@ public class JsonDefinedTransformer implements Transformer {
                 String customName = an.name();
                 m.setAccessible(true);
                 Object part = m.invoke(o);
-                if (count != 0) {
-                    out.write(",");
+                if (includeNull || part != null) {
+                    if (count != 0) {
+                        out.write(",");
+                    }
+                    out.write("\"");
+                    out.write(customName.replaceAll("\"", "\\\""));
+                    out.write("\":");
+                    TransformerFactory.get(part).transform(part, out, groups);
+                    count++;
                 }
-                out.write("\"");
-                out.write(customName.replaceAll("\"", "\\\""));
-                out.write("\":");
-                TransformerFactory.get(part).transform(part, out, groups);
-                count++;
             }
         }
 
