@@ -13,7 +13,7 @@ import java.lang.reflect.InvocationTargetException;
  * @author Grinfeld Mikhail
  * @since 5/25/2014.
  */
-public class ArrayTransformer implements Transformer {
+public class ArrayTransformer extends TransformerImpl {
 
     private Log log = LogFactory.getLog(ArrayTransformer.class);
 

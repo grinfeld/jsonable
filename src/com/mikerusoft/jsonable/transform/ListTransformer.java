@@ -13,7 +13,7 @@ import java.util.List;
  * @author Grinfeld Mikhail
  * @since 5/25/2014.
  */
-public class ListTransformer implements Transformer {
+public class ListTransformer  extends TransformerImpl {
 
     private Log log = LogFactory.getLog(ListTransformer.class);
 

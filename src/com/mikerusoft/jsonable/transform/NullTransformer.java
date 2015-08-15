@@ -12,7 +12,7 @@ import java.lang.reflect.InvocationTargetException;
  * @author Grinfeld Mikhail
  * @since 5/25/2014.
  */
-public class NullTransformer implements Transformer {
+public class NullTransformer extends TransformerImpl {
 
     private Log log = LogFactory.getLog(NullTransformer.class);
 

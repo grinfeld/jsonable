@@ -16,7 +16,7 @@ import java.lang.reflect.InvocationTargetException;
  * @author Grinfeld Mikhail
  * @since 12/5/2014.
  */
-public class EnumTransformer implements Transformer {
+public class EnumTransformer  extends TransformerImpl {
     @Override
     public boolean match(Object o) { return matchClass(o.getClass()); }
 

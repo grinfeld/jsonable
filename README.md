@@ -43,7 +43,6 @@ Sometimes, you want to avoid some of variables to be serialized to JSON, so simp
        int num = 1;
     }
 
-
     StringBuilder sb = new StringBuilder();
     try {
       JsonWriter.write(new Foo(), sb);
@@ -88,8 +87,8 @@ If you don't want to expose class name when converting objects to JSON, use **Co
     package mypackage;
     @JsonClass
     public class Foo {
-       String str = "Hello";
-       int num = 1;
+       @JsonField String str = "Hello";
+       @JsonField int num = 1;
     }
     StringBuilder sb = new StringBuilder();
     try {
@@ -100,16 +99,16 @@ If you don't want to expose class name when converting objects to JSON, use **Co
       // {"str":"Hello","num":1}
     } catch (Exception ignore) {}
 
-Another use for Configuration: if you need to include NULL values in Map or annotated by @JsonClass Object, use Configuration.INCLUDE_NULL_PROPERTY
+Another use for Configuration: if you need to include **NULL** values in Map or annotated by @JsonClass Object, use **Configuration.INCLUDE_NULL_PROPERTY**
 *Note:* default behavior will not include NULLs
 
-default behavior:
+default behavior is writing output without **NULL** fields:
 
     package mypackage;
     @JsonClass
     public class Foo {
-       String str = null;
-       int num = 1;
+       @JsonField String str = null;
+       @JsonField int num = 1;
     }
     StringBuilder sb = new StringBuilder();
     try {
@@ -118,13 +117,28 @@ default behavior:
       // {"num":1, "class": "mypackage.Foo"}
     } catch (Exception ignore) {}
 
-using include NULL configuration:
+writing **NULL** for specific field only
 
     package mypackage;
     @JsonClass
     public class Foo {
-       String str = null;
-       int num = 1;
+       @JsonField @DisplayNull String str = null;
+       @JsonField int num = 1;
+    }
+    StringBuilder sb = new StringBuilder();
+    try {
+      JsonWriter.write(new Foo(), sb);
+      System.out.println(sb.toString());
+      // {"str": null, "num":1, "class": "mypackage.Foo"}
+    } catch (Exception ignore) {}
+
+always writing **NULL**
+
+    package mypackage;
+    @JsonClass
+    public class Foo {
+       @JsonField String str = null;
+       @JsonField int num = 1;
     }
     StringBuilder sb = new StringBuilder();
     try {
@@ -143,12 +157,13 @@ using include NULL configuration:
     System.out.println(map.get("num")); // prints "1"
 
 Sometimes you need to expose different fields in different cases. For such use I added groups() attribute for @JsonField and @CustomField. For example: you have administrator who manages other users, but you don't want to show user's password - only user itself could see his own password.
+*Note:* if you don't add any group, means always serialize
 
     package mypackage;
     @JsonClass
     public class User {
 	   @JsonField (groups = {"user", "admin"}
-       String username = "Mike";
+       @JsonField String username = "Mike";
        @JsonField (groups = {"user"}
        String password = "1234"; // never use such password
        @JsonField (groups = {"girlfriend"}

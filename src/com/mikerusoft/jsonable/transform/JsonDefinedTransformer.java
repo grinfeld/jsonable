@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Grinfeld Mikhail
  * @since 5/25/2014.
  */
-public class JsonDefinedTransformer implements Transformer {
+public class JsonDefinedTransformer extends TransformerImpl {
 
     private Log log = LogFactory.getLog(JsonDefinedTransformer.class);
 
@@ -86,6 +87,11 @@ public class JsonDefinedTransformer implements Transformer {
         return new ArrayList<String>(Arrays.asList(requestedGroups)).removeAll(Arrays.asList(dataGroups));
     }
 
+    private boolean displayNullField(AccessibleObject ao) {
+        DisplayNull dn = ao.getAnnotation(DisplayNull.class);
+        return dn != null && dn.value();
+    }
+
     private int write(Object o, List<Field> fields, List<Method> methods, Outputter<String> out, String... groups) throws IllegalAccessException, IOException, InvocationTargetException {
         Configuration c = ContextManager.get(Configuration.class);
         boolean includeNull = Configuration.getBooleanProperty(c, Configuration.INCLUDE_NULL_PROPERTY, false);
@@ -96,7 +102,7 @@ public class JsonDefinedTransformer implements Transformer {
             if (an != null && inGroup(groups, an.groups())) {
                 f.setAccessible(true);
                 Object part = f.get(o);
-                if (includeNull || part != null) {
+                if (includeNull || displayNullField(f) || part != null) {
                     String name = StringUtils.isEmpty(an.name()) ? f.getName() : an.name();
                     if (count != 0) {
                         out.write(",");
@@ -104,7 +110,7 @@ public class JsonDefinedTransformer implements Transformer {
                     out.write("\"");
                     out.write(name.replaceAll("\"", "\\\""));
                     out.write("\":");
-                    TransformerFactory.get(part).transform(part, out, groups);
+                    TransformerFactory.get(part).transform(f, part, out, groups);
                     count++;
                 }
             }
@@ -117,14 +123,14 @@ public class JsonDefinedTransformer implements Transformer {
                 String customName = an.name();
                 m.setAccessible(true);
                 Object part = m.invoke(o);
-                if (includeNull || part != null) {
+                if (includeNull || displayNullField(m) || part != null) {
                     if (count != 0) {
                         out.write(",");
                     }
                     out.write("\"");
                     out.write(customName.replaceAll("\"", "\\\""));
                     out.write("\":");
-                    TransformerFactory.get(part).transform(part, out, groups);
+                    TransformerFactory.get(part).transform(m, part, out, groups);
                     count++;
                 }
             }

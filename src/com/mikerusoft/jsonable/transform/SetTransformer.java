@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Transforms Set into Json array
  */
-public class SetTransformer implements Transformer {
+public class SetTransformer  extends TransformerImpl {
 
     @Override
     public boolean match(Object o) {

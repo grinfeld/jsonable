@@ -9,7 +9,7 @@ import java.util.Collection;
 /**
  * Converts Collection into Json array. It's has low priority, so if found more appropriate Transformer, it will be used instead of this.
  */
-public class CollectionTransformer implements Transformer {
+public class CollectionTransformer extends TransformerImpl {
 
     @Override
     public boolean match(Object o) {

@@ -15,7 +15,7 @@ import java.util.Map;
  * @author Grinfeld Mikhail
  * @since 5/25/2014.
  */
-public class MapTransformer implements Transformer {
+public class MapTransformer  extends TransformerImpl {
 
     private Log log = LogFactory.getLog(MapTransformer.class);
 

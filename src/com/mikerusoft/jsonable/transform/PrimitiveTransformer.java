@@ -12,7 +12,7 @@ import java.math.BigDecimal;
  * @author Grinfeld Mikhail
  * @since 5/25/2014.
  */
-public class PrimitiveTransformer implements Transformer {
+public class PrimitiveTransformer  extends TransformerImpl {
 
     private Log log = LogFactory.getLog(PrimitiveTransformer.class);
 
