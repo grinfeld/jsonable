@@ -221,17 +221,23 @@ public class JsonParser {
             }
         } else if (f.getType().isPrimitive()) {
             if (f.getType().equals(Byte.TYPE)) {
-                f.setByte(owner, ((Long) data).byteValue());
+                Long val = data instanceof String ? Long.parseLong((String)data) : (Long)data;
+                f.setByte(owner, val.byteValue());
             } else if (f.getType().equals(Short.TYPE)) {
-                f.setShort(owner, ((Long) data).shortValue());
+                Long val = data instanceof String ? Long.parseLong((String)data) : (Long)data;
+                f.setShort(owner, val.shortValue());
             } else if (f.getType().equals(Integer.TYPE)) {
-                f.setInt(owner, ((Long) data).intValue());
+                Long val = data instanceof String ? Long.parseLong((String)data) : (Long)data;
+                f.setInt(owner, val.intValue());
             } else if (f.getType().equals(Long.TYPE)) {
-                f.setLong(owner, ((Long) data).longValue());
+                Long val = data instanceof String ? Long.parseLong((String)data) : (Long)data;
+                f.setLong(owner, val.longValue());
             } else if (f.getType().equals(Double.TYPE)) {
-                f.setDouble(owner, ((Double) data).doubleValue());
+                Double val = data instanceof String ? Double.parseDouble((String) data) : (Double)data;
+                f.setDouble(owner, val.doubleValue());
             } else if (f.getType().equals(Float.TYPE)) {
-                f.setFloat(owner, ((Double) data).floatValue());
+                Double val = data instanceof String ? Double.parseDouble((String) data) : (Double)data;
+                f.setFloat(owner, val.floatValue());
             }
         } else if (Date.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(DateField.class)) {
             int type = f.getAnnotation(DateField.class).type();
