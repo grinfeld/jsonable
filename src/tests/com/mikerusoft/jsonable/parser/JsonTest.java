@@ -33,7 +33,7 @@ public class JsonTest {
 
     @JsonClass
     public static class SimpleObjDouble extends SimpleObj {
-        @JsonField Double floating;
+        @JsonField Float floating;
 
         @Override
         public String toString() {
@@ -379,7 +379,7 @@ public class JsonTest {
         try {
             simpleObjDouble.str = "Hel\"lo";
             simpleObjDouble.num = 1;
-            simpleObjDouble.floating = 1.0;
+            simpleObjDouble.floating = (float)1.0;
             JsonWriter.write(simpleObjDouble, sb);
             Object o = JsonReader.read(sb.toString());
             JsonWriter.write(o, sb1);

@@ -196,7 +196,7 @@ public class JsonParser {
 
     private Object createEnum(Class<?> clazz, Map<String, Object> possible) {
         String enumName = (String)possible.get("name");
-        return EnumUtils.getEnum((Class<? extends Enum>)clazz, enumName);
+        return EnumUtils.getEnum((Class<? extends Enum>) clazz, enumName);
     }
 
     private void fill(Field f, Object owner, Object data) throws IllegalArgumentException, IllegalAccessException {
@@ -210,43 +210,29 @@ public class JsonParser {
             return;
         }
 
-        if (f.getType().equals(Boolean.TYPE)) {
+        if (f.getType().equals(Boolean.TYPE) || f.getType().equals(Boolean.class)) {
             if (data instanceof String) {
                 String value = (String) data;
                 f.setBoolean(owner, !("".equals(value) || "0".equals(value) || "false".equalsIgnoreCase(value)));
+            } else if (f.getType().equals(Boolean.TYPE)) {
+                f.setBoolean(owner, ((Boolean) data).booleanValue());
             } else {
-                f.setBoolean (owner, ((Boolean)data).booleanValue());
+                f.set(owner, data);
             }
-        } else if (f.getType().equals(Byte.TYPE)) {
-            if (data instanceof String)
-                f.setByte(owner, Byte.parseByte((String) data));
-            else
+        } else if (f.getType().isPrimitive()) {
+            if (f.getType().equals(Byte.TYPE)) {
                 f.setByte(owner, ((Long) data).byteValue());
-        } else if (f.getType().equals(Short.TYPE)) {
-            if (data instanceof String)
-                f.setShort(owner, Short.parseShort((String) data));
-            else
+            } else if (f.getType().equals(Short.TYPE)) {
                 f.setShort(owner, ((Long) data).shortValue());
-        } else if (f.getType().equals(Integer.TYPE)) {
-            if (data instanceof String)
-                f.setInt(owner, Integer.parseInt((String) data));
-            else
+            } else if (f.getType().equals(Integer.TYPE)) {
                 f.setInt(owner, ((Long) data).intValue());
-        }else if (f.getType().equals(Long.TYPE)) {
-            if (data instanceof String)
-                f.setLong(owner, Long.parseLong((String) data));
-            else
+            } else if (f.getType().equals(Long.TYPE)) {
                 f.setLong(owner, ((Long) data).longValue());
-        } else if (f.getType().equals(Double.TYPE)) {
-            if (data instanceof String)
-                f.setDouble(owner, Double.parseDouble((String) data));
-            else
+            } else if (f.getType().equals(Double.TYPE)) {
                 f.setDouble(owner, ((Double) data).doubleValue());
-        } else if (f.getType().equals(Float.class) || f.getType().equals(Float.TYPE)) {
-            if (data instanceof String)
-                f.setFloat(owner, Float.parseFloat((String) data));
-            else
+            } else if (f.getType().equals(Float.TYPE)) {
                 f.setFloat(owner, ((Double) data).floatValue());
+            }
         } else if (Date.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(DateField.class)) {
             int type = f.getAnnotation(DateField.class).type();
             switch (type) {
@@ -278,7 +264,26 @@ public class JsonParser {
             List<?> l = ((List) data);
             f.set(owner, l);
         } else {
-            f.set(owner, f.getType().cast(data));
+            if (data.getClass().equals(Long.class)) {
+                Long val = (Long) data;
+                if (f.getType().equals(Byte.class)) {
+                    f.set(owner, new Byte(val.byteValue()));
+                } else if (f.getType().equals(Short.class)) {
+                    f.set(owner, new Short(val.shortValue()));
+                } else if (f.getType().equals(Integer.class)) {
+                    f.set(owner, new Integer(val.intValue()));
+                } else if (f.getType().equals(Long.class)) {
+                    f.setLong(owner, val);
+                }
+            } else  if (data.getClass().equals(Double.class)) {
+                Double val = (Double) data;
+                if (f.getType().equals(Float.class)) {
+                    f.set(owner, new Float(val.floatValue()));
+                } else if (f.getType().equals(Double.class)) {
+                    f.set(owner, val);
+                }
+            } else
+                f.set(owner, f.getType().cast(data));
         }
     }
 
