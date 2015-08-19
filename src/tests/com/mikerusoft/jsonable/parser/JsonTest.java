@@ -32,6 +32,20 @@ public class JsonTest {
     }
 
     @JsonClass
+    public static class SimpleObjDouble extends SimpleObj {
+        @JsonField Double floating;
+
+        @Override
+        public String toString() {
+            return "{" +
+                "str:\"" + str + '\"' +
+                ", num:" + num +
+                ", floating:" + floating +
+            '}';
+        }
+    }
+
+    @JsonClass
     public static class SimpleObjCustom extends SimpleObj {
         Object custom;
 
@@ -84,6 +98,7 @@ public class JsonTest {
     StringBuilder sb = new StringBuilder();
     StringBuilder sb1 = new StringBuilder();
     SimpleObj simpleObj = new SimpleObj();
+    SimpleObjDouble simpleObjDouble = new SimpleObjDouble();
     SimpleObjAnnot simpleObjAnot = new SimpleObjAnnot();
     SimpleObjAnnotExtend simpleObjAnotExtend = new SimpleObjAnnotExtend();
     SimpleObjAnnotExtendWithAnnotNull simpleObjAnotExtendWithNull = new SimpleObjAnnotExtendWithAnnotNull();
@@ -94,6 +109,7 @@ public class JsonTest {
     public void cleanBuilder() {
         sb = new StringBuilder();
         simpleObj = new SimpleObj();
+        simpleObjDouble = new SimpleObjDouble();
         simpleObjAnot = new SimpleObjAnnot();
         simpleObjAnotExtend = new SimpleObjAnnotExtend();
         simpleObjAnotExtendWithNull = new SimpleObjAnnotExtendWithAnnotNull();
@@ -357,5 +373,19 @@ public class JsonTest {
             JsonWriter.write(new HashSet<Integer>(Arrays.asList(new Integer[] {1,2,3})), sb);
         } catch (Exception ignore) {}
         assertEquals("numberListTest", "[1,2,3]", sb.toString());
+    }
+
+    @Test public void doubleTest() {
+        try {
+            simpleObjDouble.str = "Hel\"lo";
+            simpleObjDouble.num = 1;
+            simpleObjDouble.floating = 1.0;
+            JsonWriter.write(simpleObjDouble, sb);
+            Object o = JsonReader.read(sb.toString());
+            JsonWriter.write(o, sb1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        assertEquals("doubleTest", sb1.toString(), sb.toString());
     }
 }

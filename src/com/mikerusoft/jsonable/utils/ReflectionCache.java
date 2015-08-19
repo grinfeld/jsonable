@@ -4,6 +4,7 @@ import com.mikerusoft.jsonable.annotations.CustomField;
 import com.sun.istack.internal.NotNull;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,19 @@ public class ReflectionCache {
         }
 
         return ms;
+    }
+
+    public static @NotNull List<Field> getFieldsByAnnotation(Class<?> clazz, Class<? extends Annotation> annotation) {
+        Field[] fields = clazz.getDeclaredFields();
+        List<Field> fs = new ArrayList<Field>();
+        if (fields != null) {
+            for (Field f : fields) {
+                if (f.getAnnotation(annotation) != null)
+                    fs.add(f);
+            }
+        }
+
+        return fs;
     }
 
     public static ReflectionCache instance;
