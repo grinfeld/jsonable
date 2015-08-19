@@ -170,13 +170,15 @@ public class JsonParser {
 
             for (Method m : methods) {
                 CustomField an = m.getAnnotation(CustomField.class);
-                String customName = an.name();
-                String[] groups = an.groups();
-                if (inGroup(groups)) {
-                    Object data = possible.get(customName);
-                    if (data != null) {
-                        m.setAccessible(true);
-                        m.invoke(o, data);
+                if (m.getReturnType().equals(Void.class) && m.getParameterTypes() != null && m.getParameterTypes().length == 1) {
+                    String customName = an.name();
+                    String[] groups = an.groups();
+                    if (inGroup(groups)) {
+                        Object data = possible.get(customName);
+                        if (data != null) {
+                            m.setAccessible(true);
+                            m.invoke(o, data);
+                        }
                     }
                 }
             }
