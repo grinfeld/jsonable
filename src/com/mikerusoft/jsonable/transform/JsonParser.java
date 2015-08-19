@@ -145,9 +145,10 @@ public class JsonParser {
         }
         try {
             Object o = clazz.newInstance();
-            List<Method> methods = new ArrayList<Method>();
-            List<Field> fields = new ArrayList<Field>();
-            fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+            Set<Method> methods = new HashSet<Method>();
+            Set<Field> fields = new HashSet<Field>();
+            fields.addAll(ReflectionCache.getFieldsByAnnotation(clazz, JsonField.class));
+            methods.addAll(ReflectionCache.getMethodsByAnnotation(clazz, CustomField.class));
 
             Class<?> inherit = clazz;
             while ((inherit = inherit.getSuperclass()) != null) {
