@@ -188,6 +188,15 @@ Oh, installation?
 2. Take jsonable.jar into your own project path
 3. Don't forget about another 2 libs: common-logging and common-lang3
 
+Maven
+-------------------------------------------------------
+
+    <dependency>
+        <groupId>com.mikerusoft</groupId>
+        <artifactId>jsonable</artifactId>
+        <version>1.0</version>
+    </dependency>
+
 Bugs, changes requests
 -------------------
 
