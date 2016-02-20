@@ -15,5 +15,6 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-
+keystore
+pom.backup.xml
 # Created by .ignore support plugin (hsz.mobi)

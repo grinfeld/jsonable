@@ -323,6 +323,7 @@ public class JsonTest {
             JsonWriter.write(m, sb);
         } catch (Exception ignore) {}
         assertEquals("Failed map test " + sb.toString(), "{\"num\":1,\"str\":\"Hello\"}", sb.toString());
+        //assertTrue("Failed map test " + sb.toString(), "{\"num\":1,\"str\":\"Hello\"}".equals(sb.toString()) || "{\"str\":\"Hello\",\"num\":1}".equals(sb.toString()));
     }
 
 
