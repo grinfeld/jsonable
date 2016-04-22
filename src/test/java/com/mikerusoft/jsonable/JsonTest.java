@@ -6,9 +6,12 @@ import com.mikerusoft.jsonable.parser.JsonWriter;
 import com.mikerusoft.jsonable.transform.DateTransformer;
 import com.mikerusoft.jsonable.utils.Configuration;
 import com.mikerusoft.jsonable.utils.ContextManager;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -390,5 +393,46 @@ public class JsonTest {
             e.printStackTrace();
         }
         assertEquals("doubleTest", sb1.toString(), sb.toString());
+    }
+
+    @JsonClass
+    public static class SimpleObjEnum {
+
+        public enum MyEnum {
+            M1, M2;
+        }
+
+        @JsonField String str;
+        @JsonField MyEnum en;
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "str:\"" + str + '\"' +
+                    ", en:\"" + en.name() + '\"' +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            SimpleObjEnum that = (SimpleObjEnum) o;
+
+            if (str != null ? !str.equals(that.str) : that.str != null) return false;
+            return en == that.en;
+
+        }
+    }
+
+    @Test
+    public void enumTest() throws IllegalAccessException, IOException, InvocationTargetException {
+        SimpleObjEnum soe = new SimpleObjEnum();
+        soe.str = "Hello";
+        soe.en = SimpleObjEnum.MyEnum.M1;
+        JsonWriter.write(soe, sb);
+        SimpleObjEnum soe1 = JsonReader.read(sb.toString(), SimpleObjEnum.class);
+        Assert.assertEquals(soe, soe1);
     }
 }

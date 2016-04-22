@@ -268,6 +268,15 @@ public class JsonParser {
         } else if (Collection.class.isAssignableFrom(f.getType()) && data instanceof List) {
             List<?> l = ((List) data);
             f.set(owner, l);
+        } else  if (f.getType().isEnum()) {
+            if (data.getClass().isEnum())
+                f.set(owner, data);
+            else if (data instanceof String) {
+                String s = (String)data;
+                if (!StringUtils.isEmpty(s)) {
+                    f.set(owner, Enum.valueOf((Class<? extends Enum>)f.getType(), s));
+                }
+            }
         } else {
             if (data.getClass().equals(Long.class)) {
                 Long val = (Long) data;
