@@ -435,4 +435,22 @@ public class JsonTest {
         SimpleObjEnum soe1 = JsonReader.read(sb.toString(), SimpleObjEnum.class);
         Assert.assertEquals(soe, soe1);
     }
+
+    @Test
+    public void mapArrayTest() throws IllegalAccessException, IOException, InvocationTargetException {
+        Map<Object, Object> m = new HashMap<>();
+        Map<Object, Object> m2 = new HashMap<>();
+        m2.put("value3", "333333");
+        m.put("value1",  "111111");
+        m.put ("value2", "222222");
+        m.put("Data", m2);
+
+        JsonWriter.write(m, sb);
+        m = JsonReader.read(sb.toString(), Map.class);
+        Assert.assertEquals("", m.get("value1"), "111111");
+        Assert.assertEquals("", m.get("value2"), "222222");
+        Map ms = (Map)m.get("Data");
+        Assert.assertNotNull("", ms);
+        Assert.assertEquals("", ms.get("value3"), "333333");
+    }
 }

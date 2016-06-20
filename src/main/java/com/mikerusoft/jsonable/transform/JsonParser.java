@@ -326,12 +326,12 @@ public class JsonParser {
                 if (c == END_MAP) {
                     m = (Map<String,Object>)queue.pollLast();
                     String cl = Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
+                    int r = bf.read();
                     if (m.containsKey(cl)) {
                         Object o = createClass(m);
-                        int r = bf.read();
                         return new ImmutablePair<Character, Object>(r != -1 ? (char)r : c, o);
                     }
-                    return new ImmutablePair<Character, Object>(c, m);
+                    return new ImmutablePair<Character, Object>(r != -1 ? (char)r : c, m);
                 }
                 break;
             case START_ARRAY:
