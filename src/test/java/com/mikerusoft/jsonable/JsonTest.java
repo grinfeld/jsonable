@@ -12,6 +12,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -93,6 +95,11 @@ public class JsonTest {
         @JsonField @DateField(type = DateTransformer.TIMESTAMP_TYPE) long time;
     }
 
+    @JsonClass
+    public static class SimpleObjAnnotDateString {
+        @JsonField String value;
+        @JsonField @DateField(type = DateTransformer.STRING_TYPE, format = "yyyyMMDD") Date date;
+    }
 
     @JsonClass
     public static class SimpleObjAnnotExtendWithAnnotNull  extends SimpleObjAnnot {
@@ -108,6 +115,7 @@ public class JsonTest {
     SimpleObjAnnotExtend simpleObjAnotExtend = new SimpleObjAnnotExtend();
     SimpleObjAnnotExtendWithAnnotNull simpleObjAnotExtendWithNull = new SimpleObjAnnotExtendWithAnnotNull();
     SimpleObjCustom simpleObjCustom = new SimpleObjCustom();
+    SimpleObjAnnotDateString simpleObjDateString = new SimpleObjAnnotDateString();
     Configuration c = new Configuration();
 
     @Before
@@ -119,6 +127,7 @@ public class JsonTest {
         simpleObjAnotExtend = new SimpleObjAnnotExtend();
         simpleObjAnotExtendWithNull = new SimpleObjAnnotExtendWithAnnotNull();
         simpleObjCustom = new SimpleObjCustom();
+        simpleObjDateString = new SimpleObjAnnotDateString();
         sb1 = new StringBuilder();
         c = new Configuration();
         ContextManager.unset();
@@ -452,5 +461,25 @@ public class JsonTest {
         Map ms = (Map)m.get("Data");
         Assert.assertNotNull("", ms);
         Assert.assertEquals("", ms.get("value3"), "333333");
+    }
+
+    @Test
+    public void dateWithStringFormatTest() throws IOException, ParseException, InvocationTargetException, IllegalAccessException {
+        SimpleObjAnnotDateString m = JsonReader.read("{\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotDateString\", \n\"date\" : \"20161008\",\n\"value\" : \"Hello\"\n}", SimpleObjAnnotDateString.class);
+        Assert.assertNotNull("Shouldn't be null", m);
+        Assert.assertEquals(m.value, "Hello");
+        Assert.assertEquals(m.date, new SimpleDateFormat("yyyyMMDD").parse("20161008"));
+        sb = new StringBuilder();
+        JsonWriter.write(m, sb);
+        Assert.assertEquals("{\"value\":\"Hello\",\"date\":20160108,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotDateString\"}", sb.toString());
+        System.out.println();
+    }
+
+    @Test
+    public void mapWithEndLineTest() throws IOException {
+        Map<Object, Object> m = JsonReader.read("{\n\"success\" : true,\n\"msg\" : \"Hello\"\n}", Map.class);
+        Assert.assertNotNull("Shouldn't be null", m);
+        Assert.assertEquals(m.get("success"), new Boolean(true));
+        Assert.assertEquals(m.get("msg"), "Hello");
     }
 }

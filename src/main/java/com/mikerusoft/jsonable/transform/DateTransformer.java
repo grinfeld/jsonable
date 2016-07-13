@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -46,7 +48,9 @@ public class DateTransformer  extends TransformerImpl {
                 out.write(String.valueOf(((Date) o).getTime()));
                 break;
             case STRING_TYPE:
-                out.write(o.toString().replaceAll("\"", "\\\""));
+                String format = ao.getAnnotation(DateField.class).format();
+                DateFormat dt = new SimpleDateFormat(format);
+                out.write(dt.format((Date)o).replaceAll("\"", "\\\""));
                 break;
         }
     }

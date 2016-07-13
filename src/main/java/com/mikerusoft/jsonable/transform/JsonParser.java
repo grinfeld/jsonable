@@ -20,6 +20,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -44,6 +45,7 @@ public class JsonParser {
         VALUE_DELIM = ':',
         SPACE_CHAR = ' ',
         TAB_CHAR = '\t',
+        END_LINE = '\n',
         EMPTY_CHAR = '\0';
 
     LinkedList<Object> queue = null;
@@ -78,7 +80,7 @@ public class JsonParser {
         int r = -1;
         while ( (r = bf.read()) != -1 ) {
             c = (char) r;
-            if (r != SPACE_CHAR && r != TAB_CHAR) {
+            if (c != SPACE_CHAR && c != TAB_CHAR && c != END_LINE) {
                 Pair<Character, Object> p = parseStructure(bf, c);
                 Object o = p.getRight();
                 c = p.getLeft();
@@ -101,7 +103,7 @@ public class JsonParser {
             if (o != null) {
                 return p;
             } else if (c != ELEM_DELIM) {
-                if (!(sb.length() == 0 && c == EMPTY_CHAR)) // avoid empty string at the beginning
+                if (!(sb.length() == 0 && c == EMPTY_CHAR) && c == END_LINE) // avoid empty string at the beginning
                     sb.append(c);
             }
             int r = bf.read();
@@ -246,7 +248,9 @@ public class JsonParser {
                     break;
                 case DateTransformer.STRING_TYPE:
                     try {
-                        f.set(owner, new SimpleDateFormat().parse((String) data));
+                        String format = f.getAnnotation(DateField.class).format();
+                        DateFormat dt = new SimpleDateFormat(format);
+                        f.set(owner, dt.parse((String)data));
                     } catch (ParseException e) {
                         throw new IllegalArgumentException("Incompatible types for " + f.getName(), e);
                     }
@@ -365,6 +369,10 @@ public class JsonParser {
                     o = Long.valueOf(pn);
                 if (pn.replaceAll("[0-9]", "").equals("."))
                     o = Double.valueOf(pn);
+                if (pn.trim().toLowerCase().equals("false"))
+                    o = new Boolean(false);
+                if (pn.toLowerCase().trim().equals("true"))
+                    o = new Boolean(true);
                 queue.pollLast();
                 if (pn.equalsIgnoreCase("null"))
                     return new ImmutablePair<Character, Object>(c, "");
@@ -387,10 +395,13 @@ public class JsonParser {
                 do {
                     if (c == -1)
                         throw new IllegalArgumentException("Reached end of stream - un-parsed data");
-                    if (c != ELEM_DELIM)
+                    if (c != ELEM_DELIM && c != END_LINE)
                         sb.append(c);
                 } while ((r = bf.read()) != -1 && (c = (char)r) != VALUE_DELIM);
                 String key = sb.toString().trim();
+                if (sb.length() == 1 && sb.charAt(0) == END_MAP) {
+                    return END_MAP;
+                }
                 if (key.startsWith(String.valueOf(CHAR_CHAR)) || key.startsWith(String.valueOf(STRING_CHAR)))
                     key = key.substring(1);
                 if (key.endsWith(String.valueOf(CHAR_CHAR)) || key.endsWith(String.valueOf(STRING_CHAR)))
@@ -445,7 +456,8 @@ public class JsonParser {
                 case ELEM_DELIM:
                     return c;
             }
-            sb.append(c);
+            if (c != END_LINE)
+                sb.append(c);
         }
         return c;
     }

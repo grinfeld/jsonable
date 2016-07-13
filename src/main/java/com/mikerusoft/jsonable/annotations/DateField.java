@@ -15,4 +15,5 @@ import java.lang.annotation.ElementType;
 @java.lang.annotation.Target({ElementType.FIELD, ElementType.METHOD})
 public @interface DateField {
     int type() default 0;
+    String format() default "";
 }
