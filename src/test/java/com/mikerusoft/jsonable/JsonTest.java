@@ -482,4 +482,28 @@ public class JsonTest {
         Assert.assertEquals(m.get("success"), new Boolean(true));
         Assert.assertEquals(m.get("msg"), "Hello");
     }
+
+    public enum TestEnum {
+        Hello
+    }
+
+    @Test
+    public void enumAsClassTest() throws Exception {
+        c.setProperty(Configuration.ENUM_AS_CLASS_PROPERTY, "true");
+        ContextManager.set(c);
+        StringBuilder sb = new StringBuilder();
+        JsonWriter.write(TestEnum.Hello, sb);
+        TestEnum en = JsonReader.read(sb.toString(), TestEnum.class);
+        Assert.assertNotNull("Shouldn't be null", en);
+        Assert.assertEquals(TestEnum.Hello, en);
+    }
+
+    @Test
+    public void enumNoClassTest() throws Exception {
+        c.setProperty(Configuration.ENUM_AS_CLASS_PROPERTY, "false");
+        ContextManager.set(c);
+        StringBuilder sb = new StringBuilder();
+        JsonWriter.write(TestEnum.Hello, sb);
+        Assert.assertEquals("\"Hello\"", sb.toString());
+    }
 }

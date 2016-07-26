@@ -17,4 +17,5 @@ buildNumber.properties
 .mvn/timing.properties
 keystore
 pom.backup.xml
+mycomment.txt
 # Created by .ignore support plugin (hsz.mobi)
