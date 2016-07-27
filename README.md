@@ -196,7 +196,7 @@ Maven
     <dependency>
         <groupId>com.mikerusoft</groupId>
         <artifactId>jsonable</artifactId>
-        <version>1.0</version>
+        <version>1.0.5</version>
     </dependency>
 
 Bugs, changes requests
