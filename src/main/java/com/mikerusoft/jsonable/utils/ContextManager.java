@@ -5,11 +5,12 @@ package com.mikerusoft.jsonable.utils;
  * @since 12/4/2014.
  */
 public class ContextManager {
-    public static final ThreadLocal<ContextData> userThreadLocal = new ThreadLocal<ContextData>();
+    public static final ThreadLocal<ContextInfo> userThreadLocal = new ThreadLocal<ContextInfo>();
 
-    public static <T extends ContextData> void set(T obj) {
-        if (obj != null)
-            userThreadLocal.set(obj);
+    public static Configuration set(Configuration obj) {
+        // do nothing. We leave this method because of backward compatibility
+        // actually if anybody called this method - before
+        return null;
     }
 
     public static void unset() {
@@ -21,5 +22,14 @@ public class ContextManager {
         if (o == null)
             return null;
         return clazz.cast(o);
+    }
+
+    public static ContextInfo get() {
+        ContextInfo o = userThreadLocal.get();
+        if (o == null) {
+            o = new ContextInfo();
+            userThreadLocal.set(o);
+        }
+        return o;
     }
 }

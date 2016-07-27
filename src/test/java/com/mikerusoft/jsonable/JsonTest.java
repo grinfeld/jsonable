@@ -213,11 +213,21 @@ public class JsonTest {
         assertEquals("Failed simple object test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObj\"}", sb.toString());
     }
 
-    @Test public void simpleObjectExcludeClassTest() {
+    @Test public void simpleObjectExcludeClassOldTest() {
         try {
             simpleObj.str = "Hello";
             simpleObj.num = 1;
             c.setProperty(Configuration.EXCLUDE_CLASS_PROPERTY, "true");
+            JsonWriter.write(simpleObj, sb, c);
+        } catch (Exception ignore) {}
+        assertEquals("Failed simple object exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());  ;
+    }
+
+    @Test public void simpleObjectExcludeClassTest() {
+        try {
+            simpleObj.str = "Hello";
+            simpleObj.num = 1;
+            ContextManager.get().setExcludeClass(true);
             JsonWriter.write(simpleObj, sb, c);
         } catch (Exception ignore) {}
         assertEquals("Failed simple object exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());  ;
@@ -246,11 +256,21 @@ public class JsonTest {
         assertEquals("Failed object with mygroup" + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnot\"}", sb.toString());
     }
 
-    @Test public void simpleObjectAnotExcludeClassTest() {
+    @Test public void simpleObjectAnotExcludeClassOldTest() {
         try {
             simpleObjAnot.str1 = "Hello";
             simpleObjAnot.num = 1;
             c.setProperty(Configuration.EXCLUDE_CLASS_PROPERTY, "true");
+            JsonWriter.write(simpleObjAnot, sb, c);
+        } catch (Exception ignore) {}
+        assertEquals("Failed simple object with annotation exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());
+    }
+
+    @Test public void simpleObjectAnotExcludeClassTest() {
+        try {
+            simpleObjAnot.str1 = "Hello";
+            simpleObjAnot.num = 1;
+            ContextManager.get().setExcludeClass(true);
             JsonWriter.write(simpleObjAnot, sb, c);
         } catch (Exception ignore) {}
         assertEquals("Failed simple object with annotation exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());
@@ -293,9 +313,21 @@ public class JsonTest {
         assertEquals("Failed simple object extended test " + sb.toString(), "{\"extendedNull\":null,\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtendWithAnnotNull\"}", sb.toString());
     }
 
-    @Test public void simpleObjectExtendedWithNullTest() {
+    @Test public void simpleObjectExtendedWithNullOldTest() {
         try {
             c.setProperty(Configuration.INCLUDE_NULL_PROPERTY, "true");
+            simpleObjAnotExtend.str1 = "Hello";
+            simpleObjAnotExtend.num = 1;
+            simpleObjAnotExtend.extended = null;
+            simpleObjAnotExtend.ignore = "Ignore me";
+            JsonWriter.write(simpleObjAnotExtend, sb, c);
+        } catch (Exception ignore) {}
+        assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":null,\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
+    }
+
+    @Test public void simpleObjectExtendedWithNullTest() {
+        try {
+            ContextManager.get().setIncludeNull(true);
             simpleObjAnotExtend.str1 = "Hello";
             simpleObjAnotExtend.num = 1;
             simpleObjAnotExtend.extended = null;
@@ -488,9 +520,27 @@ public class JsonTest {
     }
 
     @Test
-    public void enumAsClassTest() throws Exception {
+    public void enumAsClassOldTest() throws Exception {
         c.setProperty(Configuration.ENUM_AS_CLASS_PROPERTY, "true");
+        StringBuilder sb = new StringBuilder();
+        JsonWriter.write(TestEnum.Hello, sb);
+        TestEnum en = JsonReader.read(sb.toString(), TestEnum.class);
+        Assert.assertNotNull("Shouldn't be null", en);
+        Assert.assertEquals(TestEnum.Hello, en);
+    }
+
+    @Test
+    public void enumNoClassOldTest() throws Exception {
+        c.setProperty(Configuration.ENUM_AS_CLASS_PROPERTY, "false");
         ContextManager.set(c);
+        StringBuilder sb = new StringBuilder();
+        JsonWriter.write(TestEnum.Hello, sb);
+        Assert.assertEquals("\"Hello\"", sb.toString());
+    }
+
+    @Test
+    public void enumAsClassTest() throws Exception {
+        ContextManager.get().setEnumAsClass(true);
         StringBuilder sb = new StringBuilder();
         JsonWriter.write(TestEnum.Hello, sb);
         TestEnum en = JsonReader.read(sb.toString(), TestEnum.class);
@@ -500,7 +550,7 @@ public class JsonTest {
 
     @Test
     public void enumNoClassTest() throws Exception {
-        c.setProperty(Configuration.ENUM_AS_CLASS_PROPERTY, "false");
+        ContextManager.get().setEnumAsClass(false);
         ContextManager.set(c);
         StringBuilder sb = new StringBuilder();
         JsonWriter.write(TestEnum.Hello, sb);

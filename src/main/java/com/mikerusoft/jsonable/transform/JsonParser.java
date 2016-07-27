@@ -3,7 +3,6 @@ package com.mikerusoft.jsonable.transform;
 import com.mikerusoft.jsonable.annotations.CustomField;
 import com.mikerusoft.jsonable.annotations.DateField;
 import com.mikerusoft.jsonable.annotations.JsonField;
-import com.mikerusoft.jsonable.utils.Configuration;
 import com.mikerusoft.jsonable.utils.ContextManager;
 import com.mikerusoft.jsonable.utils.ReflectionCache;
 import org.apache.commons.lang3.EnumUtils;
@@ -121,7 +120,7 @@ public class JsonParser {
     }
 
     private Object createClass(Map<String, Object> possible) {
-        String cl = Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
+        String cl = ContextManager.get().getClassProperty(); // Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
         String className = (String)possible.get(cl);
         if (StringUtils.isEmpty(className))
             return possible;
@@ -329,7 +328,7 @@ public class JsonParser {
                 c = parseMap(bf, m);
                 if (c == END_MAP) {
                     m = (Map<String,Object>)queue.pollLast();
-                    String cl = Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
+                    String cl = ContextManager.get().getClassProperty(); // Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
                     int r = bf.read();
                     if (m.containsKey(cl)) {
                         Object o = createClass(m);
