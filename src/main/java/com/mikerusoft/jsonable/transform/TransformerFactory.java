@@ -106,6 +106,8 @@ public class TransformerFactory {
      * by the context class loader
      *
      * @param pckgname the package name to search
+     * @param _interface searching criteria, i.e. classes implement for _interface
+     * @param <T> type of implemented interface
      * @return a list of classes that exist within that package
      * @throws ClassNotFoundException if something went wrong
      */

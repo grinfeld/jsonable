@@ -19,10 +19,11 @@ public class JsonReader {
      * Reads JSON from input stream and converts to clazz
      * @param in input stream to read JSON
      * @param clazz class to convert to
+     * @param groups list of groups to serialize data for them
      * @param <T> type of class to convert to
      * @return returns T
-     * @throws IOException
-     * @throws IllegalArgumentException
+     * @throws IOException on failure of reading stream
+     * @throws IllegalArgumentException on unexpected data
      */
     public static <T> T read(InputStream in, Class<T> clazz, String...groups) throws IOException, IllegalArgumentException {
         Object r = read(in, groups);
@@ -33,10 +34,11 @@ public class JsonReader {
      * Reads JSON from String and converts to clazz
      * @param in input stream to read JSON
      * @param clazz class to convert to
+     * @param groups list of groups to serialize data for them
      * @param <T> type of class to convert to
      * @return returns T
-     * @throws IOException
-     * @throws IllegalArgumentException
+     * @throws IOException on reading string
+     * @throws IllegalArgumentException on invalid data
      */
     public static <T> T read(String in, Class<T> clazz, String...groups) throws IOException, IllegalArgumentException {
         Object r = read(in, groups);
@@ -46,9 +48,10 @@ public class JsonReader {
     /**
      * Reads JSON from input stream and converts to java object
      * @param in input stream to read JSON
+     * @param groups list of groups to serialize data for them
      * @return returns T
-     * @throws IOException
-     * @throws IllegalArgumentException
+     * @throws IOException on failure reading stream
+     * @throws IllegalArgumentException if data is invalid
      */
     public static Object read(InputStream in, String...groups) throws IOException, IllegalArgumentException {
         BufferedReader bf = new BufferedReader(new InputStreamReader(in));
@@ -66,9 +69,10 @@ public class JsonReader {
     /**
      * Reads JSON from String and converts to java object
      * @param in input stream to read JSON
+     * @param groups list of groups to serialize data for them
      * @return returns T
-     * @throws IOException
-     * @throws IllegalArgumentException
+     * @throws IOException on failure reading string
+     * @throws IllegalArgumentException if data is invalid
      */
     public static Object read(String in, String...groups) throws IOException, IllegalArgumentException {
         BufferedReader bf = new BufferedReader(new StringReader(in));

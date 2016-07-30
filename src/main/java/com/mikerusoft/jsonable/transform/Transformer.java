@@ -30,6 +30,9 @@ public interface Transformer {
      * @param o Object to transform to JSON
      * @param out StringBuilder to write into
      * @param groups list of groups to use for current conversion  @throws IOException
+     * @throws IOException on writting output failure
+     * @throws IllegalAccessException on failure to craete appropriate class
+     * @throws InvocationTargetException on failure to craete appropriate class
      */
     void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException;
 
@@ -39,6 +42,9 @@ public interface Transformer {
      * @param o Object to transform to JSON
      * @param out StringBuilder to write into
      * @param groups list of groups to use for current conversion  @throws IOException
+     * @throws IOException on writting output failure
+     * @throws IllegalAccessException on failure to craete appropriate class
+     * @throws InvocationTargetException on failure to craete appropriate class
      */
     void transform(AnnotatedElement ao, Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException;
 

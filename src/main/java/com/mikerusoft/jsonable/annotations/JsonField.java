@@ -3,8 +3,8 @@ package com.mikerusoft.jsonable.annotations;
 import java.lang.annotation.ElementType;
 
 /**
- * Defines field to be serialized by JsonDefinedTransformer {@link JsonClass}<br/>
- * name is optional. If not set - using annotated field name<br/>
+ * Defines field to be serialized by JsonDefinedTransformer {@link JsonClass}
+ * name is optional. If not set - using annotated field name
  * groups is list of groups supported by this Field
  */
 @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)

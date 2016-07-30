@@ -84,7 +84,7 @@ Sometimes, we store complex data, but in JSON it must be represented by single v
     System.out.println(foo.name); // prints "Mike"
     System.out.println(foo.action); // prints "FIRST" enum
 
-If you don't want to expose class name when converting objects to JSON, use **Configuration**:
+If you don't want to expose class name when converting objects to JSON, use **ConfInfo**:
 
     package mypackage;
     @JsonClass
@@ -94,14 +94,13 @@ If you don't want to expose class name when converting objects to JSON, use **Co
     }
     StringBuilder sb = new StringBuilder();
     try {
-      Configuration c = new Configuration();
-      c.setProperty(Configuration.EXCLUDE_CLASS_PROPERTY, "true")
+      ConfInfo.setExcludeClass(true);
       JsonWriter.write(new Foo(), sb, c);
       System.out.println(sb.toString());
       // {"str":"Hello","num":1}
     } catch (Exception ignore) {}
 
-Another use for Configuration: if you need to include **NULL** values in Map or annotated by @JsonClass Object, use **Configuration.INCLUDE_NULL_PROPERTY**
+Another use for ConfInfo: if you need to include **NULL** values in Map or annotated by @JsonClass Object, use **ConfInfo.setIncludeNull(true)**
 *Note:* default behavior will not include NULLs
 
 default behavior is writing output without **NULL** fields:
@@ -144,8 +143,7 @@ always writing **NULL**
     }
     StringBuilder sb = new StringBuilder();
     try {
-      Configuration c = new Configuration();
-      c.setProperty(Configuration.INCLUDE_NULL_PROPERTY, "true")
+      ConfInfo.setIncludeNull(true);
       JsonWriter.write(new Foo(), sb, c);
       System.out.println(sb.toString());
       // {"str":null,"num":1, "class": "mypackage.Foo"}
@@ -198,6 +196,9 @@ Maven
         <artifactId>jsonable</artifactId>
         <version>1.0.5</version>
     </dependency>
+
+Note: Currently the last published version in repository is 1.0.5.
+It works almost same as described in README below, except ConfInfo (in older versions is Configuration class. See published in maven javadoc)
 
 Bugs, changes requests
 -------------------

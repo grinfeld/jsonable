@@ -52,7 +52,7 @@ public class ConfInfo implements ContextData {
      *
      * @param clazz class name to create Adapater for
      * @param params list of bean properties
-     * @return
+     * @return ConfInfo to apply next register or other method using sugr syntax
      */
     public ConfInfo registerAdapter(Class<?> clazz, String[] params) {
         adapters.put(clazz, new ParserAdapter(clazz, params));
