@@ -1,6 +1,8 @@
 package com.mikerusoft.jsonable.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,8 +13,19 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Grinfeld Mikhail
  * @since 7/27/2016.
  */
-public class ContextInfo implements ContextData {
+public class ConfInfo implements ContextData {
+
+    private static Log log = LogFactory.getLog(ConfInfo.class);
+
     private static final String DEFAULT_CLASS_PROPERTY_VALUE = "class";
+
+    private static ConfInfo get() {
+        return ContextManager.get();
+    }
+
+    public static void unset() {
+        ContextManager.unset();
+    }
 
     private String classProperty = DEFAULT_CLASS_PROPERTY_VALUE;
     private boolean excludeClass = false;
@@ -20,17 +33,19 @@ public class ContextInfo implements ContextData {
     private boolean enumAsClass = false;
     private Map<Class, ParserAdapter> adapters = new ConcurrentHashMap<>();
 
-    public String getClassProperty() { return StringUtils.isEmpty(classProperty) ? DEFAULT_CLASS_PROPERTY_VALUE : classProperty; }
-    public ContextInfo setClassProperty(String classProperty) { this.classProperty = classProperty; return this; }
-    public boolean isExcludeClass() { return excludeClass; }
-    public ContextInfo setExcludeClass(boolean excludeClass) { this.excludeClass = excludeClass; return this;}
-    public boolean isIncludeNull() { return includeNull; }
-    public ContextInfo setIncludeNull(boolean includeNull) { this.includeNull = includeNull; return this; }
-    public boolean isEnumAsClass() { return enumAsClass; }
-    public ContextInfo setEnumAsClass(boolean enumAsClass) { this.enumAsClass = enumAsClass; return this; }
 
-    public Map<Class, ParserAdapter> getAdapters() {
-        return Collections.unmodifiableMap(adapters);
+
+    public static String getClassProperty() { return StringUtils.isEmpty(get().classProperty) ? DEFAULT_CLASS_PROPERTY_VALUE : get().classProperty; }
+    public static void setClassProperty(String classProperty) { get().classProperty = classProperty; }
+    public static boolean isExcludeClass() { return get().excludeClass; }
+    public static void setExcludeClass(boolean excludeClass) { get().excludeClass = excludeClass; }
+    public static boolean isIncludeNull() { return get().includeNull; }
+    public static void setIncludeNull(boolean includeNull) { get().includeNull = includeNull; }
+    public static boolean isEnumAsClass() { return get().enumAsClass; }
+    public static void setEnumAsClass(boolean enumAsClass) { get().enumAsClass = enumAsClass; }
+
+    public static Map<Class, ParserAdapter> getAdapters() {
+        return Collections.unmodifiableMap(get().adapters);
     }
 
     /**
@@ -39,7 +54,7 @@ public class ContextInfo implements ContextData {
      * @param params list of bean properties
      * @return
      */
-    public ContextInfo registerAdapter(Class<?> clazz, String[] params) {
+    public ConfInfo registerAdapter(Class<?> clazz, String[] params) {
         adapters.put(clazz, new ParserAdapter(clazz, params));
         return this;
     }

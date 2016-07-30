@@ -4,9 +4,9 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * This is old class to store Configuration. Use {@link ContextInfo} instead
+ * This is old class to store Configuration. Use {@link ConfInfo} instead
  * Class is store only because of backward compatibility, actually it's fill
- * new {@link ContextInfo}
+ * new {@link ConfInfo}
  *
  * @author Grinfeld Mikhail
  * @since 12/4/2014.
@@ -28,45 +28,45 @@ public class Configuration implements ContextData {
         exclude_class {
             @Override
             public String getValue() {
-                return String.valueOf(ContextManager.get().isExcludeClass());
+                return String.valueOf(ConfInfo.isExcludeClass());
             }
 
             @Override
             public void setValue(String value) {
-                ContextManager.get().setExcludeClass(Boolean.valueOf(value));
+                ConfInfo.setExcludeClass(Boolean.valueOf(value));
             }
         },
         class_property {
             @Override
             public String getValue() {
-                return ContextManager.get().getClassProperty();
+                return ConfInfo.getClassProperty();
             }
 
             @Override
             public void setValue(String value) {
-                ContextManager.get().setClassProperty(value);
+                ConfInfo.setClassProperty(value);
             }
         },
         include_null {
             @Override
             public String getValue() {
-                return String.valueOf(ContextManager.get().isIncludeNull());
+                return String.valueOf(ConfInfo.isIncludeNull());
             }
 
             @Override
             public void setValue(String value) {
-                ContextManager.get().setIncludeNull(Boolean.valueOf(value));
+                ConfInfo.setIncludeNull(Boolean.valueOf(value));
             }
         },
         enum_class {
             @Override
             public String getValue() {
-                return String.valueOf(ContextManager.get().isEnumAsClass());
+                return String.valueOf(ConfInfo.isEnumAsClass());
             }
 
             @Override
             public void setValue(String value) {
-                ContextManager.get().setEnumAsClass(Boolean.valueOf(value));
+                ConfInfo.setEnumAsClass(Boolean.valueOf(value));
             }
         };
 
@@ -77,14 +77,14 @@ public class Configuration implements ContextData {
 
     @Deprecated
     /**
-     * Class deprecated. Use {@link ContextInfo}
+     * Class deprecated. Use {@link ConfInfo}
      */
     public Configuration() {
     }
 
     @Deprecated
     /**
-     * Class deprecated. Use {@link ContextInfo}
+     * Class deprecated. Use {@link ConfInfo}
      */
     public Configuration(Properties defaults) {
         if (defaults != null) {
@@ -96,7 +96,7 @@ public class Configuration implements ContextData {
 
     @Deprecated
     /**
-     * Class deprecated. Use {@link ContextInfo}
+     * Class deprecated. Use {@link ConfInfo}
      */
     public static String getStringProperty(Configuration c, String name, String def) {
         try {
@@ -108,7 +108,7 @@ public class Configuration implements ContextData {
 
     @Deprecated
     /**
-     * Class deprecated. Use {@link ContextInfo}
+     * Class deprecated. Use {@link ConfInfo}
      */
     public static Boolean getBooleanProperty(Configuration c, String name, Boolean def) {
         String value = getStringProperty(c, name, null);
@@ -119,7 +119,7 @@ public class Configuration implements ContextData {
 
     @Deprecated
     /**
-     * Class deprecated. Use {@link ContextInfo}
+     * Class deprecated. Use {@link ConfInfo}
      */
     public static Integer getIntegerProperty(Configuration c, String name, Integer def) {
         String value = getStringProperty(c, name, null);
@@ -130,7 +130,7 @@ public class Configuration implements ContextData {
 
     @Deprecated
     /**
-     * Class deprecated. Use {@link ContextInfo}
+     * Class deprecated. Use {@link ConfInfo}
      */
     public static Long getLongProperty(Configuration c, String name, Long def) {
         String value = getStringProperty(c, name, null);
@@ -141,7 +141,7 @@ public class Configuration implements ContextData {
 
     @Deprecated
     /**
-     * Class deprecated. Use {@link ContextInfo}
+     * Class deprecated. Use {@link ConfInfo}
      */
     public Object setProperty(String name, String value) {
         String current = null;

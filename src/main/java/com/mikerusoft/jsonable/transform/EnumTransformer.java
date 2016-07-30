@@ -1,6 +1,6 @@
 package com.mikerusoft.jsonable.transform;
 
-import com.mikerusoft.jsonable.utils.ContextManager;
+import com.mikerusoft.jsonable.utils.ConfInfo;
 import com.mikerusoft.jsonable.utils.Outputter;
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -27,10 +27,10 @@ public class EnumTransformer  extends TransformerImpl {
     @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
         // Configuration c = ContextManager.get(Configuration.class);
-        boolean asClass = ContextManager.get().isEnumAsClass(); // Configuration.getBooleanProperty(c, Configuration.ENUM_AS_CLASS_PROPERTY, false);
-        boolean excludeClass = ContextManager.get().isExcludeClass(); // Configuration.getBooleanProperty(c, Configuration.EXCLUDE_CLASS_PROPERTY, false);
+        boolean asClass = ConfInfo.isEnumAsClass(); // Configuration.getBooleanProperty(c, Configuration.ENUM_AS_CLASS_PROPERTY, false);
+        boolean excludeClass = ConfInfo.isExcludeClass(); // Configuration.getBooleanProperty(c, Configuration.EXCLUDE_CLASS_PROPERTY, false);
         if (asClass && !excludeClass) {
-            String cl = ContextManager.get().getClassProperty(); // Configuration.getStringProperty(c, Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
+            String cl = ConfInfo.getClassProperty(); // Configuration.getStringProperty(c, Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
             out.write("{\"name\" : \"" + ((Enum) o).name() + "\",\"" + cl + "\":\"" + o.getClass().getName() + "\"}");
         } else {
             out.write(("\"" + StringEscapeUtils.escapeJson(((Enum) o).name()) + "\""));

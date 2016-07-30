@@ -1,7 +1,7 @@
 package com.mikerusoft.jsonable.transform;
 
 import com.mikerusoft.jsonable.annotations.*;
-import com.mikerusoft.jsonable.utils.ContextManager;
+import com.mikerusoft.jsonable.utils.ConfInfo;
 import com.mikerusoft.jsonable.utils.Outputter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -68,9 +68,9 @@ public class JsonDefinedTransformer extends TransformerImpl {
         }
         int count = write(o, allFields, allMethods, out, groups);
         if (count > 0) {
-            boolean excludeClass = ContextManager.get().isExcludeClass(); // Configuration.getBooleanProperty(c, Configuration.EXCLUDE_CLASS_PROPERTY, false);
+            boolean excludeClass = ConfInfo.isExcludeClass(); // Configuration.getBooleanProperty(c, Configuration.EXCLUDE_CLASS_PROPERTY, false);
             if (!excludeClass) {
-                String cl = ContextManager.get().getClassProperty(); // Configuration.getStringProperty(c, Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
+                String cl = ConfInfo.getClassProperty(); // Configuration.getStringProperty(c, Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
                 out.write((",\"" + cl + "\":\"" + o.getClass().getName() + "\""));
             }
         }
@@ -92,7 +92,7 @@ public class JsonDefinedTransformer extends TransformerImpl {
 
     private int write(Object o, List<Field> fields, List<Method> methods, Outputter<String> out, String... groups) throws IllegalAccessException, IOException, InvocationTargetException {
         // Configuration c = ContextManager.get(Configuration.class);
-        boolean includeNull = ContextManager.get().isIncludeNull(); // Configuration.getBooleanProperty(c, Configuration.INCLUDE_NULL_PROPERTY, false);
+        boolean includeNull = ConfInfo.isIncludeNull(); // Configuration.getBooleanProperty(c, Configuration.INCLUDE_NULL_PROPERTY, false);
 
         int count = 0;
         for (Field f : fields) {

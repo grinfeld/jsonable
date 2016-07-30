@@ -37,7 +37,7 @@ public class JsonWriter {
 
     @Deprecated
     /**
-     * No more Configuration as parameter. Use {@link ContextInfo} instead.
+     * No more Configuration as parameter. Use {@link ConfInfo} instead.
      */
     public static void write (Object o, StringBuilder out, Configuration c, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
         write(o, new StringBuilderOutputter(out), c, groups);
@@ -45,7 +45,7 @@ public class JsonWriter {
 
     @Deprecated
     /**
-     * No more Configuration as parameter. Use {@link ContextInfo} instead.
+     * No more Configuration as parameter. Use {@link ConfInfo} instead.
      */
     public static void write (Object o, Outputter<String> out, Configuration c, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
         write(o, out, groups);
@@ -53,7 +53,7 @@ public class JsonWriter {
 
     @Deprecated
     /**
-     * No more Configuration as parameter. Use {@link ContextInfo} instead.
+     * No more Configuration as parameter. Use {@link ConfInfo} instead.
      */
     public static void write (Object o, OutputStream out, Configuration c, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
         write(o, out, c, null, groups);
@@ -61,7 +61,7 @@ public class JsonWriter {
 
     @Deprecated
     /**
-     * No more Configuration as parameter. Use {@link ContextInfo} instead.
+     * No more Configuration as parameter. Use {@link ConfInfo} instead.
      */
     public static void write (Object o, OutputStream out, Configuration c, String charset, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
         write(o, new OutputStreamOutputter(out, charset), c, groups);
@@ -69,7 +69,7 @@ public class JsonWriter {
 
     @Deprecated
     /**
-     * No more Configuration as parameter. Use {@link ContextInfo} instead.
+     * No more Configuration as parameter. Use {@link ConfInfo} instead.
      */
     public static void write (Object o, Writer out, Configuration c, String...groups) throws IOException, InvocationTargetException, IllegalAccessException {
         write(o, new WriterOutputter(out), c, groups);

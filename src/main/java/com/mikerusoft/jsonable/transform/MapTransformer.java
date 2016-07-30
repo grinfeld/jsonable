@@ -1,6 +1,6 @@
 package com.mikerusoft.jsonable.transform;
 
-import com.mikerusoft.jsonable.utils.ContextManager;
+import com.mikerusoft.jsonable.utils.ConfInfo;
 import com.mikerusoft.jsonable.utils.Outputter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +31,7 @@ public class MapTransformer  extends TransformerImpl {
     @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
         //Configuration c = ContextManager.get(Configuration.class);
-        boolean includeNull = ContextManager.get().isIncludeNull(); // Configuration.getBooleanProperty(c, Configuration.INCLUDE_NULL_PROPERTY, false);
+        boolean includeNull = ConfInfo.isIncludeNull(); // Configuration.getBooleanProperty(c, Configuration.INCLUDE_NULL_PROPERTY, false);
         Map<?, ?> m = (Map<?, ?>)o;
         int i=0;
         out.write("{");

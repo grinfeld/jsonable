@@ -4,8 +4,8 @@ import com.mikerusoft.jsonable.annotations.*;
 import com.mikerusoft.jsonable.parser.JsonReader;
 import com.mikerusoft.jsonable.parser.JsonWriter;
 import com.mikerusoft.jsonable.transform.DateTransformer;
+import com.mikerusoft.jsonable.utils.ConfInfo;
 import com.mikerusoft.jsonable.utils.Configuration;
-import com.mikerusoft.jsonable.utils.ContextManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -130,7 +130,7 @@ public class JsonTest {
         simpleObjDateString = new SimpleObjAnnotDateString();
         sb1 = new StringBuilder();
         c = new Configuration();
-        ContextManager.unset();
+        ConfInfo.unset();
     }
 
     @Test public void stringTest() {
@@ -227,7 +227,7 @@ public class JsonTest {
         try {
             simpleObj.str = "Hello";
             simpleObj.num = 1;
-            ContextManager.get().setExcludeClass(true);
+            ConfInfo.setExcludeClass(true);
             JsonWriter.write(simpleObj, sb, c);
         } catch (Exception ignore) {}
         assertEquals("Failed simple object exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());  ;
@@ -270,7 +270,7 @@ public class JsonTest {
         try {
             simpleObjAnot.str1 = "Hello";
             simpleObjAnot.num = 1;
-            ContextManager.get().setExcludeClass(true);
+            ConfInfo.setExcludeClass(true);
             JsonWriter.write(simpleObjAnot, sb, c);
         } catch (Exception ignore) {}
         assertEquals("Failed simple object with annotation exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());
@@ -327,7 +327,7 @@ public class JsonTest {
 
     @Test public void simpleObjectExtendedWithNullTest() {
         try {
-            ContextManager.get().setIncludeNull(true);
+            ConfInfo.setIncludeNull(true);
             simpleObjAnotExtend.str1 = "Hello";
             simpleObjAnotExtend.num = 1;
             simpleObjAnotExtend.extended = null;
@@ -362,12 +362,12 @@ public class JsonTest {
     @Test public void mapTest() {
         try {
             Map<String, Object> m = new HashMap<String, Object>();
-            m.put("str", "Hello");
             m.put("num", 1);
+            m.put("str", "Hello");
             JsonWriter.write(m, sb);
         } catch (Exception ignore) {}
-        assertEquals("Failed map test " + sb.toString(), "{\"num\":1,\"str\":\"Hello\"}", sb.toString());
-        //assertTrue("Failed map test " + sb.toString(), "{\"num\":1,\"str\":\"Hello\"}".equals(sb.toString()) || "{\"str\":\"Hello\",\"num\":1}".equals(sb.toString()));
+        //assertEquals("Failed map test " + sb.toString(), "{\"num\":1,\"str\":\"Hello\"}", sb.toString());
+        assertTrue("Failed map test " + sb.toString(), "{\"num\":1,\"str\":\"Hello\"}".equals(sb.toString()) || "{\"str\":\"Hello\",\"num\":1}".equals(sb.toString()));
     }
 
 
@@ -532,7 +532,6 @@ public class JsonTest {
     @Test
     public void enumNoClassOldTest() throws Exception {
         c.setProperty(Configuration.ENUM_AS_CLASS_PROPERTY, "false");
-        ContextManager.set(c);
         StringBuilder sb = new StringBuilder();
         JsonWriter.write(TestEnum.Hello, sb);
         Assert.assertEquals("\"Hello\"", sb.toString());
@@ -540,7 +539,7 @@ public class JsonTest {
 
     @Test
     public void enumAsClassTest() throws Exception {
-        ContextManager.get().setEnumAsClass(true);
+        ConfInfo.setEnumAsClass(true);
         StringBuilder sb = new StringBuilder();
         JsonWriter.write(TestEnum.Hello, sb);
         TestEnum en = JsonReader.read(sb.toString(), TestEnum.class);
@@ -550,8 +549,7 @@ public class JsonTest {
 
     @Test
     public void enumNoClassTest() throws Exception {
-        ContextManager.get().setEnumAsClass(false);
-        ContextManager.set(c);
+        ConfInfo.setEnumAsClass(false);
         StringBuilder sb = new StringBuilder();
         JsonWriter.write(TestEnum.Hello, sb);
         Assert.assertEquals("\"Hello\"", sb.toString());
