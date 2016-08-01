@@ -7,6 +7,7 @@ import com.mikerusoft.jsonable.parser.JsonWriter;
 import com.mikerusoft.jsonable.transform.DateTransformer;
 import com.mikerusoft.jsonable.utils.ConfInfo;
 import com.mikerusoft.jsonable.utils.Configuration;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -593,7 +594,7 @@ public class JsonTest {
         Assert.assertEquals("\"Hello\"", sb.toString());
     }
 
-    //@Test
+    @Test
     public void simpleAdapterTest() throws Exception {
         ConfInfo.registerAdapter(SimpleObjNoAnot.class, new String[] {"str", "num", "bool"});
         simpleNoAnot.bool = true;
@@ -602,29 +603,41 @@ public class JsonTest {
         ConfInfo.setExcludeClass(true);
         StringBuilder sb = new StringBuilder();
         JsonWriter.write(simpleNoAnot, sb);
-        Assert.assertEquals("{\"str\":\"Hello\",\"bool\":true,\"num\":10}", sb.toString());
+        assertSplitSimpleJson("{\"str\":\"Hello\",\"bool\":true,\"num\":10}", sb.toString());
         ConfInfo.setExcludeClass(false);
         sb = new StringBuilder();
         JsonWriter.write(simpleNoAnot, sb);
-        Assert.assertEquals("{\"str\":\"Hello\",\"bool\":true,\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
+        assertSplitSimpleJson("{\"str\":\"Hello\",\"bool\":true,\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
         ConfInfo.unset();
         ConfInfo.registerAdapter(SimpleObjNoAnot.class, new String[] {"str", "num"});
         sb = new StringBuilder();
         JsonWriter.write(simpleNoAnot, sb);
-        Assert.assertEquals("{\"str\":\"Hello\",\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
+        assertSplitSimpleJson("{\"str\":\"Hello\",\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
         ConfInfo.setExcludeClass(false);
         sb = new StringBuilder();
         JsonWriter.write(simpleNoAnot, sb);
-        Assert.assertEquals("{\"str\":\"Hello\",\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
+        assertSplitSimpleJson("{\"str\":\"Hello\",\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
         ConfInfo.unset();
         ConfInfo.registerAdapter(new SimpleBeanAdapter<>(SimpleObjNoAnot.class));
         ConfInfo.setExcludeClass(true);
         sb = new StringBuilder();
         JsonWriter.write(simpleNoAnot, sb);
-        Assert.assertEquals("{\"str\":\"Hello\",\"bool\":true,\"num\":10}", sb.toString());
+        assertSplitSimpleJson("{\"str\":\"Hello\",\"bool\":true,\"num\":10}", sb.toString());
         ConfInfo.setExcludeClass(false);
         sb = new StringBuilder();
         JsonWriter.write(simpleNoAnot, sb);
-        Assert.assertEquals("{\"str\":\"Hello\",\"bool\":true,\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
+        assertSplitSimpleJson("{\"str\":\"Hello\",\"bool\":true,\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
+    }
+
+    private void assertSplitSimpleJson(String expected, String actual) {
+        assertSplitSimpleJson(null, expected, actual);
+    }
+
+    private void assertSplitSimpleJson(String msg, String expected, String actual) {
+        String[] expAr = StringUtils.split(expected.substring(1, expected.length() - 1), ",");
+        Arrays.sort(expAr);
+        String[] actAr = StringUtils.split(actual.substring(1, actual.length() - 1), ",");
+        Arrays.sort(actAr);
+        assertArrayEquals(msg, expAr, actAr);
     }
 }
