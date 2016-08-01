@@ -21,5 +21,11 @@ public interface ParserAdapter<T> {
      */
     public Class<T> getClazz();
     public Method getParam(String name);
+
+    /**
+     * returns list of {@link MethodWrapper}.
+     * Do favor for youdelf - return unmodifiable collection of params, in order nobody could change it
+     * @return list of {@link MethodWrapper}
+     */
     public Collection<MethodWrapper> getParams();
 }

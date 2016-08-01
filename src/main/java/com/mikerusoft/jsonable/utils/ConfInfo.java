@@ -37,13 +37,13 @@ public class ConfInfo implements ContextData {
     private Map<Class, ParserAdapter> adapters = new ConcurrentHashMap<>();
 
     public static String getClassProperty() { return StringUtils.isEmpty(get().classProperty) ? DEFAULT_CLASS_PROPERTY_VALUE : get().classProperty; }
-    public static ConfInfo setClassProperty(String classProperty) { get().classProperty = classProperty; return get(); }
+    public static void setClassProperty(String classProperty) { get().classProperty = classProperty; }
     public static boolean isExcludeClass() { return get().excludeClass; }
-    public static ConfInfo setExcludeClass(boolean excludeClass) { get().excludeClass = excludeClass; return get(); }
+    public static void setExcludeClass(boolean excludeClass) { get().excludeClass = excludeClass; }
     public static boolean isIncludeNull() { return get().includeNull; }
-    public static ConfInfo setIncludeNull(boolean includeNull) { get().includeNull = includeNull; return get(); }
+    public static void setIncludeNull(boolean includeNull) { get().includeNull = includeNull; }
     public static boolean isEnumAsClass() { return get().enumAsClass; }
-    public static ConfInfo setEnumAsClass(boolean enumAsClass) { get().enumAsClass = enumAsClass; return get(); }
+    public static void setEnumAsClass(boolean enumAsClass) { get().enumAsClass = enumAsClass; }
 
     public static Map<Class, ParserAdapter> getAdapters() {
         return Collections.unmodifiableMap(get().adapters);
@@ -54,11 +54,9 @@ public class ConfInfo implements ContextData {
      * serialization
      * @param clazz class name to create Adapater for
      * @param params list of bean properties
-     * @return ConfInfo to apply next register or other method using sugr syntax
      */
-    public static ConfInfo registerAdapter(Class<?> clazz, PropertyPair[] params) {
+    public static void registerAdapter(Class<?> clazz, PropertyPair[] params) {
         get().adapters.put(clazz, new ParserAdapterBasic(clazz, params));
-        return get();
     }
 
     /**
@@ -66,11 +64,18 @@ public class ConfInfo implements ContextData {
      * serialization
      * @param clazz class name to create Adapater for
      * @param params list of bean properties
-     * @return ConfInfo to apply next register or other method using sugr syntax
      */
-    public static ConfInfo registerAdapter(Class<?> clazz, String[] params) {
+    public static void registerAdapter(Class<?> clazz, String[] params) {
         get().adapters.put(clazz, new ParserAdapterBasic(clazz, params));
-        return get();
+    }
+    
+    /**
+     * Creates Adapter for specified class and its properties (see {@link ParserAdapter} for more explanations)
+     * serialization
+     * @param adapter custom implementation of adapter
+     */
+    public static <T> void registerAdapter(ParserAdapter<T> adapter) {
+        get().adapters.put(adapter.getClazz(), adapter);
     }
 
     /*
@@ -78,11 +83,11 @@ public class ConfInfo implements ContextData {
      * @author Grinfeld Mikhail
      * @since 7/27/2016.
      */
-    private final static class ParserAdapterBasic implements ParserAdapter {
-        final Class<?> clazz;
+    private final static class ParserAdapterBasic<T> implements ParserAdapter<T> {
+        final Class<T> clazz;
         final Map<String, MethodWrapper> methods;
 
-        private ParserAdapterBasic(Class<?> clazz, String[] params) {
+        private ParserAdapterBasic(Class<T> clazz, String[] params) {
             if (params == null || params.length <= 0)
                 throw new IllegalArgumentException("You should specify parameters for Adapter");
             if (clazz == null)
@@ -92,14 +97,14 @@ public class ConfInfo implements ContextData {
             for (String param : params) {
                 try {
                     Method[] pm = getPropertyMethods(param);
-                    methods.put(param, new MethodWrapper(param, param, pm[0], pm[1]));
+                    methods.put(param, new MethodWrapper(param, param, pm[1], pm[0]));
                 } catch (NoSuchMethodException e) {
                     throw new IllegalArgumentException("Not found both getters and setter for param " + param);
                 }
             }
         }
 
-        private ParserAdapterBasic(Class<?> clazz, PropertyPair[] params) {
+        private ParserAdapterBasic(Class<T> clazz, PropertyPair[] params) {
             if (params == null || params.length <= 0)
                 throw new IllegalArgumentException("You should specify parameters for Adapter");
             if (clazz == null)
@@ -109,7 +114,7 @@ public class ConfInfo implements ContextData {
             for (PropertyPair param : params) {
                 try {
                     Method[] pm = getPropertyMethods(param.getProperty());
-                    methods.put(param.getName(), new MethodWrapper(param.getProperty(), param.getName(), pm[0], pm[1]));
+                    methods.put(param.getName(), new MethodWrapper(param.getProperty(), param.getName(), pm[1], pm[0]));
                 } catch (NoSuchMethodException e) {
                     throw new IllegalArgumentException("Not found both getters and setter for param " + param);
                 }
@@ -159,7 +164,7 @@ public class ConfInfo implements ContextData {
             throw new NoSuchMethodException("No setters and getters for property" + name);
         }
 
-        public Class<?> getClazz() { return clazz; }
+        public Class<T> getClazz() { return clazz; }
         public Method getParam(String name) { return null; }
         public Collection<MethodWrapper> getParams() { return Collections.unmodifiableCollection(this.methods.values()); }
     }

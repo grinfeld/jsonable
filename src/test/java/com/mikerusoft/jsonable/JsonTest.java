@@ -1,5 +1,6 @@
 package com.mikerusoft.jsonable;
 
+import com.mikerusoft.jsonable.adapters.SimpleBeanAdapter;
 import com.mikerusoft.jsonable.annotations.*;
 import com.mikerusoft.jsonable.parser.JsonReader;
 import com.mikerusoft.jsonable.parser.JsonWriter;
@@ -35,6 +36,28 @@ public class JsonTest {
                 "str:\"" + str + '\"' +
                 ", num:" + num +
             '}';
+        }
+    }
+
+    public static class SimpleObjNoAnot {
+        String str;
+        int num;
+        boolean bool;
+
+        public String getStr() { return str; }
+        public void setStr(String str) { this.str = str; }
+        public int getNum() { return num; }
+        public void setNum(int num) { this.num = num; }
+        public boolean isBool() { return bool; }
+        public void setBool(boolean bool) { this.bool = bool; }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "str:\"" + str + '\"' +
+                    ", num:" + num +
+                    ", bool:" + bool +
+                    '}';
         }
     }
 
@@ -117,6 +140,7 @@ public class JsonTest {
     SimpleObjCustom simpleObjCustom = new SimpleObjCustom();
     SimpleObjAnnotDateString simpleObjDateString = new SimpleObjAnnotDateString();
     Configuration c = new Configuration();
+    SimpleObjNoAnot simpleNoAnot = new SimpleObjNoAnot();
 
     @Before
     public void cleanBuilder() {
@@ -128,6 +152,7 @@ public class JsonTest {
         simpleObjAnotExtendWithNull = new SimpleObjAnnotExtendWithAnnotNull();
         simpleObjCustom = new SimpleObjCustom();
         simpleObjDateString = new SimpleObjAnnotDateString();
+        simpleNoAnot = new SimpleObjNoAnot();
         sb1 = new StringBuilder();
         c = new Configuration();
         ConfInfo.unset();
@@ -553,5 +578,40 @@ public class JsonTest {
         StringBuilder sb = new StringBuilder();
         JsonWriter.write(TestEnum.Hello, sb);
         Assert.assertEquals("\"Hello\"", sb.toString());
+    }
+
+    @Test
+    public void simpleAdapterTest() throws Exception {
+        ConfInfo.registerAdapter(SimpleObjNoAnot.class, new String[] {"str", "num", "bool"});
+        simpleNoAnot.bool = true;
+        simpleNoAnot.str = "Hello";
+        simpleNoAnot.num = 10;
+        ConfInfo.setExcludeClass(true);
+        StringBuilder sb = new StringBuilder();
+        JsonWriter.write(simpleNoAnot, sb);
+        Assert.assertEquals("{\"str\":\"Hello\",\"bool\":true,\"num\":10}", sb.toString());
+        ConfInfo.setExcludeClass(false);
+        sb = new StringBuilder();
+        JsonWriter.write(simpleNoAnot, sb);
+        Assert.assertEquals("{\"str\":\"Hello\",\"bool\":true,\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
+        ConfInfo.unset();
+        ConfInfo.registerAdapter(SimpleObjNoAnot.class, new String[] {"str", "num"});
+        sb = new StringBuilder();
+        JsonWriter.write(simpleNoAnot, sb);
+        Assert.assertEquals("{\"str\":\"Hello\",\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
+        ConfInfo.setExcludeClass(false);
+        sb = new StringBuilder();
+        JsonWriter.write(simpleNoAnot, sb);
+        Assert.assertEquals("{\"str\":\"Hello\",\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
+        ConfInfo.unset();
+        ConfInfo.registerAdapter(new SimpleBeanAdapter<>(SimpleObjNoAnot.class));
+        ConfInfo.setExcludeClass(true);
+        sb = new StringBuilder();
+        JsonWriter.write(simpleNoAnot, sb);
+        Assert.assertEquals("{\"str\":\"Hello\",\"bool\":true,\"num\":10}", sb.toString());
+        ConfInfo.setExcludeClass(false);
+        sb = new StringBuilder();
+        JsonWriter.write(simpleNoAnot, sb);
+        Assert.assertEquals("{\"str\":\"Hello\",\"bool\":true,\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
     }
 }
