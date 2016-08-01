@@ -580,9 +580,9 @@ public class JsonTest {
         Assert.assertEquals("\"Hello\"", sb.toString());
     }
 
-    @Test
+    //@Test
     public void simpleAdapterTest() throws Exception {
-        /*ConfInfo.registerAdapter(SimpleObjNoAnot.class, new String[] {"str", "num", "bool"});
+        ConfInfo.registerAdapter(SimpleObjNoAnot.class, new String[] {"str", "num", "bool"});
         simpleNoAnot.bool = true;
         simpleNoAnot.str = "Hello";
         simpleNoAnot.num = 10;
@@ -612,6 +612,6 @@ public class JsonTest {
         ConfInfo.setExcludeClass(false);
         sb = new StringBuilder();
         JsonWriter.write(simpleNoAnot, sb);
-        Assert.assertEquals("{\"str\":\"Hello\",\"bool\":true,\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());*/
+        Assert.assertEquals("{\"str\":\"Hello\",\"bool\":true,\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
     }
 }
