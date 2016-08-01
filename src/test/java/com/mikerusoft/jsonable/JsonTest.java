@@ -52,6 +52,19 @@ public class JsonTest {
         public void setBool(boolean bool) { this.bool = bool; }
 
         @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            SimpleObjNoAnot that = (SimpleObjNoAnot) o;
+
+            if (num != that.num) return false;
+            if (bool != that.bool) return false;
+            return str != null ? str.equals(that.str) : that.str == null;
+
+        }
+
+        @Override
         public String toString() {
             return "{" +
                     "str:\"" + str + '\"' +
