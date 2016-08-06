@@ -15,6 +15,7 @@ import java.util.Properties;
 public class Configuration implements ContextData {
 
     public static final String EXCLUDE_CLASS_PROPERTY = "exclude_class";
+    public static final String INCLUDE_PRIMITIVE_CLASS_PROPERTY = "include_primitive_class";
     public static final String CLASS_PROPERTY = "class_property";
     public static final String DEFAULT_CLASS_PROPERTY_VALUE = "class";
 
@@ -67,6 +68,17 @@ public class Configuration implements ContextData {
             @Override
             public void setValue(String value) {
                 ConfInfo.setEnumAsClass(Boolean.valueOf(value));
+            }
+        },
+        include_primitive_class {
+            @Override
+            public String getValue() {
+                return String.valueOf(ConfInfo.isIncludePrimitiveClass());
+            }
+
+            @Override
+            public void setValue(String value) {
+                ConfInfo.setIncludePrimitiveClass(Boolean.valueOf(value));
             }
         };
 

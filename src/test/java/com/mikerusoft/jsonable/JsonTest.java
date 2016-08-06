@@ -186,9 +186,22 @@ public class JsonTest {
         assertEquals("Failed integer test " + sb.toString(), "1", sb.toString());
     }
 
+    @Test public void integerWithClassTest() {
+        try {
+            ConfInfo.setIncludePrimitiveClass(true);
+            JsonWriter.write(1, sb);
+        } catch (Exception ignore) {}
+        assertEquals("Failed integer test " + sb.toString(), "{\"value\": 1,\"class\":\"java.lang.Integer\"}", sb.toString());
+        Integer i = null;
+        try {
+            i = JsonReader.read(sb.toString(), Integer.class);
+        } catch (Exception ignore) {}
+        assertEquals("Should be 1, but " + String.valueOf(i), new Integer(1), i);
+    }
+
     @Test public void longTest() {
         try {
-            JsonWriter.write(1l, sb);
+            JsonWriter.write(1L, sb);
         } catch (Exception ignore) {}
         assertEquals("Failed long test " + sb.toString(), "1", sb.toString());
     }
@@ -205,6 +218,14 @@ public class JsonTest {
             JsonWriter.write(false, sb);
         } catch (Exception ignore) {}
         assertEquals("Failed boolean false test " + sb.toString(), "false", sb.toString());
+    }
+
+    @Test public void booleanFalseWithClassTest() {
+        try {
+            ConfInfo.setIncludePrimitiveClass(true);
+            JsonWriter.write(false, sb);
+        } catch (Exception ignore) {}
+        assertEquals("Failed boolean false test " + sb.toString(), "{\"value\": false,\"class\":\"java.lang.Boolean\"}", sb.toString());
     }
 
     @Test public void booleanTrueTest() {
@@ -608,6 +629,8 @@ public class JsonTest {
         sb = new StringBuilder();
         JsonWriter.write(simpleNoAnot, sb);
         assertSplitSimpleJson("{\"str\":\"Hello\",\"bool\":true,\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
+        SimpleObjNoAnot test = JsonReader.read(sb.toString(), SimpleObjNoAnot.class);
+        assertEquals(simpleNoAnot, test);
         ConfInfo.unset();
         ConfInfo.registerAdapter(SimpleObjNoAnot.class, new String[] {"str", "num"});
         sb = new StringBuilder();

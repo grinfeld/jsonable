@@ -1,5 +1,6 @@
 package com.mikerusoft.jsonable.transform;
 
+import com.mikerusoft.jsonable.utils.ConfInfo;
 import com.mikerusoft.jsonable.utils.Outputter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +32,14 @@ public class PrimitiveTransformer  extends TransformerImpl {
 
     @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
-        out.write(String.valueOf(o));
+        boolean includePrimitiveClass = ConfInfo.isIncludePrimitiveClass(); // Configuration.getBooleanProperty(c, Configuration.INCLUDE_PRIMITIVE_CLASS_PROPERTY, false);
+        if (!includePrimitiveClass) {
+            out.write(String.valueOf(o));
+        } else {
+            String cl = ConfInfo.getClassProperty(); // Configuration.getStringProperty(c, Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
+            out.write("{\"value\": " + String.valueOf(o) + ",\"" + cl + "\":\"" + o.getClass().getName() + "\"}");
+        }
+
     }
 
     @Override public int matchPriority() { return Transformer.HIGH_PRIORITY; }

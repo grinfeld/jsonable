@@ -33,6 +33,7 @@ public class ConfInfo implements ContextData {
     private String classProperty = DEFAULT_CLASS_PROPERTY_VALUE;
     private boolean excludeClass = false;
     private boolean includeNull = false;
+    private boolean includePrimitiveClass = false;
     private boolean enumAsClass = false;
     private Map<Class, ParserAdapter> adapters = new ConcurrentHashMap<>();
 
@@ -44,6 +45,8 @@ public class ConfInfo implements ContextData {
     public static void setIncludeNull(boolean includeNull) { get().includeNull = includeNull; }
     public static boolean isEnumAsClass() { return get().enumAsClass; }
     public static void setEnumAsClass(boolean enumAsClass) { get().enumAsClass = enumAsClass; }
+    public static boolean isIncludePrimitiveClass() { return get().includePrimitiveClass; }
+    public static void setIncludePrimitiveClass(boolean includePrimitiveClass) { get().includePrimitiveClass = includePrimitiveClass; }
 
     public static Map<Class, ParserAdapter> getAdapters() {
         return Collections.unmodifiableMap(get().adapters);

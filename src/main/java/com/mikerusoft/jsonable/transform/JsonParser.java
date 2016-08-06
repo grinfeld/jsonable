@@ -1,5 +1,7 @@
 package com.mikerusoft.jsonable.transform;
 
+import com.mikerusoft.jsonable.adapters.MethodWrapper;
+import com.mikerusoft.jsonable.adapters.ParserAdapter;
 import com.mikerusoft.jsonable.annotations.CustomField;
 import com.mikerusoft.jsonable.annotations.DateField;
 import com.mikerusoft.jsonable.annotations.JsonField;
@@ -19,6 +21,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -119,6 +122,66 @@ public class JsonParser {
         return new ArrayList<String>(Arrays.asList(groups)).removeAll(this.groups);
     }
 
+    private boolean isPrimitiveLike(Class<?> clazz) {
+        return clazz.isPrimitive() || Boolean.class.equals(clazz) || Byte.class.equals(clazz) ||
+                Short.class.equals(clazz) || Character.class.equals(clazz) ||
+                Integer.class.equals(clazz) || Long.class.equals(clazz) ||
+                Double.class.equals(clazz) || Float.class.equals(clazz) || clazz.equals(BigDecimal.class);
+    }
+
+    private Object getPrimitive(Class<?> clazz, Object value) throws InstantiationException {
+        if (value == null)
+            return null;
+        if (Byte.TYPE.equals(clazz) || Byte.class.equals(clazz)) {
+            Byte b = Byte.valueOf(String.valueOf(value));
+            if (b != null && Byte.TYPE.equals(clazz))
+                return b.byteValue();
+            return b;
+        } else if (Short.TYPE.equals(clazz) || Short.class.equals(clazz)) {
+            Short s = Short.valueOf(String.valueOf(value));
+            if (s != null && Byte.TYPE.equals(clazz))
+                return s.shortValue();
+            return s;
+        } else if (Character.TYPE.equals(clazz) || Character.class.equals(clazz)) {
+            Character c = String.valueOf(value).charAt(0);
+            if (c != null && Byte.TYPE.equals(clazz))
+                return c.charValue();
+            return c;
+        } else if (Integer.TYPE.equals(clazz) || Integer.class.equals(clazz)) {
+            Integer i = Integer.valueOf(String.valueOf(value));
+            if (i != null && Byte.TYPE.equals(clazz))
+                return i.intValue();
+            return i;
+        } else if (Long.TYPE.equals(clazz) || Long.class.equals(clazz)) {
+            Long l = Long.valueOf(String.valueOf(value));
+            if (l != null && Byte.TYPE.equals(clazz))
+                return l.longValue();
+            return l;
+        } else if (Float.TYPE.equals(clazz) || Float.class.equals(clazz)) {
+            Float f = Float.valueOf(String.valueOf(value));
+            if (f != null && Byte.TYPE.equals(clazz))
+                return f.floatValue();
+            return f;
+        } else if (Double.TYPE.equals(clazz) || Double.class.equals(clazz)) {
+            Double d = Double.valueOf(String.valueOf(value));
+            if (d != null && Byte.TYPE.equals(clazz))
+                return d.doubleValue();
+            return d;
+        } else if (BigDecimal.class.equals(clazz)) {
+            return BigDecimal.valueOf(Double.valueOf(String.valueOf(value)));
+        }
+        throw new InstantiationException("Invalid type" + clazz + " for value " + value); // should never occur
+    }
+
+    private void createFromAdapter(Map<String, Object> data, Object o, ParserAdapter<?> adapter) throws InvocationTargetException, IllegalAccessException {
+        for (MethodWrapper wrapper : adapter.getParams()) {
+            Method m = wrapper.getSetter();
+            if (m != null){
+                m.invoke(o, getValue(m.getParameterTypes()[0], data.get(wrapper.getName()), -1, ""));
+            }
+        }
+    }
+
     private Object createClass(Map<String, Object> possible) {
         String cl = ConfInfo.getClassProperty(); // Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
         String className = (String)possible.get(cl);
@@ -132,71 +195,169 @@ public class JsonParser {
         } catch (ClassNotFoundException e) {
             return possible;
         }
+
         if (clazz == null)
             return possible;
 
-        if (clazz.isEnum()) {
-            try {
-                return createEnum(clazz, possible);
-            } catch (Exception e) {
-                log.debug("Failed to create enum, return Map");
-                return possible;
-            }
-        }
         try {
+            if (isPrimitiveLike(clazz)) {
+                Object value = possible.get("value");
+                return getPrimitive(clazz, value);
+            }
+            if (clazz.isEnum()) {
+                return createEnum(clazz, possible);
+            }
+            ParserAdapter adapter = ConfInfo.getAdapters().get(clazz);
             Object o = clazz.newInstance();
-            Set<Method> methods = new HashSet<Method>();
-            Set<Field> fields = new HashSet<Field>();
-            fields.addAll(ReflectionCache.getFieldsByAnnotation(clazz, JsonField.class));
-            methods.addAll(ReflectionCache.getMethodsByAnnotation(clazz, CustomField.class));
-
-            Class<?> inherit = clazz;
-            while ((inherit = inherit.getSuperclass()) != null) {
-                fields.addAll(ReflectionCache.getFieldsByAnnotation(inherit, JsonField.class));
-                methods.addAll(ReflectionCache.getMethodsByAnnotation(inherit, CustomField.class));
-            }
-            for (Field f : fields) {
-                JsonField an = f.getAnnotation(JsonField.class);
-                String name = an != null && !StringUtils.isEmpty(an.name()) ? an.name() : f.getName();
-                String[] groups = an != null ? an.groups() : null;
-                if (inGroup(groups)) {
-                    Object data = possible.get(name);
-                    if (data != null) {
-                        f.setAccessible(true);
-                        fill(f, o, data);
-                    }
-                }
+            if (adapter != null) {
+                createFromAdapter(possible, o, adapter);
+                return o;
             }
 
-            for (Method m : methods) {
-                CustomField an = m.getAnnotation(CustomField.class);
-                if (m.getReturnType().equals(Void.class) && m.getParameterTypes() != null && m.getParameterTypes().length == 1) {
-                    String customName = an.name();
-                    String[] groups = an.groups();
-                    if (inGroup(groups)) {
-                        Object data = possible.get(customName);
-                        if (data != null) {
-                            m.setAccessible(true);
-                            m.invoke(o, data);
-                        }
-                    }
-                }
-            }
+            createFromAnnotation(possible, o, clazz);
 
             return o;
-        } catch (IllegalAccessException iae) {
-            log.debug("Failed to create class " + className);
-        } catch (InstantiationException e) {
-            log.debug("Failed to create class " + className);
-        } catch (InvocationTargetException e) {
-            log.debug("Failed to create class " + className);
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            log.debug("Failed to create class " + className + " with error: " + e.getMessage());
         }
         return possible;
+    }
+
+    public void createFromAnnotation(Map<String, Object> possible, Object o, Class<?> clazz) throws IllegalAccessException, InvocationTargetException {
+        Set<Method> methods = new HashSet<Method>();
+        Set<Field> fields = new HashSet<Field>();
+        fields.addAll(ReflectionCache.getFieldsByAnnotation(clazz, JsonField.class));
+        methods.addAll(ReflectionCache.getMethodsByAnnotation(clazz, CustomField.class));
+
+        Class<?> inherit = clazz;
+        while ((inherit = inherit.getSuperclass()) != null) {
+            fields.addAll(ReflectionCache.getFieldsByAnnotation(inherit, JsonField.class));
+            methods.addAll(ReflectionCache.getMethodsByAnnotation(inherit, CustomField.class));
+        }
+        for (Field f : fields) {
+            JsonField an = f.getAnnotation(JsonField.class);
+            String name = an != null && !StringUtils.isEmpty(an.name()) ? an.name() : f.getName();
+            String[] groups = an != null ? an.groups() : null;
+            if (inGroup(groups)) {
+                Object data = possible.get(name);
+                if (data != null) {
+                    f.setAccessible(true);
+                    fill(f, o, data);
+                }
+            }
+        }
+
+        for (Method m : methods) {
+            CustomField an = m.getAnnotation(CustomField.class);
+            if (m.getReturnType().equals(Void.class) && m.getParameterTypes() != null && m.getParameterTypes().length == 1) {
+                String customName = an.name();
+                String[] groups = an.groups();
+                if (inGroup(groups)) {
+                    Object data = possible.get(customName);
+                    if (data != null) {
+                        m.setAccessible(true);
+                        int dateType = -1;
+                        String format = "";
+                        if (m.isAnnotationPresent(DateField.class)) {
+                            dateType = m.getAnnotation(DateField.class).type();
+                            format = m.getAnnotation(DateField.class).format();
+                        }
+                        m.invoke(o, getValue(m.getParameterTypes()[0], data, dateType, format));
+                    }
+                }
+            }
+        }
     }
 
     private Object createEnum(Class<?> clazz, Map<String, Object> possible) {
         String enumName = (String)possible.get("name");
         return EnumUtils.getEnum((Class<? extends Enum>) clazz, enumName);
+    }
+
+    public Object getValue(Class<?> expected, Object data, int dateTimeType, String format) {
+        if (expected.equals(Boolean.TYPE) || expected.equals(Boolean.class)) {
+            if (data instanceof String) {
+                String value = (String) data;
+                return !("".equals(value) || "0".equals(value) || "false".equalsIgnoreCase(value));
+            } else {
+                return data;
+            }
+        } else if (expected.isPrimitive()) {
+            if (expected.equals(Byte.TYPE)) {
+                return (data instanceof String ? Long.valueOf((String)data) : (Long)data).byteValue();
+            } else if (expected.equals(Short.TYPE)) {
+                return (data instanceof String ? Long.valueOf((String)data) : (Long)data).shortValue();
+            } else if (expected.equals(Integer.TYPE)) {
+                return ((data instanceof String ? Long.valueOf((String)data) : (Long)data)).intValue();
+            } else if (expected.equals(Long.TYPE)) {
+                return data instanceof String ? Long.valueOf((String)data) : (Long)data;
+            } else if (expected.equals(Double.TYPE)) {
+                return data instanceof String ? Double.valueOf((String) data) : (Double)data;
+            } else if (expected.equals(Float.TYPE)) {
+                return (data instanceof String ? Double.valueOf((String) data) : (Double)data).floatValue();
+            }
+        } else if (Date.class.isAssignableFrom(expected) && (dateTimeType == DateTransformer.TIMESTAMP_TYPE || dateTimeType == DateTransformer.STRING_TYPE)) {
+            switch (dateTimeType) {
+                case DateTransformer.TIMESTAMP_TYPE:
+                    return new Date((Long)data);
+                case DateTransformer.STRING_TYPE:
+                    try {
+                        DateFormat dt = new SimpleDateFormat(format);
+                        return dt.parse((String)data);
+                    } catch (ParseException e) {
+                        throw new IllegalArgumentException("Incompatible types for " + expected.getName(), e);
+                    }
+            }
+        } else if (expected.equals(String.class)) {
+            return StringEscapeUtils.unescapeJson((String)data);
+        } else if (expected.isArray() && data instanceof List) {
+            List<?> l = ((List) data);
+            Object ar = Array.newInstance(expected.getComponentType(), l.size());
+            System.arraycopy(l.toArray(), 0, ar, 0, l.size());
+            return ar;
+        } else if (List.class.isAssignableFrom(expected) && data instanceof List) {
+            List<?> l = ((List) data);
+            return l;
+        } else if (Set.class.isAssignableFrom(expected) && data instanceof List) {
+            List<?> l = ((List) data);
+            Set<?> s = new HashSet<>(l);
+            return s;
+        } else if (Collection.class.isAssignableFrom(expected) && data instanceof List) {
+            List<?> l = ((List) data);
+            return l;
+        } else  if (expected.isEnum()) {
+            if (data.getClass().isEnum())
+                return data;
+            else if (data instanceof String) {
+                String s = (String)data;
+                if (!StringUtils.isEmpty(s)) {
+                    return Enum.valueOf((Class<? extends Enum>)expected, s);
+                }
+                return null;
+            }
+        } else {
+            if (data.getClass().equals(Long.class)) {
+                Long val = (Long) data;
+                if (expected.equals(Byte.class)) {
+                    return val.byteValue();
+                } else if (expected.equals(Short.class)) {
+                    return val.shortValue();
+                } else if (expected.equals(Integer.class)) {
+                    return val.intValue();
+                } else if (expected.equals(Long.class)) {
+                    return val;
+                }
+            } else  if (data.getClass().equals(Double.class)) {
+                Double val = (Double) data;
+                if (expected.equals(Float.class)) {
+                    return val.floatValue();
+                } else if (expected.equals(Double.class)) {
+                    return val;
+                }
+            } else
+                return expected.cast(data);
+        }
+        return data;
     }
 
     private void fill(Field f, Object owner, Object data) throws IllegalArgumentException, IllegalAccessException {
@@ -210,7 +371,7 @@ public class JsonParser {
             return;
         }
 
-        if (f.getType().equals(Boolean.TYPE) || f.getType().equals(Boolean.class)) {
+        /*if (f.getType().equals(Boolean.TYPE) || f.getType().equals(Boolean.class)) {
             if (data instanceof String) {
                 String value = (String) data;
                 f.setBoolean(owner, !("".equals(value) || "0".equals(value) || "false".equalsIgnoreCase(value)));
@@ -301,7 +462,14 @@ public class JsonParser {
                 }
             } else
                 f.set(owner, f.getType().cast(data));
+        }*/
+        int dateType = -1;
+        String format = "";
+        if (f.isAnnotationPresent(DateField.class)) {
+            dateType = f.getAnnotation(DateField.class).type();
+            format = f.getAnnotation(DateField.class).format();
         }
+        f.set(owner, getValue(f.getType(), data, dateType, format));
     }
 
     public <T> T cast(Class<T> clazz, Object value) {

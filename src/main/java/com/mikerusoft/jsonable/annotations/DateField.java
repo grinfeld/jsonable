@@ -1,5 +1,7 @@
 package com.mikerusoft.jsonable.annotations;
 
+import com.mikerusoft.jsonable.transform.DateTransformer;
+
 import java.lang.annotation.ElementType;
 
 /**
@@ -14,6 +16,6 @@ import java.lang.annotation.ElementType;
 @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
 @java.lang.annotation.Target({ElementType.FIELD, ElementType.METHOD})
 public @interface DateField {
-    int type() default 0;
+    int type() default DateTransformer.TIMESTAMP_TYPE;
     String format() default "";
 }
