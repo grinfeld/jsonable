@@ -214,6 +214,8 @@ Here the list of all available options in *ConfInfo*:
     // serialization from other languages or you simple don't want to use word 'class'
     public static void setClassProperty(String classProperty)
 
+See more info at API: http://www.mikerusoft.com/jsonable/
+
 Oh, installation?
 ------------------------
 1. Download Jsonable project
