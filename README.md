@@ -181,6 +181,38 @@ Sometimes you need to expose different fields in different cases. For such use I
       // {"username":"Mike","nickname": "Honey", "class": "mypackage.User"}
     } catch (Exception ignore) {}
 
+Adapters
+    
+This is the way to parse classes from 3rd party or if you don't want to use Jsonable annotations.
+Adapters is the way to define how to serialize class. There are 3 options:
+1. adding Adapter by specifying class and list of properties to be serialized. In this case, Jsonable will search 
+  public methods with setter (starts with *set*) and getter (starts with *get* or *is*) and try to call them 
+  during the serialization process.
+2. adding SimpleBeanAdapter by specifying class of the POJO Bean. We'll try to fill the Bean according to public getters and
+  setters in the Bean
+3. Custom adapter - implements *ParserAdapter* interface with your own logica
+
+All adapters should be registered with the *ConfInfo*
+
+Here the list of all available options in *ConfInfo*:
+    
+    // defines if during serialization (writing the JSON) to use class attribute (default: false) 
+    public static boolean issetExcludeClass();
+    
+    // defines if to include fields with null values (default: false)
+    public static boolean setIncludeNull();
+    
+    // defines the way to treat Enum. By default Enum is written as String of its name, but by setting this 
+    // field true - enum will be serialized as class with class name (default: false)
+    public static boolean setEnumAsClass();
+
+    // defines how to treat primitive values: print the value only or as JSON class with class 
+    // name and its value as 'value' attribute (default: false)
+    public static boolean setIncludePrimitiveClass();
+
+    // setting different class property instead of 'class'. It could be useful when you dealing with 
+    // serialization from other languages or you simple don't want to use word 'class'
+    public static void setClassProperty(String classProperty)
 
 Oh, installation?
 ------------------------
@@ -194,7 +226,7 @@ Maven
     <dependency>
         <groupId>com.mikerusoft</groupId>
         <artifactId>jsonable</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.3</version>
     </dependency>
 
 Bugs, changes requests
