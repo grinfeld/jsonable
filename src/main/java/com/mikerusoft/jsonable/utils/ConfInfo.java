@@ -36,6 +36,7 @@ public class ConfInfo implements ContextData {
     private boolean includePrimitiveClass = false;
     private boolean enumAsClass = false;
     private Map<Class, ParserAdapter> adapters = new ConcurrentHashMap<>();
+    private Map<String, String> properties = new ConcurrentHashMap<>();
 
     public static String getClassProperty() { return StringUtils.isEmpty(get().classProperty) ? DEFAULT_CLASS_PROPERTY_VALUE : get().classProperty; }
     public static void setClassProperty(String classProperty) { get().classProperty = classProperty; }
@@ -47,10 +48,31 @@ public class ConfInfo implements ContextData {
     public static void setEnumAsClass(boolean enumAsClass) { get().enumAsClass = enumAsClass; }
     public static boolean isIncludePrimitiveClass() { return get().includePrimitiveClass; }
     public static void setIncludePrimitiveClass(boolean includePrimitiveClass) { get().includePrimitiveClass = includePrimitiveClass; }
-
-    public static Map<Class, ParserAdapter> getAdapters() {
-        return Collections.unmodifiableMap(get().adapters);
+    public static Map<Class, ParserAdapter> getAdapters() { return Collections.unmodifiableMap(get().adapters); }
+    public static String getProperty(String name) { return get().properties.get(name); }
+    public static String getProperty(String name, String def) { String value = get().properties.get(name); return value == null ? def : value; }
+    public static Integer getProperty(String name, Integer def) {
+        String value = get().properties.get(name);
+        if (value == null)
+            return def;
+        return Integer.valueOf(value);
     }
+    public static Long getProperty(String name, Long def) {
+        String value = get().properties.get(name);
+        if (value == null)
+            return def;
+        return Long.valueOf(value);
+    }
+    public static boolean getProperty(String name, boolean def) {
+        String value = get().properties.get(name);
+        if (value == null)
+            return def;
+        return Boolean.valueOf(value);
+    }
+    public static void setProperty(String name, String value) { get().properties.put(name, value); }
+    public static void setProperty(String name, Integer value) { get().properties.put(name, value == null ? null : String.valueOf(value)); }
+    public static void setProperty(String name, Long value) { get().properties.put(name, value == null ? null : String.valueOf(value)); }
+    public static void setProperty(String name, Boolean value) { get().properties.put(name, value == null ? null : String.valueOf(value)); }
 
     /**
      * Creates Adapter for specified class and its properties (see {@link ParserAdapter} for more explanations)

@@ -115,7 +115,7 @@ public class Configuration implements ContextData {
             Names n = Names.valueOf(name);
             return n.getValue();
         } catch (Exception ignore) {}
-        return def;
+        return ConfInfo.getProperty(name, def);
     }
 
     @Deprecated
@@ -162,6 +162,7 @@ public class Configuration implements ContextData {
             current = n.getValue();
             n.setValue(value);
         } catch (Exception ignore) {}
+        ConfInfo.setProperty(name, value);
         return current;
     }
 }
