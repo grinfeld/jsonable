@@ -194,7 +194,7 @@ Maven
     <dependency>
         <groupId>com.mikerusoft</groupId>
         <artifactId>jsonable</artifactId>
-        <version>1.0.5</version>
+        <version>1.1.0</version>
     </dependency>
 
 Note: Currently the last published version in repository is 1.0.5.
