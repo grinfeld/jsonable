@@ -197,9 +197,6 @@ Maven
         <version>1.1.0</version>
     </dependency>
 
-Note: Currently the last published version in repository is 1.0.5.
-It works almost same as described in README above, except ConfInfo (in older versions is Configuration class. See published in maven javadoc)
-
 Bugs, changes requests
 -------------------
 
