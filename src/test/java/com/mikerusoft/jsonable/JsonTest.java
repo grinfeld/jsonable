@@ -220,12 +220,21 @@ public class JsonTest {
         assertEquals("Failed boolean false test " + sb.toString(), "false", sb.toString());
     }
 
-    @Test public void booleanFalseWithClassTest() {
+    @Test public void booleanFalseWithClassTest() throws IOException {
         try {
             ConfInfo.setIncludePrimitiveClass(true);
             JsonWriter.write(false, sb);
         } catch (Exception ignore) {}
         assertEquals("Failed boolean false test " + sb.toString(), "{\"value\": false,\"class\":\"java.lang.Boolean\"}", sb.toString());
+
+        Boolean res = JsonReader.read(sb.toString(), Boolean.class);
+        assertEquals(false, res);
+        sb = new StringBuilder();
+        try {
+            ConfInfo.setIncludePrimitiveClass(true);
+            JsonWriter.write(new Object[] { false }, sb);
+        } catch (Exception ignore) {}
+        assertEquals("Failed boolean false test " + sb.toString(), "[{\"value\": false,\"class\":\"java.lang.Boolean\"}]", sb.toString());
     }
 
     @Test public void booleanTrueTest() {

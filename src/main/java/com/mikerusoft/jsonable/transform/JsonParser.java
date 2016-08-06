@@ -137,6 +137,11 @@ public class JsonParser {
             if (b != null && Byte.TYPE.equals(clazz))
                 return b.byteValue();
             return b;
+        } else if (Boolean.TYPE.equals(clazz) || Boolean.class.equals(clazz)) {
+            Boolean s = Boolean.valueOf(String.valueOf(value));
+            if (s != null && Byte.TYPE.equals(clazz))
+                return s.booleanValue();
+            return s;
         } else if (Short.TYPE.equals(clazz) || Short.class.equals(clazz)) {
             Short s = Short.valueOf(String.valueOf(value));
             if (s != null && Byte.TYPE.equals(clazz))
@@ -376,98 +381,6 @@ public class JsonParser {
             return;
         }
 
-        /*if (f.getType().equals(Boolean.TYPE) || f.getType().equals(Boolean.class)) {
-            if (data instanceof String) {
-                String value = (String) data;
-                f.setBoolean(owner, !("".equals(value) || "0".equals(value) || "false".equalsIgnoreCase(value)));
-            } else if (f.getType().equals(Boolean.TYPE)) {
-                f.setBoolean(owner, ((Boolean) data).booleanValue());
-            } else {
-                f.set(owner, data);
-            }
-        } else if (f.getType().isPrimitive()) {
-            if (f.getType().equals(Byte.TYPE)) {
-                Long val = data instanceof String ? Long.parseLong((String)data) : (Long)data;
-                f.setByte(owner, val.byteValue());
-            } else if (f.getType().equals(Short.TYPE)) {
-                Long val = data instanceof String ? Long.parseLong((String)data) : (Long)data;
-                f.setShort(owner, val.shortValue());
-            } else if (f.getType().equals(Integer.TYPE)) {
-                Long val = data instanceof String ? Long.parseLong((String)data) : (Long)data;
-                f.setInt(owner, val.intValue());
-            } else if (f.getType().equals(Long.TYPE)) {
-                Long val = data instanceof String ? Long.parseLong((String)data) : (Long)data;
-                f.setLong(owner, val.longValue());
-            } else if (f.getType().equals(Double.TYPE)) {
-                Double val = data instanceof String ? Double.parseDouble((String) data) : (Double)data;
-                f.setDouble(owner, val.doubleValue());
-            } else if (f.getType().equals(Float.TYPE)) {
-                Double val = data instanceof String ? Double.parseDouble((String) data) : (Double)data;
-                f.setFloat(owner, val.floatValue());
-            }
-        } else if (Date.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(DateField.class)) {
-            int type = f.getAnnotation(DateField.class).type();
-            switch (type) {
-                case DateTransformer.TIMESTAMP_TYPE:
-                    f.set(owner, new Date((Long)data));
-                    break;
-                case DateTransformer.STRING_TYPE:
-                    try {
-                        String format = f.getAnnotation(DateField.class).format();
-                        DateFormat dt = new SimpleDateFormat(format);
-                        f.set(owner, dt.parse((String)data));
-                    } catch (ParseException e) {
-                        throw new IllegalArgumentException("Incompatible types for " + f.getName(), e);
-                    }
-                    break;
-            }
-        } else if (f.getType().equals(String.class)) {
-            f.set(owner, StringEscapeUtils.unescapeJson((String)data));
-        } else if (f.getType().isArray() && data instanceof List) {
-            List<?> l = ((List) data);
-            Object ar = Array.newInstance(f.getType().getComponentType(), l.size());
-            System.arraycopy(l.toArray(), 0, ar, 0, l.size());
-            f.set(owner, ar);
-        } else if (List.class.isAssignableFrom(f.getType()) && data instanceof List) {
-            List<?> l = ((List) data);
-            f.set(owner, l);
-        } else if (Set.class.isAssignableFrom(f.getType()) && data instanceof List) {
-            List l = ((List) data);
-            f.set(owner, new HashSet(l));
-        } else if (Collection.class.isAssignableFrom(f.getType()) && data instanceof List) {
-            List<?> l = ((List) data);
-            f.set(owner, l);
-        } else  if (f.getType().isEnum()) {
-            if (data.getClass().isEnum())
-                f.set(owner, data);
-            else if (data instanceof String) {
-                String s = (String)data;
-                if (!StringUtils.isEmpty(s)) {
-                    f.set(owner, Enum.valueOf((Class<? extends Enum>)f.getType(), s));
-                }
-            }
-        } else {
-            if (data.getClass().equals(Long.class)) {
-                Long val = (Long) data;
-                if (f.getType().equals(Byte.class)) {
-                    f.set(owner, new Byte(val.byteValue()));
-                } else if (f.getType().equals(Short.class)) {
-                    f.set(owner, new Short(val.shortValue()));
-                } else if (f.getType().equals(Integer.class)) {
-                    f.set(owner, new Integer(val.intValue()));
-                } else if (f.getType().equals(Long.class)) {
-                    f.setLong(owner, val);
-                }
-            } else  if (data.getClass().equals(Double.class)) {
-                Double val = (Double) data;
-                if (f.getType().equals(Float.class)) {
-                    f.set(owner, new Float(val.floatValue()));
-                } else if (f.getType().equals(Double.class)) {
-                    f.set(owner, val);
-                }
-            } else
-                f.set(owner, f.getType().cast(data));
-        }*/
         int dateType = -1;
         String format = "";
         if (f.isAnnotationPresent(DateField.class)) {
