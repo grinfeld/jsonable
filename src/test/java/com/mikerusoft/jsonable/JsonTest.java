@@ -244,9 +244,9 @@ public class JsonTest {
 
     @Test public void objectArrayTest() {
         try {
-            JsonWriter.write(new Object[] {"hello", 1L}, sb);
+            JsonWriter.write(new Object[] {"hello", 1L, true}, sb);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple array string test " + sb.toString(), "[\"hello\",1]", sb.toString());
+        assertEquals("Failed simple array string test " + sb.toString(), "[\"hello\",1,true]", sb.toString());
 
         List ar = new ArrayList<>(0);
         try {
@@ -255,9 +255,10 @@ public class JsonTest {
             ignore.printStackTrace();
         }
         assertNotNull(ar);
-        assertEquals("Size should be 2 for " + sb.toString(), 2, ar.size());
+        assertEquals("Size should be 3 for " + sb.toString(), 3, ar.size());
         assertEquals("hello", ar.get(0));
         assertEquals(1L, ar.get(1));
+        assertEquals(true, ar.get(2));
     }
 
     @Test public void simpleArrayNumberTest() {
