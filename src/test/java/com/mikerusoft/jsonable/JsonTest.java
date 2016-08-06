@@ -242,6 +242,24 @@ public class JsonTest {
         assertEquals("Failed simple array string test " + sb.toString(), "[\"hello\",\"bye\"]", sb.toString());
     }
 
+    @Test public void objectArrayTest() {
+        try {
+            JsonWriter.write(new Object[] {"hello", 1L}, sb);
+        } catch (Exception ignore) {}
+        assertEquals("Failed simple array string test " + sb.toString(), "[\"hello\",1]", sb.toString());
+
+        List ar = new ArrayList<>(0);
+        try {
+            ar = JsonReader.read(sb.toString(), List.class);
+        } catch (Exception ignore) {
+            ignore.printStackTrace();
+        }
+        assertNotNull(ar);
+        assertEquals("Size should be 2 for " + sb.toString(), 2, ar.size());
+        assertEquals("hello", ar.get(0));
+        assertEquals(1L, ar.get(1));
+    }
+
     @Test public void simpleArrayNumberTest() {
         try {
             JsonWriter.write(new int[] {1, 2}, sb);

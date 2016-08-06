@@ -274,7 +274,9 @@ public class JsonParser {
         return EnumUtils.getEnum((Class<? extends Enum>) clazz, enumName);
     }
 
-    public Object getValue(Class<?> expected, Object data, int dateTimeType, String format) {
+    private Object getValue(Class<?> expected, Object data, int dateTimeType, String format) {
+        if (data == null)
+            return null;
         if (expected.equals(Boolean.TYPE) || expected.equals(Boolean.class)) {
             if (data instanceof String) {
                 String value = (String) data;
@@ -283,18 +285,21 @@ public class JsonParser {
                 return data;
             }
         } else if (expected.isPrimitive()) {
+            String value = data instanceof String ? (String)data : String.valueOf(data);
             if (expected.equals(Byte.TYPE)) {
-                return (data instanceof String ? Long.valueOf((String)data) : (Long)data).byteValue();
+                return Byte.valueOf(value);
             } else if (expected.equals(Short.TYPE)) {
-                return (data instanceof String ? Long.valueOf((String)data) : (Long)data).shortValue();
+                return Short.valueOf(value);
             } else if (expected.equals(Integer.TYPE)) {
-                return ((data instanceof String ? Long.valueOf((String)data) : (Long)data)).intValue();
+                return Integer.valueOf(value);
             } else if (expected.equals(Long.TYPE)) {
-                return data instanceof String ? Long.valueOf((String)data) : (Long)data;
+                return Long.valueOf(value);
             } else if (expected.equals(Double.TYPE)) {
-                return data instanceof String ? Double.valueOf((String) data) : (Double)data;
+                return Double.valueOf(value);
             } else if (expected.equals(Float.TYPE)) {
-                return (data instanceof String ? Double.valueOf((String) data) : (Double)data).floatValue();
+                return Float.valueOf(value);
+            } else if (expected.equals(Character.TYPE) && value.length() > 0) {
+                return value.charAt(0);
             }
         } else if (Date.class.isAssignableFrom(expected) && (dateTimeType == DateTransformer.TIMESTAMP_TYPE || dateTimeType == DateTransformer.STRING_TYPE)) {
             switch (dateTimeType) {
