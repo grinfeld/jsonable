@@ -93,7 +93,7 @@ public class JsonDefinedTransformer extends TransformerImpl {
     private int write(Object o, List<Field> fields, List<Method> methods, Outputter<String> out, String... groups) throws IllegalAccessException, IOException, InvocationTargetException {
         // Configuration c = ContextManager.get(Configuration.class);
         boolean includeNull = ConfInfo.isIncludeNull(); // Configuration.getBooleanProperty(c, Configuration.INCLUDE_NULL_PROPERTY, false);
-
+        // TODO: we need to ensure that if method or field with the same property name has been executed - don't do it again for overrided methods
         int count = 0;
         for (Field f : fields) {
             JsonField an = f.getAnnotation(JsonField.class);

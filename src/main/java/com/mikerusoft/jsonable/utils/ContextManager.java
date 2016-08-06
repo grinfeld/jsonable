@@ -4,7 +4,7 @@ package com.mikerusoft.jsonable.utils;
  * @author Grinfeld Mikhail
  * @since 12/4/2014.
  *
- * TODO: when removing use of Configuration - move this class into ConfiInfo in order to avoid getting it from outside of package
+ * TODO: when removing use of Configuration - move this class into ConfInfo in order to avoid getting it from outside of package
  */
 public class ContextManager {
     public static final ThreadLocal<ConfInfo> userThreadLocal = new ThreadLocal<ConfInfo>();
