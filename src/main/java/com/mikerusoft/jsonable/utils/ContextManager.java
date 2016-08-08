@@ -20,6 +20,8 @@ public class ContextManager {
     }
 
     public static <T extends ContextData> T get(Class<T> clazz) {
+        if (clazz.isInstance(Configuration.class))
+            return (T)new Configuration(); // for backward compatibility
         ContextData o = userThreadLocal.get();
         if (o == null)
             return null;
