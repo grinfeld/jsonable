@@ -181,16 +181,21 @@ Sometimes you need to expose different fields in different cases. For such use I
       // {"username":"Mike","nickname": "Honey", "class": "mypackage.User"}
     } catch (Exception ignore) {}
 
-Adapters
+**Adapters**
     
 This is the way to parse classes from 3rd party or if you don't want to use Jsonable annotations.
 Adapters is the way to define how to serialize class. There are 3 options:
-1. adding Adapter by specifying class and list of properties to be serialized. In this case, Jsonable will search 
+
+1. adding ParserAdapter by specifying class and list of properties to be serialized. In this case, Jsonable will search 
   public methods with setter (starts with *set*) and getter (starts with *get* or *is*) and try to call them 
   during the serialization process.
-2. adding SimpleBeanAdapter by specifying class of the POJO Bean. We'll try to fill the Bean according to public getters and
+  
+2. adding *SimpleBeanAdapter* by specifying class of the POJO Bean. We'll try to fill the Bean according to public getters and
   setters in the Bean
-3. Custom adapter - implements *ParserAdapter* interface with your own logica
+
+3. register all classes under some package. All classes under specified package will be registered as *SimpleBeanAdapter*  
+  
+4. Custom adapter - implements *ParserAdapter* interface with your own logic
 
 All adapters should be registered with the *ConfInfo*
 
@@ -214,7 +219,7 @@ Here the list of all available options in *ConfInfo*:
     // serialization from other languages or you simple don't want to use word 'class'
     public static void setClassProperty(String classProperty)
 
-See more info at API: http://www.mikerusoft.com/jsonable/
+See more info at [API](http://www.mikerusoft.com/jsonable/)
 
 Oh, installation?
 ------------------------
@@ -228,7 +233,7 @@ Maven
     <dependency>
         <groupId>com.mikerusoft</groupId>
         <artifactId>jsonable</artifactId>
-        <version>1.1.3</version>
+        <version>1.1.4</version>
     </dependency>
 
 Bugs, changes requests

@@ -17,19 +17,19 @@ import java.util.Collection;
 public class AdapterTransformer extends TransformerImpl {
     @Override
     public boolean match(Object o) {
-        return matchClass(o.getClass());
+        return o != null && matchClass(o.getClass());
     }
 
     @Override
     public boolean matchClass(Class<?> clazz) {
-        return ConfInfo.getAdapters().containsKey(clazz);
+        return ConfInfo.getAdapter(clazz) != null;
     }
 
 
     // TODO: decide how to deal with adapter that doesn't have getter methods ?
     @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException {
-        ParserAdapter<?> adapter = ConfInfo.getAdapters().get(o.getClass());
+        ParserAdapter<?> adapter = ConfInfo.getAdapter(o.getClass());
         Collection<MethodWrapper> methodWrappers = adapter.getParams();
 
         out.write("{");

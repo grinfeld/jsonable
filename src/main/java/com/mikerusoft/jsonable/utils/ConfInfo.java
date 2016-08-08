@@ -2,14 +2,13 @@ package com.mikerusoft.jsonable.utils;
 
 import com.mikerusoft.jsonable.adapters.MethodWrapper;
 import com.mikerusoft.jsonable.adapters.ParserAdapter;
+import com.mikerusoft.jsonable.adapters.SimpleBeanAdapter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -19,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConfInfo implements ContextData {
 
     private static Log log = LogFactory.getLog(ConfInfo.class);
-
+    private static final Object lock = new Object();
     private static final String DEFAULT_CLASS_PROPERTY_VALUE = "class";
 
     private static ConfInfo get() {
@@ -35,7 +34,8 @@ public class ConfInfo implements ContextData {
     private boolean includeNull = false;
     private boolean includePrimitiveClass = false;
     private boolean enumAsClass = false;
-    private Map<Class, ParserAdapter> adapters = new ConcurrentHashMap<>();
+    private Map<Class, ParserAdapter> classAdapters = new ConcurrentHashMap<>();
+    private Map<String, Boolean> packageAdapters = new ConcurrentHashMap<>();
     private Map<String, String> properties = new ConcurrentHashMap<>();
 
     public static String getClassProperty() { return StringUtils.isEmpty(get().classProperty) ? DEFAULT_CLASS_PROPERTY_VALUE : get().classProperty; }
@@ -48,7 +48,20 @@ public class ConfInfo implements ContextData {
     public static void setEnumAsClass(boolean enumAsClass) { get().enumAsClass = enumAsClass; }
     public static boolean isIncludePrimitiveClass() { return get().includePrimitiveClass; }
     public static void setIncludePrimitiveClass(boolean includePrimitiveClass) { get().includePrimitiveClass = includePrimitiveClass; }
-    public static Map<Class, ParserAdapter> getAdapters() { return Collections.unmodifiableMap(get().adapters); }
+    public static ParserAdapter<?> getAdapter(Class<?> clazz) {
+        if (clazz.getPackage() == null)
+            return null;
+        ParserAdapter<?> adapter = get().classAdapters.get(clazz);
+        if (adapter == null) {
+            String packageName = clazz.getPackage().getName();
+            Boolean exists = get().packageAdapters.get(packageName);
+            if (exists != null) {
+                adapter = new SimpleBeanAdapter<>(clazz);
+                get().classAdapters.put(clazz, adapter);
+            }
+        }
+        return adapter;
+    }
     public static String getProperty(String name) { return get().properties.get(name); }
     public static String getProperty(String name, String def) { String value = get().properties.get(name); return value == null ? def : value; }
     public static Integer getProperty(String name, Integer def) {
@@ -81,7 +94,7 @@ public class ConfInfo implements ContextData {
      * @param params list of bean properties
      */
     public static void registerAdapter(Class<?> clazz, PropertyPair[] params) {
-        get().adapters.put(clazz, new ParserAdapterBasic(clazz, params));
+        get().classAdapters.put(clazz, new ParserAdapterBasic(clazz, params));
     }
 
     /**
@@ -91,7 +104,7 @@ public class ConfInfo implements ContextData {
      * @param params list of bean properties
      */
     public static void registerAdapter(Class<?> clazz, String[] params) {
-        get().adapters.put(clazz, new ParserAdapterBasic(clazz, params));
+        get().classAdapters.put(clazz, new ParserAdapterBasic(clazz, params));
     }
     
     /**
@@ -100,7 +113,15 @@ public class ConfInfo implements ContextData {
      * @param adapter custom implementation of adapter
      */
     public static <T> void registerAdapter(ParserAdapter<T> adapter) {
-        get().adapters.put(adapter.getClazz(), adapter);
+        get().classAdapters.put(adapter.getClazz(), adapter);
+    }
+
+    /**
+     * registers package to read classes for serialization in the same way as {@link SimpleBeanAdapter}
+     * @param packageName package to check classes
+     */
+    public static <T> void registerAdapter(String packageName) {
+        get().packageAdapters.put(packageName, true);
     }
 
     /*
