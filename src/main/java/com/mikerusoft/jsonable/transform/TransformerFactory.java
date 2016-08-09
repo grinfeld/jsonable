@@ -2,7 +2,6 @@ package com.mikerusoft.jsonable.transform;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import sun.net.www.protocol.file.FileURLConnection;
 
 import java.io.File;
 import java.io.IOException;
@@ -128,14 +127,13 @@ public class TransformerFactory {
                     connection = url.openConnection();
                     if (connection instanceof JarURLConnection) {
                         checkJarFile((JarURLConnection) connection, pckgname, classes, _interface);
-                    } else if (connection instanceof FileURLConnection) {
+                    } else {
                         try {
                             checkDirectory(new File(URLDecoder.decode(url.getPath(), "UTF-8")), pckgname, classes, _interface);
                         } catch (final UnsupportedEncodingException ex) {
                             throw new ClassNotFoundException(pckgname + " does not appear to be a valid package (Unsupported encoding)", ex);
                         }
-                    } else
-                        throw new ClassNotFoundException(pckgname + " (" + url.getPath() + ") does not appear to be a valid package");
+                    }
                 } catch (final IOException ioex) {
                     throw new ClassNotFoundException("IOException was thrown when trying to get all resources for " + pckgname, ioex);
                 }

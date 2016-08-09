@@ -212,11 +212,10 @@ public class JsonParser {
             if (clazz.isEnum()) {
                 return createEnum(clazz, possible);
             }
-            ParserAdapter adapter = ConfInfo.getAdapters().get(clazz);
+            ParserAdapter adapter = ConfInfo.getAdapter(clazz);
             Object o = clazz.newInstance();
             if (adapter != null) {
                 createFromAdapter(possible, o, adapter);
-                return o;
             }
 
             createFromAnnotation(possible, o, clazz);
