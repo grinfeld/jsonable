@@ -26,8 +26,13 @@ public class JsonReader {
      * @throws IllegalArgumentException on unexpected data
      */
     public static <T> T read(InputStream in, Class<T> clazz, String...groups) throws IOException, IllegalArgumentException {
-        Object r = read(in, groups);
-        return r == null ? null : clazz.cast(r);
+        BufferedReader bf = new BufferedReader(new InputStreamReader(in));
+        try {
+            return JsonParser.get(groups).parse(bf, clazz);
+        } catch (InstantiationException | IllegalAccessException e) {
+            log.error(e);
+            throw new IllegalArgumentException("Failed to convert Json to Object", e);
+        }
     }
 
     /**
@@ -41,8 +46,13 @@ public class JsonReader {
      * @throws IllegalArgumentException on invalid data
      */
     public static <T> T read(String in, Class<T> clazz, String...groups) throws IOException, IllegalArgumentException {
-        Object r = read(in, groups);
-        return r == null ? null : clazz.cast(r);
+        BufferedReader bf = new BufferedReader(new StringReader(in));
+        try {
+            return JsonParser.get(groups).parse(bf, clazz);
+        } catch (InstantiationException | IllegalAccessException e) {
+            log.error(e);
+            throw new IllegalArgumentException("Failed to convert Json to Object", e);
+        }
     }
 
     /**
@@ -56,11 +66,8 @@ public class JsonReader {
     public static Object read(InputStream in, String...groups) throws IOException, IllegalArgumentException {
         BufferedReader bf = new BufferedReader(new InputStreamReader(in));
         try {
-            return JsonParser.get(groups).parse(bf);
-        } catch (InstantiationException e) {
-            log.error(e);
-            throw new IllegalArgumentException("Failed to convert Json to Object", e);
-        } catch (IllegalAccessException e) {
+            return JsonParser.get(groups).parse(bf, null);
+        } catch (InstantiationException | IllegalAccessException e) {
             log.error(e);
             throw new IllegalArgumentException("Failed to convert Json to Object", e);
         }
@@ -77,11 +84,8 @@ public class JsonReader {
     public static Object read(String in, String...groups) throws IOException, IllegalArgumentException {
         BufferedReader bf = new BufferedReader(new StringReader(in));
         try {
-            return JsonParser.get(groups).parse(bf);
-        } catch (InstantiationException e) {
-            log.error(e);
-            throw new IllegalArgumentException("Failed to convert Json to Object", e);
-        } catch (IllegalAccessException e) {
+            return JsonParser.get(groups).parse(bf, null);
+        } catch (InstantiationException | IllegalAccessException e) {
             log.error(e);
             throw new IllegalArgumentException("Failed to convert Json to Object", e);
         }

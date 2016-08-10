@@ -486,7 +486,8 @@ public class JsonTest {
             Object o = JsonReader.read(sb.toString());
             JsonWriter.write(o, sb1);
         } catch (Exception ignore) {}
-        assertEquals("readWriteSimpleAnotTest", sb1.toString(), sb.toString());
+        assertSplitSimpleJson(sb1.toString(), sb.toString());
+        //assertEquals("readWriteSimpleAnotTest", sb1.toString(), sb.toString());
     }
 
     @Test public void numberArrayTest() {
@@ -510,6 +511,19 @@ public class JsonTest {
         assertEquals("numberListTest", "[1,2,3]", sb.toString());
     }
 
+    @Test public void complStringTest() {
+        String str = "Hel\"lo";
+        Object o = null;
+        try {
+            JsonWriter.write(str, sb);
+            o = JsonReader.read(sb.toString());
+            JsonWriter.write(o, sb1);
+        } catch (Exception ignore) {}
+        assertNotNull(o);
+        assertEquals(str, o);
+        assertEquals(sb.toString(), sb1.toString());
+    }
+
     @Test public void doubleTest() {
         try {
             simpleObjDouble.str = "Hel\"lo";
@@ -518,10 +532,9 @@ public class JsonTest {
             JsonWriter.write(simpleObjDouble, sb);
             Object o = JsonReader.read(sb.toString());
             JsonWriter.write(o, sb1);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        assertEquals("doubleTest", sb1.toString(), sb.toString());
+        } catch (Exception e) {}
+        assertSplitSimpleJson(sb1.toString(), sb.toString());
+        //assertEquals("doubleTest", sb1.toString(), sb.toString());
     }
 
     @JsonClass
