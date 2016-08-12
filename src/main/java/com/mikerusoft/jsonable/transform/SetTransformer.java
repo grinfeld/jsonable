@@ -22,7 +22,7 @@ public class SetTransformer  extends TransformerImpl {
     }
 
     @Override
-    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException {
+    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Set<?> l = (Set<?>)o;
         out.write("[");
         int i = 0;

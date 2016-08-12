@@ -28,7 +28,7 @@ public class AdapterTransformer extends TransformerImpl {
 
     // TODO: decide how to deal with adapter that doesn't have getter methods ?
     @Override
-    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException {
+    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException, InstantiationException {
         ParserAdapter<?> adapter = ConfInfo.getAdapter(o.getClass());
         Collection<MethodWrapper> methodWrappers = adapter.getParams();
 

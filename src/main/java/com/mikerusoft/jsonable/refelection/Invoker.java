@@ -8,7 +8,7 @@ import java.lang.reflect.InvocationTargetException;
  * @since 8/11/2016.
  */
 public interface Invoker {
-    public Object get(Object o) throws IllegalAccessException, InvocationTargetException;
+    public Object get(Object o) throws IllegalAccessException, InvocationTargetException, InstantiationException;
     public void set(Object o, Object param) throws IllegalAccessException, InvocationTargetException, InstantiationException;
     public boolean setEnabled();
     public boolean getEnabled();
@@ -16,4 +16,6 @@ public interface Invoker {
     public String getGetterName();
     public String[] getGetterGroups();
     public String[] getSetterGroups();
+    public <T extends Annotation> T getGetterAnnotation(Class<T> annotationClass);
+    public <T extends Annotation> T getSetterAnnotation(Class<T> annotationClass);
 }

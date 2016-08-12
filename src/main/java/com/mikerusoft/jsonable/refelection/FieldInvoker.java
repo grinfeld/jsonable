@@ -1,7 +1,9 @@
 package com.mikerusoft.jsonable.refelection;
 
+import com.mikerusoft.jsonable.annotations.DateField;
 import com.mikerusoft.jsonable.annotations.JsonField;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
@@ -19,14 +21,19 @@ public class FieldInvoker implements Invoker {
     }
 
     @Override
-    public Object get(Object o) throws IllegalAccessException {
+    public Object get(Object o) throws IllegalAccessException, InstantiationException {
         field.setAccessible(true);
-        return field.get(o);
+        Object result = field.get(o);
+        if (result == null)
+            return null;
+        Class<?>[] generics = field.getType().getComponentType() != null ?  new Class[] { field.getType().getComponentType() } : null;
+        return ReflectionCache.getValue(field.getType(), generics, result, getGetterAnnotation(DateField.class));
     }
 
     @Override
     public void set(Object o, Object param) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        ReflectionCache.fill(field, o, param);
+        Class<?>[] generics = field.getType().getComponentType() != null ?  new Class[] { field.getType().getComponentType() } : null;
+        ReflectionCache.fill(field, generics, o, param);
     }
 
     @Override
@@ -53,5 +60,15 @@ public class FieldInvoker implements Invoker {
     @Override
     public String[] getSetterGroups() {
         return field.isAnnotationPresent(JsonField.class) ? field.getAnnotation(JsonField.class).groups() : null;
+    }
+
+    @Override
+    public <T extends Annotation> T getGetterAnnotation(Class<T> annotationClass) {
+        return field.isAnnotationPresent(annotationClass) ? field.getAnnotation(annotationClass) : null;
+    }
+
+    @Override
+    public <T extends Annotation> T getSetterAnnotation(Class<T> annotationClass) {
+        return field.isAnnotationPresent(annotationClass) ? field.getAnnotation(annotationClass) : null;
     }
 }

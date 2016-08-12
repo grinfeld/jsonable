@@ -1,10 +1,7 @@
 package com.mikerusoft.jsonable.transform;
 
-import com.mikerusoft.jsonable.adapters.ParserAdapter;
-import com.mikerusoft.jsonable.refelection.Invoker;
 import com.mikerusoft.jsonable.utils.ConfInfo;
 import com.mikerusoft.jsonable.refelection.ReflectionCache;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
@@ -12,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -112,7 +108,7 @@ public class JsonParser {
         return new ImmutablePair<>(c, null);
     }
 
-    private Pair<Character, Object> parseListInnerElement(BufferedReader bf, char c, Class<?> initialClass) throws IOException, InstantiationException {
+    private Pair<Character, Object> parseListInnerElement(BufferedReader bf, char c) throws IOException, InstantiationException {
         StringBuilder sb = new StringBuilder();
         do {
             Pair<Character, Object> p = parseStructure(bf, c);
@@ -128,106 +124,6 @@ public class JsonParser {
             c = r != -1 ? (char) r : EMPTY_CHAR;
         } while (bf.ready());
         return new ImmutablePair<>(c, null);
-    }
-
-    private boolean inGroup(String[] groups, List<String> allGroups) {
-        if (allGroups == null || allGroups.size() == 0)
-            return true;
-        if (groups == null || groups.length == 0)
-            return true;
-        return new ArrayList<>(Arrays.asList(groups)).removeAll(allGroups);
-    }
-
-    private Object createClass(Map<String, Object> possible) {
-        String cl = ConfInfo.getClassProperty(); // Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
-        String className = (String)possible.get(cl);
-        if (StringUtils.isEmpty(className))
-            return possible;
-        Class<?> clazz = null;
-
-        try {
-            // using cache in order to avoid searching class in ClassLoader, but get it directly from cache.
-            // There is pitfall: cache could be large same as ClassLoader, if most classes will be serialized
-            clazz = ReflectionCache.get().getClass(className);
-        } catch (ClassNotFoundException e) {
-            return possible;
-        }
-
-        if (clazz == null)
-            return possible;
-
-        try {
-            if (ReflectionCache.isPrimitiveLike(clazz)) {
-                Object value = possible.get("value");
-                return ReflectionCache.getPrimitive(clazz, value);
-            }
-            if (clazz.isEnum()) {
-                return ReflectionCache.createEnum(clazz, possible);
-            }
-            Object o = clazz.newInstance();
-            createSpecific(possible, o, clazz);
-
-            return o;
-        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
-            log.debug("Failed to create class " + className + " with error: " + e.getMessage());
-        }
-        return possible;
-    }
-
-    public void createSpecific(Map<String, Object> possible, Object o, Class<?> clazz) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-
-        Collection<Invoker> invokers = ReflectionCache.get().getInvokers(clazz);
-
-        for (Invoker i : invokers) {
-            if (i.setEnabled()) {
-                if (inGroup(i.getSetterGroups(), this.groups))
-                    i.set(o, possible.get(i.getSetterName()));
-            }
-        }
-
-        /*Set<Method> methods = new HashSet<Method>();
-        Set<Field> fields = new HashSet<Field>();
-        fields.addAll(ReflectionCache.getFieldsByAnnotation(clazz, JsonField.class));
-        methods.addAll(ReflectionCache.getMethodsByAnnotation(clazz, CustomField.class));
-
-        Class<?> inherit = clazz;
-        while ((inherit = inherit.getSuperclass()) != null) {
-            fields.addAll(ReflectionCache.getFieldsByAnnotation(inherit, JsonField.class));
-            methods.addAll(ReflectionCache.getMethodsByAnnotation(inherit, CustomField.class));
-        }
-        for (Field f : fields) {
-            JsonField an = f.getAnnotation(JsonField.class);
-            String name = an != null && !StringUtils.isEmpty(an.name()) ? an.name() : f.getName();
-            String[] groups = an != null ? an.groups() : null;
-            if (inGroup(groups, this.groups)) {
-                Object data = possible.get(name);
-                if (data != null) {
-                    f.setAccessible(true);
-                    ReflectionCache.fill(f, o, data);
-                }
-            }
-        }
-
-        for (Method m : methods) {
-            CustomField an = m.getAnnotation(CustomField.class);
-            if (m.getReturnType().equals(Void.class) && m.getParameterTypes() != null && m.getParameterTypes().length == 1) {
-                String customName = an.name();
-                String[] groups = an.groups();
-                if (inGroup(groups, this.groups)) {
-                    Object data = possible.get(customName);
-                    if (data != null) {
-                        m.setAccessible(true);
-                        int dateType = -1;
-                        String format = "";
-                        if (m.isAnnotationPresent(DateField.class)) {
-                            dateType = m.getAnnotation(DateField.class).type();
-                            format = m.getAnnotation(DateField.class).format();
-                        }
-                        m.invoke(o, ReflectionCache.getValue(m.getParameterTypes()[0], data, dateType, format));
-                    }
-                }
-            }
-        }*/
     }
 
     /**
@@ -254,7 +150,7 @@ public class JsonParser {
                     String cl = ConfInfo.getClassProperty(); // Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
                     int r = bf.read();
                     if (m.containsKey(cl)) {
-                        Object o = createClass(m);
+                        Object o = ReflectionCache.createClass(m, this.groups);
                         return new ImmutablePair<>(r != -1 ? (char)r : c, o);
                     }
                     return new ImmutablePair<Character, Object>(r != -1 ? (char)r : c, m);
@@ -263,7 +159,7 @@ public class JsonParser {
             case START_ARRAY:
                 l = new ArrayList<>();
                 queue.offer(l);
-                c = parseList(bf, l, null);
+                c = parseList(bf, l);
                 if (c == END_ARRAY) {
                     l = (List)queue.pollLast();
                     int r = bf.read();
@@ -344,7 +240,7 @@ public class JsonParser {
         return c;
     }
 
-    private char parseList(BufferedReader bf, List l, Class<?> initialClass) throws IOException, InstantiationException {
+    private char parseList(BufferedReader bf, List l) throws IOException, InstantiationException {
         char c = SPACE_CHAR;
         int r = -1;
         while ((r = bf.read()) != -1) {
@@ -354,7 +250,7 @@ public class JsonParser {
             } else if (c == ELEM_DELIM || c == VALUE_DELIM) {
                 // do nothing
             } else {
-                Pair<Character, Object> p = parseListInnerElement(bf, c, initialClass);
+                Pair<Character, Object> p = parseListInnerElement(bf, c);
                 Object o = p.getRight();
                 c = p.getLeft();
                 l.add(o);

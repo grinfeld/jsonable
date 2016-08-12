@@ -26,7 +26,7 @@ public class ArrayTransformer extends TransformerImpl {
     }
 
     @Override
-    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
+    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException, InstantiationException {
         out.write("[");
         int length = Array.getLength(o);
         for (int i=0; i<length; i++) {

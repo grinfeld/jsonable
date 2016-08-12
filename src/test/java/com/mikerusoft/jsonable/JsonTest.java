@@ -7,6 +7,7 @@ import com.mikerusoft.jsonable.parser.JsonWriter;
 import com.mikerusoft.jsonable.transform.DateTransformer;
 import com.mikerusoft.jsonable.utils.ConfInfo;
 import com.mikerusoft.jsonable.utils.Configuration;
+import com.mikerusoft.jsonable.utils.PropertyPair;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,8 +16,6 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -126,6 +125,23 @@ public class JsonTest {
                     ", num:" + num +
                     '}';
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            SimpleObjAnnot that = (SimpleObjAnnot) o;
+
+            if (num != that.num) return false;
+            return str1 != null ? str1.equals(that.str1) : that.str1 == null;
+
+        }
+
+        @Override
+        public int hashCode() {
+            return str1.hashCode();
+        }
     }
 
     @JsonClass
@@ -146,6 +162,114 @@ public class JsonTest {
         @JsonField @DateField(type = DateTransformer.TIMESTAMP_TYPE) long time;
     }
 
+    @JsonClass
+    public static class SimpleObjEnum {
+
+        public enum MyEnum {
+            M1, M2;
+        }
+
+        @JsonField String str;
+        @JsonField MyEnum en;
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "str:\"" + String.valueOf(str) + '\"' +
+                    ", en:\"" + (en != null ? en.name() : "") + '\"' +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            SimpleObjEnum that = (SimpleObjEnum) o;
+
+            if (str != null ? !str.equals(that.str) : that.str != null) return false;
+            return en == that.en;
+
+        }
+    }
+
+    @JsonClass
+    public static class ListObj {
+        @JsonField String str;
+        @JsonField List<Integer> list;
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("{" +
+                    "str:\"" + str + '\"' +
+                    ", list:");
+            if (list == null || list.size() == 0)
+                sb.append("[]");
+            else {
+                int count = 0;
+                for(Integer i : list) {
+                    if (count > 0)
+                        sb.append(",");
+                    sb.append(i);
+                    count++;
+                }
+
+            }
+            sb.append('}');
+
+            return sb.toString();
+        }
+    }
+
+    public enum TestEnum {
+        Hello
+    }
+
+    public static class Pair<T, K> {
+        T left;
+        K right;
+
+        public Pair() {}
+
+        public Pair(T left, K right) {
+            this.left = left;
+            this.right = right;
+        }
+
+        public T getLeft() { return left; }
+        public void setLeft(T left) { this.left = left; }
+        public K getRight() { return right; }
+        public void setRight(K right) { this.right = right; }
+
+        @Override
+        public String toString() {
+            return "Pair{" +
+                    "left=" + String.valueOf(left) +
+                    ", right=" + String.valueOf(right) +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Pair<?, ?> pair = (Pair<?, ?>) o;
+
+            if (!left.equals(pair.left)) return false;
+            return right.equals(pair.right);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = left.hashCode();
+            result = 31 * result + right.hashCode();
+            return result;
+        }
+    }
+
     StringBuilder sb = new StringBuilder();
     StringBuilder sb1 = new StringBuilder();
     SimpleObj simpleObj = new SimpleObj();
@@ -157,6 +281,7 @@ public class JsonTest {
     SimpleObjAnnotDateString simpleObjDateString = new SimpleObjAnnotDateString();
     Configuration c = new Configuration();
     SimpleObjNoAnot simpleNoAnot = new SimpleObjNoAnot();
+    ListObj listObj = new ListObj();
 
     @Before
     public void cleanBuilder() {
@@ -170,6 +295,7 @@ public class JsonTest {
         simpleObjDateString = new SimpleObjAnnotDateString();
         simpleNoAnot = new SimpleObjNoAnot();
         sb1 = new StringBuilder();
+        listObj = new ListObj();
         c = new Configuration();
         ConfInfo.unset();
     }
@@ -320,7 +446,7 @@ public class JsonTest {
             simpleObj.num = 1;
             JsonWriter.write(simpleObj, sb);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple object test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObj\"}", sb.toString());
+        assertSplitSimpleJson("Failed simple object test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObj\"}", sb.toString());
     }
 
     @Test public void simpleObjectExcludeClassOldTest() {
@@ -330,7 +456,7 @@ public class JsonTest {
             c.setProperty(Configuration.EXCLUDE_CLASS_PROPERTY, "true");
             JsonWriter.write(simpleObj, sb, c);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple object exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());  ;
+        assertSplitSimpleJson("Failed simple object exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());  ;
     }
 
     @Test public void simpleObjectExcludeClassTest() {
@@ -340,7 +466,7 @@ public class JsonTest {
             ConfInfo.setExcludeClass(true);
             JsonWriter.write(simpleObj, sb, c);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple object exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());  ;
+        assertSplitSimpleJson("Failed simple object exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());  ;
     }
 
     @Test public void simpleObjectAnotTest() {
@@ -350,7 +476,7 @@ public class JsonTest {
             simpleObjAnot.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnot, sb);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple object with annotation test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnot\"}", sb.toString());
+        assertSplitSimpleJson("Failed simple object with annotation test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnot\"}", sb.toString());
     }
 
     @Test public void simpleObjectAnotWithGroupTest() {
@@ -362,8 +488,10 @@ public class JsonTest {
 
             Object o = JsonReader.read(sb.toString(), "mygroup");
             JsonWriter.write(o, sb1);
-        } catch (Exception ignore) {}
-        assertEquals("Failed object with mygroup" + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnot\"}", sb.toString());
+        } catch (Exception ignore) {
+            ignore.printStackTrace();
+        }
+        assertSplitSimpleJson("Failed object with mygroup" + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnot\"}", sb.toString());
     }
 
     @Test public void simpleObjectAnotExcludeClassOldTest() {
@@ -373,7 +501,7 @@ public class JsonTest {
             c.setProperty(Configuration.EXCLUDE_CLASS_PROPERTY, "true");
             JsonWriter.write(simpleObjAnot, sb, c);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple object with annotation exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());
+        assertSplitSimpleJson("Failed simple object with annotation exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());
     }
 
     @Test public void simpleObjectAnotExcludeClassTest() {
@@ -383,7 +511,7 @@ public class JsonTest {
             ConfInfo.setExcludeClass(true);
             JsonWriter.write(simpleObjAnot, sb, c);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple object with annotation exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());
+        assertSplitSimpleJson("Failed simple object with annotation exclude class test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1}", sb.toString());
     }
 
 
@@ -396,8 +524,10 @@ public class JsonTest {
             simpleObjAnotExtend.ignore = "Ignore me";
             simpleObjAnotExtend.time = t;
             JsonWriter.write(simpleObjAnotExtend, sb);
-        } catch (Exception ignore) {}
-        assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":\"Extended\",\"time\":" + t + ",\"str\":\"Hel\\\"lo\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
+        } catch (Exception ignore) {
+            ignore.printStackTrace();
+        }
+        assertSplitSimpleJson("Failed simple object extended test " + sb.toString(), "{\"extended\":\"Extended\",\"time\":" + t + ",\"str\":\"Hel\\\"lo\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
     }
 
 
@@ -409,7 +539,7 @@ public class JsonTest {
             simpleObjAnotExtend.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnotExtend, sb);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple object extended test " + sb.toString(), "{\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
+        assertSplitSimpleJson("Failed simple object extended test " + sb.toString(), "{\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
     }
 
     @Test public void simpleObjectExtendedWithAnnotNullTest() {
@@ -420,7 +550,7 @@ public class JsonTest {
             simpleObjAnotExtendWithNull.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnotExtendWithNull, sb, c);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple object extended test " + sb.toString(), "{\"extendedNull\":null,\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtendWithAnnotNull\"}", sb.toString());
+        assertSplitSimpleJson("Failed simple object extended test " + sb.toString(), "{\"extendedNull\":null,\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtendWithAnnotNull\"}", sb.toString());
     }
 
     @Test public void simpleObjectExtendedWithNullOldTest() {
@@ -432,7 +562,7 @@ public class JsonTest {
             simpleObjAnotExtend.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnotExtend, sb, c);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":null,\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
+        assertSplitSimpleJson("Failed simple object extended test " + sb.toString(), "{\"extended\":null,\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
     }
 
     @Test public void simpleObjectExtendedWithNullTest() {
@@ -444,10 +574,10 @@ public class JsonTest {
             simpleObjAnotExtend.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnotExtend, sb, c);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":null,\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
+        assertSplitSimpleJson("Failed simple object extended test " + sb.toString(), "{\"extended\":null,\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
     }
 
-    @Test public void simpleObjectExtendedWithEmptStringTest() {
+    @Test public void simpleObjectExtendedWithEmptyStringTest() {
         try {
             simpleObjAnotExtend.str1 = "Hello";
             simpleObjAnotExtend.num = 1;
@@ -455,7 +585,7 @@ public class JsonTest {
             simpleObjAnotExtend.ignore = "Ignore me";
             JsonWriter.write(simpleObjAnotExtend, sb);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple object extended test " + sb.toString(), "{\"extended\":\"\",\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
+        assertSplitSimpleJson("Failed simple object extended test " + sb.toString(), "{\"extended\":\"\",\"time\":0,\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotExtend\"}", sb.toString());
     }
 
     @Test public void simpleObjectCustomTest() {
@@ -465,7 +595,7 @@ public class JsonTest {
             simpleObjCustom.custom = 456L;
             JsonWriter.write(simpleObjCustom, sb);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple object with custom test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"custom\":456,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjCustom\"}", sb.toString());
+        assertSplitSimpleJson("Failed simple object with custom test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"custom\":456,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjCustom\"}", sb.toString());
     }
 
     @Test public void mapTest() {
@@ -485,7 +615,7 @@ public class JsonTest {
             Object o = JsonReader.read(bys);
             JsonWriter.write(o, sb1);
         } catch (Exception ignore) {}
-        assertEquals("stringWriteReadTest", sb1.toString(), sb.toString());
+        assertSplitSimpleJson("stringWriteReadTest", sb1.toString(), sb.toString());
     }
 
     @Test public void stringWriteReadTest() {
@@ -494,7 +624,7 @@ public class JsonTest {
             Object o = JsonReader.read(sb.toString());
             JsonWriter.write(o, sb1);
         } catch (Exception ignore) {}
-        assertEquals("stringWriteReadTest", sb1.toString(), sb.toString());
+        assertSplitSimpleJson("stringWriteReadTest", sb1.toString(), sb.toString());
     }
 
     @Test public void numberWriteReadTest() {
@@ -516,7 +646,6 @@ public class JsonTest {
             JsonWriter.write(o, sb1);
         } catch (Exception ignore) {}
         assertSplitSimpleJson(sb1.toString(), sb.toString());
-        //assertEquals("readWriteSimpleAnotTest", sb1.toString(), sb.toString());
     }
 
     @Test public void numberArrayTest() {
@@ -535,7 +664,7 @@ public class JsonTest {
 
     @Test public void numberSetTest() {
         try {
-            JsonWriter.write(new HashSet<Integer>(Arrays.asList(new Integer[] {1,2,3})), sb);
+            JsonWriter.write(new HashSet<>(Arrays.asList(new Integer[] {1,2,3})), sb);
         } catch (Exception ignore) {}
         assertEquals("numberListTest", "[1,2,3]", sb.toString());
     }
@@ -563,42 +692,10 @@ public class JsonTest {
             JsonWriter.write(o, sb1);
         } catch (Exception e) {}
         assertSplitSimpleJson(sb1.toString(), sb.toString());
-        //assertEquals("doubleTest", sb1.toString(), sb.toString());
-    }
-
-    @JsonClass
-    public static class SimpleObjEnum {
-
-        public enum MyEnum {
-            M1, M2;
-        }
-
-        @JsonField String str;
-        @JsonField MyEnum en;
-
-        @Override
-        public String toString() {
-            return "{" +
-                    "str:\"" + String.valueOf(str) + '\"' +
-                    ", en:\"" + (en != null ? en.name() : "") + '\"' +
-                    '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            SimpleObjEnum that = (SimpleObjEnum) o;
-
-            if (str != null ? !str.equals(that.str) : that.str != null) return false;
-            return en == that.en;
-
-        }
     }
 
     @Test
-    public void enumTest() throws IllegalAccessException, IOException, InvocationTargetException {
+    public void enumTest() throws Exception {
         SimpleObjEnum soe = new SimpleObjEnum();
         soe.str = "Hello";
         soe.en = SimpleObjEnum.MyEnum.M1;
@@ -608,7 +705,7 @@ public class JsonTest {
     }
 
     @Test
-    public void mapArrayTest() throws IllegalAccessException, IOException, InvocationTargetException {
+    public void mapArrayTest() throws Exception {
         Map<Object, Object> m = new HashMap<>();
         Map<Object, Object> m2 = new HashMap<>();
         m2.put("value3", "333333");
@@ -626,15 +723,14 @@ public class JsonTest {
     }
 
     @Test
-    public void dateWithStringFormatTest() throws IOException, ParseException, InvocationTargetException, IllegalAccessException {
+    public void dateWithStringFormatTest() throws Exception {
         SimpleObjAnnotDateString m = JsonReader.read("{\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotDateString\", \n\"date\" : \"20161008\",\n\"value\" : \"Hello\"\n}", SimpleObjAnnotDateString.class);
         Assert.assertNotNull("Shouldn't be null", m);
         Assert.assertEquals(m.value, "Hello");
         Assert.assertEquals(m.date, new SimpleDateFormat("yyyyMMDD").parse("20161008"));
         sb = new StringBuilder();
         JsonWriter.write(m, sb);
-        Assert.assertEquals("{\"value\":\"Hello\",\"date\":20160108,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotDateString\"}", sb.toString());
-        System.out.println();
+        assertSplitSimpleJson("{\"value\":\"Hello\",\"date\":\"20160108\",\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnotDateString\"}", sb.toString());
     }
 
     @Test
@@ -643,10 +739,6 @@ public class JsonTest {
         Assert.assertNotNull("Shouldn't be null", m);
         Assert.assertEquals(m.get("success"), new Boolean(true));
         Assert.assertEquals(m.get("msg"), "Hello");
-    }
-
-    public enum TestEnum {
-        Hello
     }
 
     @Test
@@ -686,6 +778,19 @@ public class JsonTest {
     }
 
     @Test
+    public void listInObjectTest() throws Exception {
+        listObj = new ListObj();
+        listObj.str = "listInObjectTest";
+        listObj.list = Arrays.asList(1,5,3,4, 0);
+        JsonWriter.write(listObj, sb);
+        assertSplitSimpleJson("{\"list\":[1,5,3,4,0],\"str\":\"listInObjectTest\",\"class\":\"com.mikerusoft.jsonable.JsonTest$ListObj\"}", sb.toString());
+        ListObj another = JsonReader.read(sb.toString(), ListObj.class);
+        assertNotNull(another);
+        assertEquals(listObj.str, another.str);
+        assertArrayEquals(listObj.list.toArray(), another.list.toArray());
+    }
+
+    @Test
     public void simpleAdapterTest() throws Exception {
         ConfInfo.registerAdapter(SimpleObjNoAnot.class, new String[] {"str", "num", "bool"});
         simpleNoAnot.bool = true;
@@ -722,29 +827,42 @@ public class JsonTest {
         assertSplitSimpleJson("{\"str\":\"Hello\",\"bool\":true,\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
     }
 
-    public static class Pair<T, K> {
-        T left;
-        K right;
-
-        public Pair() {}
-
-        public Pair(T left, K right) {
-            this.left = left;
-            this.right = right;
-        }
-
-        public T getLeft() { return left; }
-        public void setLeft(T left) { this.left = left; }
-        public K getRight() { return right; }
-        public void setRight(K right) { this.right = right; }
+    @Test
+    public void objectInObjectTest() throws Exception {
+        ConfInfo.registerAdapter(SimpleObjNoAnot.class, new String[] {"str", "num", "bool"});
+        ConfInfo.registerAdapter(new SimpleBeanAdapter<>(Pair.class));
+        ConfInfo.setExcludeClass(false);
+        ConfInfo.setIncludePrimitiveClass(true);
+        Pair<SimpleObjAnnot, SimpleObjNoAnot> p = new Pair<>(new SimpleObjAnnot(), new SimpleObjNoAnot());
+        p.getLeft().num = 33;
+        p.getLeft().str1 = "Left";
+        p.getRight().bool = false;
+        p.getRight().str = "Right";
+        p.getRight().num = Integer.MAX_VALUE;
+        ByteArrayOutputStream byos = new ByteArrayOutputStream();
+        JsonWriter.write(p, byos, "UTF-8");
+        String result = new String(byos.toByteArray());
+        Pair<SimpleObjAnnot, SimpleObjNoAnot> p1 = JsonReader.read(new ByteArrayInputStream(result.getBytes("UTF-8")), Pair.class);
+        Assert.assertEquals(p, p1);
     }
 
-    public void testTest() throws IllegalAccessException, IOException, InvocationTargetException {
-        Pair<String,Integer> p = new Pair<>("hello", 1);
-        ConfInfo.setExcludeClass(true);
-        JsonWriter.write(p, sb);
-        JsonReader.read(sb.toString(), p.getClass());
-        System.out.println();
+    @Test
+    public void objectInObjectPropertyTest() throws Exception {
+        ConfInfo.registerAdapter(SimpleObjNoAnot.class, new PropertyPair[] { new PropertyPair("str", "str"), new PropertyPair("num", "num"), new PropertyPair("bool", "bool")});
+        ConfInfo.registerAdapter(new SimpleBeanAdapter<>(Pair.class));
+        ConfInfo.setExcludeClass(false);
+        ConfInfo.setIncludePrimitiveClass(true);
+        Pair<SimpleObjAnnot, SimpleObjNoAnot> p = new Pair<>(new SimpleObjAnnot(), new SimpleObjNoAnot());
+        p.getLeft().num = 33;
+        p.getLeft().str1 = "Left";
+        p.getRight().bool = false;
+        p.getRight().str = "Right";
+        p.getRight().num = Integer.MAX_VALUE;
+        ByteArrayOutputStream byos = new ByteArrayOutputStream();
+        JsonWriter.write(p, byos, "UTF-8");
+        String result = new String(byos.toByteArray());
+        Pair<SimpleObjAnnot, SimpleObjNoAnot> p1 = JsonReader.read(new ByteArrayInputStream(result.getBytes("UTF-8")), Pair.class);
+        Assert.assertEquals(p, p1);
     }
 
     private static void assertSplitSimpleJson(String expected, String actual) {

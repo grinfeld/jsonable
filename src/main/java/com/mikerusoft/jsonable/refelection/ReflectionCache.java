@@ -7,10 +7,13 @@ import com.mikerusoft.jsonable.annotations.DateField;
 import com.mikerusoft.jsonable.annotations.JsonClass;
 import com.mikerusoft.jsonable.annotations.JsonField;
 import com.mikerusoft.jsonable.transform.DateTransformer;
+import com.mikerusoft.jsonable.transform.JsonParser;
 import com.mikerusoft.jsonable.utils.ConfInfo;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +37,8 @@ import java.util.jar.JarFile;
  * @since 12/6/2014.
  */
 public class ReflectionCache {
+
+    private static Log log = LogFactory.getLog(ReflectionCache.class);
 
     public static ReflectionCache instance;
     private static final Object lock = new Object();
@@ -165,6 +170,68 @@ public class ReflectionCache {
         return classes;
     }
 
+    public static boolean inGroup(String[] groups, String[] allGroups) {
+        if (allGroups == null || allGroups.length == 0)
+            return true;
+        if (groups == null || groups.length == 0)
+            return true;
+        return new ArrayList<>(Arrays.asList(groups)).removeAll(Arrays.asList(allGroups));
+    }
+
+    public static boolean inGroup(String[] groups, List<String> allGroups) {
+        if (allGroups == null || allGroups.size() == 0)
+            return true;
+        if (groups == null || groups.length == 0)
+            return true;
+        return new ArrayList<>(Arrays.asList(groups)).removeAll(allGroups);
+    }
+
+    public static void createSpecific(Map<String, Object> possible, Object o, Class<?> clazz, List<String> groups) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        Collection<Invoker> invokers = get().getInvokers(clazz);
+        for (Invoker i : invokers) {
+            if (i.setEnabled()) {
+                if (inGroup(i.getSetterGroups(), groups))
+                    i.set(o, possible.get(i.getSetterName()));
+            }
+        }
+    }
+
+    public static Object createClass(Map<String, Object> possible, List<String> groups) {
+        String cl = ConfInfo.getClassProperty();
+        String className = (String)possible.get(cl);
+        if (StringUtils.isEmpty(className))
+            return possible;
+        Class<?> clazz = null;
+
+        try {
+            // using cache in order to avoid searching class in ClassLoader, but get it directly from cache.
+            // There is pitfall: cache could be large same as ClassLoader, if most classes will be serialized
+            clazz = get().getClass(className);
+        } catch (ClassNotFoundException e) {
+            return possible;
+        }
+
+        if (clazz == null)
+            return possible;
+
+        try {
+            if (isPrimitiveLike(clazz)) {
+                Object value = possible.get("value");
+                return getPrimitive(clazz, value);
+            }
+            if (clazz.isEnum()) {
+                return createEnum(clazz, possible);
+            }
+            Object o = clazz.newInstance();
+            createSpecific(possible, o, clazz, groups);
+
+            return o;
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            log.debug("Failed to create class " + className + " with error: " + e.getMessage());
+        }
+        return possible;
+    }
+
     public void clear() {
         classes.clear();
         invokers.clear();
@@ -180,12 +247,9 @@ public class ReflectionCache {
 
 
         Class<?> inherit = clazz;
-        List<Set<Invoker>> classInvokers = new ArrayList<>();
-        List<Class<?>> clazzes = new ArrayList<>();
+        invokers = new HashSet<>();
         do {
-            invokers = new HashSet<>();
             ParserAdapter<?> adapter = ConfInfo.getAdapter(inherit);
-            Class<?> superClass = inherit.getSuperclass();
             if (inherit.getAnnotation(JsonClass.class) != null || adapter != null) {
 
                 Field[] fields = inherit.getDeclaredFields();
@@ -220,24 +284,11 @@ public class ReflectionCache {
                 }
             }
 
-            if (this.invokers.containsKey(superClass)) {
-                invokers.addAll(this.invokers.get(superClass));
-            }
+            inherit = inherit.getSuperclass();
+        } while (inherit != null && !Object.class.equals(inherit));
 
-            classInvokers.add(invokers);
-            clazzes.add(inherit);
-
-            inherit = superClass;
-        } while (inherit != null && !this.invokers.containsKey(inherit) && !Object.class.equals(inherit));
-
-        invokers = new HashSet<>();
-        for (int i=classInvokers.size() - 1; i >= 0; i--) {
-            Set<Invoker> l = classInvokers.get(i);
-            invokers.addAll(l);
-            Class<?> cl = clazzes.get(i);
-            putClass(cl);
-            this.invokers.put(cl, invokers);
-        }
+        putClass(clazz);
+        this.invokers.put(clazz, invokers);
 
         return Collections.unmodifiableCollection(invokers);
     }
@@ -314,7 +365,57 @@ public class ReflectionCache {
         return EnumUtils.getEnum((Class<? extends Enum>) clazz, enumName);
     }
 
-    public static Object getValue(Class<?> expected, Object data, int dateTimeType, String format) throws InstantiationException {
+    public static Object getValue(Class<?> expected, Class<?>[] generic, Object data, DateField annoted) throws InstantiationException {
+        int dateType = -1;
+        String format = "";
+        if (annoted != null) {
+            dateType = annoted.type();
+            format = annoted.format();
+        }
+        return getValue(expected, generic, data, dateType, format);
+    }
+
+    private static <T> Collection<T> createCollection(Class<T> clazz) {
+        return createList(clazz);
+    }
+
+    private static <T> Set<T> createSet(Class<T> clazz) {
+        return new HashSet<T>();
+    }
+
+    private static <K,V> Map<K, V> createMap(Class<K> clazz1, Class<V> clazz2) {
+        return new HashMap<K, V>();
+    }
+
+    private static <T> List<T> createList(Class<T> clazz) {
+        return new ArrayList<T>();
+    }
+
+    public static Object getValue(Class<?> expected, Class<?>[] generic, Object data) throws InstantiationException {
+        return getValue(expected, generic, data, -1, "");
+    }
+
+    public static Object getCollectionValueFromList(Class<?> expected, Class<?>[] generic, Object data) throws InstantiationException {
+        Collection c = null;
+        if ((Collection.class.isAssignableFrom(expected) || List.class.isAssignableFrom(expected))) {
+            c = createList(data.getClass());
+        } else if (Set.class.isAssignableFrom(expected)) {
+            c = createSet(data.getClass());
+        }
+
+        Class<?> listType = null;
+        if (generic != null && generic.length > 0)
+            listType = generic[0];
+        for (Object v : (Iterable) data) {
+            if (listType == null)
+                c.add(v);
+            else
+                c.add(getValue(listType, null, v));
+        }
+        return c;
+    }
+
+    public static Object getValue(Class<?> expected, Class<?>[] generic, Object data, int dateTimeType, String format) throws InstantiationException {
         if (data == null)
             return null;
         if (expected.equals(Boolean.TYPE) || expected.equals(Boolean.class)) {
@@ -329,32 +430,34 @@ public class ReflectionCache {
         } else if (Date.class.isAssignableFrom(expected) && (dateTimeType == DateTransformer.TIMESTAMP_TYPE || dateTimeType == DateTransformer.STRING_TYPE)) {
             switch (dateTimeType) {
                 case DateTransformer.TIMESTAMP_TYPE:
-                    return new Date((Long)data);
+                    if (Date.class.isAssignableFrom(data.getClass())) {
+                        return ((Date)data).getTime(); // means we write out the date
+                    } else {
+                        return new Date((Long) data); // means we read in the date
+                    }
                 case DateTransformer.STRING_TYPE:
                     try {
                         DateFormat dt = new SimpleDateFormat(format);
-                        return dt.parse((String)data);
+                        if (Date.class.isAssignableFrom(data.getClass())) {
+                            return dt.format((Date)data); // means we write out the date
+                        } else {
+                            return dt.parse((String) data);  // means we read in the date
+                        }
                     } catch (ParseException e) {
                         throw new IllegalArgumentException("Incompatible types for " + expected.getName(), e);
                     }
             }
         } else if (expected.equals(String.class)) {
             return StringEscapeUtils.unescapeJson((String)data);
-        } else if (expected.isArray() && data instanceof List) {
-            List<?> l = ((List) data);
+        } else if (expected.isArray() && data instanceof Collection) {
+            Collection<?> l = ((Collection) data);
             Object ar = Array.newInstance(expected.getComponentType(), l.size());
             System.arraycopy(l.toArray(), 0, ar, 0, l.size());
             return ar;
-        } else if (List.class.isAssignableFrom(expected) && data instanceof List) {
-            List<?> l = ((List) data);
-            return l;
-        } else if (Set.class.isAssignableFrom(expected) && data instanceof List) {
-            List<?> l = ((List) data);
-            Set<?> s = new HashSet<>(l);
-            return s;
-        } else if (Collection.class.isAssignableFrom(expected) && data instanceof List) {
-            List<?> l = ((List) data);
-            return l;
+        } else if (Collection.class.isAssignableFrom(expected) && data.getClass().isArray()) {
+            return getCollectionValueFromList(expected, generic, data);
+        } else if (Collection.class.isAssignableFrom(expected) && data instanceof Collection) {
+            return getCollectionValueFromList(expected, generic, data);
         } else  if (expected.isEnum()) {
             if (data.getClass().isEnum())
                 return data;
@@ -390,8 +493,8 @@ public class ReflectionCache {
         return data;
     }
 
-    public static void fill(Method m, Object owner, Object data) throws IllegalArgumentException, IllegalAccessException, InstantiationException, InvocationTargetException {
-        if (data == null || (data instanceof String && "".equals(data))) {
+    public static void fill(Method m, Class[] generics, Object owner, Object data) throws IllegalArgumentException, IllegalAccessException, InstantiationException, InvocationTargetException {
+        if (data instanceof String && "".equals(data)) {
             data = null;
         }
         if (m.getReturnType().isPrimitive() && data == null) {
@@ -407,15 +510,16 @@ public class ReflectionCache {
             dateType = m.getAnnotation(DateField.class).type();
             format = m.getAnnotation(DateField.class).format();
         }
-        Object value = getValue(m.getParameterTypes()[0], data, dateType, format);
+
+        Object value = getValue(m.getParameterTypes()[0], generics, data, dateType, format);
         if (owner == null)
             throw new IllegalArgumentException("Trying to invoke setter " + m.getName() + " for value " + String.valueOf(value) + " for Object which is null");
         m.setAccessible(true);
         m.invoke(owner, value);
     }
 
-    public static void fill(Field f, Object owner, Object data) throws IllegalArgumentException, IllegalAccessException, InstantiationException {
-        if (data == null || (data instanceof String && "".equals(data))) {
+    public static void fill(Field f, Class[] generics, Object owner, Object data) throws IllegalArgumentException, IllegalAccessException, InstantiationException {
+        if (data instanceof String && "".equals(data)) {
             data = null;
         }
         if (f.getType().isPrimitive() && data == null) {
@@ -431,7 +535,19 @@ public class ReflectionCache {
             dateType = f.getAnnotation(DateField.class).type();
             format = f.getAnnotation(DateField.class).format();
         }
-        Object value = getValue(f.getType(), data, dateType, format);
+
+        if (f.getGenericType() != null && f.getGenericType() instanceof ParameterizedType) {
+            Type[] types = ((ParameterizedType)f.getGenericType()).getActualTypeArguments();
+            if (types != null && types.length > 0) {
+                generics = new Class<?>[types.length];
+                for (int i=0; i<types.length; i++) {
+                    if (types[i] instanceof Class)
+                        generics[i] = (Class<?>)types[i];
+                }
+            }
+        }
+
+        Object value = getValue(f.getType(), generics, data, dateType, format);
         if (owner == null)
             throw new IllegalArgumentException("Trying to set field " + f.getName() + " for value " + String.valueOf(value) + " for Object which is null");
         f.setAccessible(true);

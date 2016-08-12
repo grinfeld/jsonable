@@ -22,7 +22,7 @@ public class CollectionTransformer extends TransformerImpl {
     }
 
     @Override
-    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException {
+    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Collection<?> l = (Collection<?>) o;
         out.write("[");
         int i = 0;

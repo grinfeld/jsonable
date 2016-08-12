@@ -29,7 +29,7 @@ public class MapTransformer  extends TransformerImpl {
     }
 
     @Override
-    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
+    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException, InstantiationException {
         //Configuration c = ContextManager.get(Configuration.class);
         boolean includeNull = ConfInfo.isIncludeNull(); // Configuration.getBooleanProperty(c, Configuration.INCLUDE_NULL_PROPERTY, false);
         Map<?, ?> m = (Map<?, ?>)o;
