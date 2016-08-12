@@ -12,6 +12,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
@@ -91,13 +93,13 @@ public class JsonTest {
 
     @JsonClass
     public static class SimpleObjCustom extends SimpleObj {
-        Object custom;
+        Long custom;
 
-        @CustomField(name="custom") public Object getCustom() {
+        @CustomField(name="custom") public Long getCustom() {
             return custom;
         }
 
-        @CustomField(name="custom") public void setCustom(Object custom) {
+        @CustomField(name="custom") public void setCustom(Long custom) {
             this.custom = custom;
         }
 
@@ -170,6 +172,26 @@ public class JsonTest {
         sb1 = new StringBuilder();
         c = new Configuration();
         ConfInfo.unset();
+    }
+
+    @Test public void stringToStreamTest() {
+        String result = "";
+        try {
+            ByteArrayOutputStream b = new ByteArrayOutputStream();
+            JsonWriter.write("Hello", b, "UTF-8");
+            result = new String(b.toByteArray());
+        } catch (Exception ignore) {}
+        assertEquals("Failed StringTest" + result, "\"Hello\"", result);
+    }
+
+    @Test public void integerToStreamTest() {
+        String result = "";
+        try {
+            ByteArrayOutputStream b = new ByteArrayOutputStream();
+            JsonWriter.write(1, b, "UTF-8");
+            result = new String(b.toByteArray());
+        } catch (Exception ignore) {}
+        assertEquals("Failed integer test " + result, "1", result);
     }
 
     @Test public void stringTest() {
@@ -440,12 +462,11 @@ public class JsonTest {
         try {
             simpleObjCustom.str = "Hello";
             simpleObjCustom.num = 1;
-            simpleObjCustom.custom = "Custom me";
+            simpleObjCustom.custom = 456L;
             JsonWriter.write(simpleObjCustom, sb);
         } catch (Exception ignore) {}
-        assertEquals("Failed simple object with custom test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"custom\":\"Custom me\",\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjCustom\"}", sb.toString());
+        assertEquals("Failed simple object with custom test " + sb.toString(), "{\"str\":\"Hello\",\"num\":1,\"custom\":456,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjCustom\"}", sb.toString());
     }
-
 
     @Test public void mapTest() {
         try {
@@ -454,10 +475,18 @@ public class JsonTest {
             m.put("str", "Hello");
             JsonWriter.write(m, sb);
         } catch (Exception ignore) {}
-        //assertEquals("Failed map test " + sb.toString(), "{\"num\":1,\"str\":\"Hello\"}", sb.toString());
-        assertTrue("Failed map test " + sb.toString(), "{\"num\":1,\"str\":\"Hello\"}".equals(sb.toString()) || "{\"str\":\"Hello\",\"num\":1}".equals(sb.toString()));
+        assertSplitSimpleJson("Failed map test " + sb.toString(), "{\"num\":1,\"str\":\"Hello\"}", sb.toString());
     }
 
+    @Test public void stringWriteReadInputStreamTest() {
+        try {
+            JsonWriter.write("Hello", sb);
+            ByteArrayInputStream bys = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
+            Object o = JsonReader.read(bys);
+            JsonWriter.write(o, sb1);
+        } catch (Exception ignore) {}
+        assertEquals("stringWriteReadTest", sb1.toString(), sb.toString());
+    }
 
     @Test public void stringWriteReadTest() {
         try {
@@ -550,8 +579,8 @@ public class JsonTest {
         @Override
         public String toString() {
             return "{" +
-                    "str:\"" + str + '\"' +
-                    ", en:\"" + en.name() + '\"' +
+                    "str:\"" + String.valueOf(str) + '\"' +
+                    ", en:\"" + (en != null ? en.name() : "") + '\"' +
                     '}';
         }
 
@@ -693,11 +722,36 @@ public class JsonTest {
         assertSplitSimpleJson("{\"str\":\"Hello\",\"bool\":true,\"num\":10,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjNoAnot\"}", sb.toString());
     }
 
-    private void assertSplitSimpleJson(String expected, String actual) {
+    public static class Pair<T, K> {
+        T left;
+        K right;
+
+        public Pair() {}
+
+        public Pair(T left, K right) {
+            this.left = left;
+            this.right = right;
+        }
+
+        public T getLeft() { return left; }
+        public void setLeft(T left) { this.left = left; }
+        public K getRight() { return right; }
+        public void setRight(K right) { this.right = right; }
+    }
+
+    public void testTest() throws IllegalAccessException, IOException, InvocationTargetException {
+        Pair<String,Integer> p = new Pair<>("hello", 1);
+        ConfInfo.setExcludeClass(true);
+        JsonWriter.write(p, sb);
+        JsonReader.read(sb.toString(), p.getClass());
+        System.out.println();
+    }
+
+    private static void assertSplitSimpleJson(String expected, String actual) {
         assertSplitSimpleJson(null, expected, actual);
     }
 
-    private void assertSplitSimpleJson(String msg, String expected, String actual) {
+    private static void assertSplitSimpleJson(String msg, String expected, String actual) {
         String[] expAr = StringUtils.split(expected.substring(1, expected.length() - 1), ",");
         Arrays.sort(expAr);
         String[] actAr = StringUtils.split(actual.substring(1, actual.length() - 1), ",");

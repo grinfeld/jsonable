@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConfInfo implements ContextData {
 
     private static Log log = LogFactory.getLog(ConfInfo.class);
-    private static final Object lock = new Object();
+
     private static final String DEFAULT_CLASS_PROPERTY_VALUE = "class";
 
     private static ConfInfo get() {
@@ -211,7 +211,7 @@ public class ConfInfo implements ContextData {
         }
 
         public Class<T> getClazz() { return clazz; }
-        public Method getParam(String name) { return null; }
+        public MethodWrapper getParam(String name) { return methods == null ? null : methods.get(name); }
         public Collection<MethodWrapper> getParams() { return Collections.unmodifiableCollection(this.methods.values()); }
     }
 }

@@ -29,7 +29,7 @@ public class JsonReader {
         BufferedReader bf = new BufferedReader(new InputStreamReader(in));
         try {
             return JsonParser.get(groups).parse(bf, clazz);
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchFieldException e) {
             log.error(e);
             throw new IllegalArgumentException("Failed to convert Json to Object", e);
         }
@@ -49,7 +49,7 @@ public class JsonReader {
         BufferedReader bf = new BufferedReader(new StringReader(in));
         try {
             return JsonParser.get(groups).parse(bf, clazz);
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchFieldException e) {
             log.error(e);
             throw new IllegalArgumentException("Failed to convert Json to Object", e);
         }
@@ -67,7 +67,7 @@ public class JsonReader {
         BufferedReader bf = new BufferedReader(new InputStreamReader(in));
         try {
             return JsonParser.get(groups).parse(bf, null);
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchFieldException e) {
             log.error(e);
             throw new IllegalArgumentException("Failed to convert Json to Object", e);
         }
@@ -85,7 +85,7 @@ public class JsonReader {
         BufferedReader bf = new BufferedReader(new StringReader(in));
         try {
             return JsonParser.get(groups).parse(bf, null);
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchFieldException e) {
             log.error(e);
             throw new IllegalArgumentException("Failed to convert Json to Object", e);
         }
