@@ -232,6 +232,27 @@ public class ReflectionCache {
         return possible;
     }
 
+    public static Object guessClass(Object possible, Class<?> clazz, Class<?>[] generics) throws ClassNotFoundException, NoSuchFieldException, InstantiationException {
+        if (isPrimitiveLike(clazz)) {
+            if (clazz.isAssignableFrom(possible.getClass()))
+                return possible;
+            return getPrimitive(clazz, possible);
+        } else if (Map.class.isAssignableFrom(clazz)) {
+            for (Object entry : ((Map)possible).entrySet()) {
+                Map.Entry e = (Map.Entry)entry;
+            }
+
+            Method[] methods = get().getClass(clazz.getName()).getMethods();
+        } else if (List.class.isAssignableFrom(clazz)) {
+            Class<?> type = clazz.getComponentType();
+        } else if (Set.class.isAssignableFrom(clazz)) {
+            Class<?> type = clazz.getComponentType();
+        } else if (clazz.isArray()) {
+
+        }
+        return possible;
+    }
+
     public void clear() {
         classes.clear();
         invokers.clear();
@@ -497,9 +518,7 @@ public class ReflectionCache {
         if (data instanceof String && "".equals(data)) {
             data = null;
         }
-        if (m.getReturnType().isPrimitive() && data == null) {
-            throw new IllegalArgumentException("Incompatible types for " + m.getName());
-        }
+
         if (data == null) {
             return;
         }

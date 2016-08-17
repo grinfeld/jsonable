@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -49,37 +48,15 @@ public class JsonParser {
     public <T> T parse(BufferedReader bf, Class<T> clazz) throws IOException, IllegalArgumentException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchFieldException {
         Pair<Character, Object> resp = parseRecursive(bf);
         if (resp != null && resp.getRight() != null) {
-            T ret = (T)resp.getRight();
-            if (ConfInfo.isExcludeClass() && clazz != null) {
-                ret = guessClass(ret, clazz);
+            return (T)resp.getRight();
+            /*if (ConfInfo.isExcludeClass() && clazz != null) {
+                ret = ReflectionCache.guessClass(ret, clazz);
             }
-            return ret;
+            return ret;*/
         }
         return null;
     }
 
-
-    public <T> T guessClass(T possible, Class<T> clazz) throws ClassNotFoundException, NoSuchFieldException {
-        if (ReflectionCache.isPrimitiveLike(clazz)) {
-            return possible;
-        } else if (Map.class.isAssignableFrom(clazz)) {
-            for (Object entry : ((Map)possible).entrySet()) {
-                Map.Entry e = (Map.Entry)entry;
-            }
-
-
-
-
-            Method[] methods = ReflectionCache.get().getClass(clazz.getName()).getMethods();
-        } else if (List.class.isAssignableFrom(clazz)) {
-            Class<?> type = clazz.getComponentType();
-        } else if (Set.class.isAssignableFrom(clazz)) {
-            Class<?> type = clazz.getComponentType();
-        } else if (clazz.isArray()) {
-
-        }
-        return possible;
-    }
 
     /**
      * From this method starts our recursion
