@@ -1,5 +1,6 @@
 com.mikerusoft.jsonable.adapters
 com.mikerusoft.jsonable.annotations
 com.mikerusoft.jsonable.parser
+com.mikerusoft.jsonable.refelection
 com.mikerusoft.jsonable.transform
 com.mikerusoft.jsonable.utils

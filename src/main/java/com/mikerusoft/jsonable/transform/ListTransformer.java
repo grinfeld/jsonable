@@ -28,7 +28,7 @@ public class ListTransformer extends TransformerImpl {
     }
 
     @Override
-    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
+    public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException, InstantiationException {
         List<?> l = (List<?>)o;
         out.write("[");
         for (int i=0; i<l.size(); i++) {

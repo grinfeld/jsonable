@@ -29,7 +29,7 @@ public class StringTransformer  extends TransformerImpl {
 
     @Override
     public void transform(Object o, Outputter<String> out, String... groups) throws IOException, InvocationTargetException, IllegalAccessException {
-        out.write(("\"" + StringEscapeUtils.escapeJson((String) o).trim() + "\""));
+        out.write("\"" + StringEscapeUtils.escapeJson((String) o).trim() + "\"");
     }
 
     @Override public int matchPriority() { return Transformer.HIGH_PRIORITY + 1; }

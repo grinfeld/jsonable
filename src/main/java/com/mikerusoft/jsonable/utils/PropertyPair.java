@@ -1,7 +1,7 @@
 package com.mikerusoft.jsonable.utils;
 
 /**
- * Class to store data about property where property is a name of property and name (know, sounds bad)
+ * Class to store data about property where property is a name of property and name (I know, it sounds bad)
  * is a name to be used in serialization
  * @author Grinfeld Mikhail
  * @since 7/31/2016 11:40 AM

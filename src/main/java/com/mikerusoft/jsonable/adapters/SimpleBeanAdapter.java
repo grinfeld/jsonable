@@ -70,6 +70,6 @@ public class SimpleBeanAdapter<T> implements ParserAdapter<T> {
     }
 
     public Class<T> getClazz() { return clazz; }
-    public Method getParam(String name) { return null; }
+    public MethodWrapper getParam(String name) { return methods != null ? methods.get(name) : null; }
     public Collection<MethodWrapper> getParams() { return Collections.unmodifiableCollection(this.methods.values()); }
 }

@@ -13,7 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 public abstract class TransformerImpl implements Transformer {
 
     @Override
-    public void transform(AnnotatedElement ao, Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException {
+    public void transform(AnnotatedElement ao, Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException, InstantiationException {
         transform(o, out, groups);
     }
 }

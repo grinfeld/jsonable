@@ -34,7 +34,7 @@ public interface Transformer {
      * @throws IllegalAccessException on failure to craete appropriate class
      * @throws InvocationTargetException on failure to craete appropriate class
      */
-    void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException;
+    void transform(Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException, InstantiationException;
 
     /**
      * Transforms Object to JSON and writes into OutputStream
@@ -46,7 +46,7 @@ public interface Transformer {
      * @throws IllegalAccessException on failure to craete appropriate class
      * @throws InvocationTargetException on failure to craete appropriate class
      */
-    void transform(AnnotatedElement ao, Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException;
+    void transform(AnnotatedElement ao, Object o, Outputter<String> out, String... groups) throws IOException, IllegalAccessException, InvocationTargetException, InstantiationException;
 
     /**
      * Defines match priority, i.e. when 2 or more Transformers matches Object, defines order between them. Lower, means match better

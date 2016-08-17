@@ -20,7 +20,7 @@ public interface ParserAdapter<T> {
      * @return class to be adapted to work with jsonable
      */
     public Class<T> getClazz();
-    public Method getParam(String name);
+    public MethodWrapper getParam(String name);
 
     /**
      * returns list of {@link MethodWrapper}.

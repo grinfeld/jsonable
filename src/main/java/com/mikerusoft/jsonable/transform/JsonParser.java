@@ -1,15 +1,7 @@
 package com.mikerusoft.jsonable.transform;
 
-import com.mikerusoft.jsonable.adapters.MethodWrapper;
-import com.mikerusoft.jsonable.adapters.ParserAdapter;
-import com.mikerusoft.jsonable.annotations.CustomField;
-import com.mikerusoft.jsonable.annotations.DateField;
-import com.mikerusoft.jsonable.annotations.JsonField;
 import com.mikerusoft.jsonable.utils.ConfInfo;
-import com.mikerusoft.jsonable.utils.ReflectionCache;
-import org.apache.commons.lang3.EnumUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.mikerusoft.jsonable.refelection.ReflectionCache;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
@@ -17,14 +9,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -33,7 +18,7 @@ import java.util.*;
  */
 public class JsonParser {
 
-    private Log log = LogFactory.getLog(JsonParser.class);
+    private static Log log = LogFactory.getLog(JsonParser.class);
 
     private static final char
         START_MAP = '{',
@@ -57,16 +42,43 @@ public class JsonParser {
     }
 
     private JsonParser(String...groups) {
-        this.queue = new LinkedList<Object>();
-        this.groups = groups == null? null : new ArrayList<String>(Arrays.asList(groups));
+        this.queue = new LinkedList<>();
+        this.groups = groups == null? null : new ArrayList<>(Arrays.asList(groups));
     }
 
-    public Object parse(BufferedReader bf) throws IOException, IllegalArgumentException, InstantiationException, IllegalAccessException {
+    public <T> T parse(BufferedReader bf, Class<T> clazz) throws IOException, IllegalArgumentException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchFieldException {
         Pair<Character, Object> resp = parseRecursive(bf);
         if (resp != null && resp.getRight() != null) {
-            return resp.getRight();
+            T ret = (T)resp.getRight();
+            if (ConfInfo.isExcludeClass() && clazz != null) {
+                ret = guessClass(ret, clazz);
+            }
+            return ret;
         }
         return null;
+    }
+
+
+    public <T> T guessClass(T possible, Class<T> clazz) throws ClassNotFoundException, NoSuchFieldException {
+        if (ReflectionCache.isPrimitiveLike(clazz)) {
+            return possible;
+        } else if (Map.class.isAssignableFrom(clazz)) {
+            for (Object entry : ((Map)possible).entrySet()) {
+                Map.Entry e = (Map.Entry)entry;
+            }
+
+
+
+
+            Method[] methods = ReflectionCache.get().getClass(clazz.getName()).getMethods();
+        } else if (List.class.isAssignableFrom(clazz)) {
+            Class<?> type = clazz.getComponentType();
+        } else if (Set.class.isAssignableFrom(clazz)) {
+            Class<?> type = clazz.getComponentType();
+        } else if (clazz.isArray()) {
+
+        }
+        return possible;
     }
 
     /**
@@ -76,7 +88,7 @@ public class JsonParser {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    private Pair<Character, Object> parseRecursive(BufferedReader bf) throws IOException {
+    private Pair<Character, Object> parseRecursive(BufferedReader bf) throws IOException, InstantiationException {
         StringBuilder sb = new StringBuilder();
         char c = '\0';
         int r = -1;
@@ -87,16 +99,16 @@ public class JsonParser {
                 Object o = p.getRight();
                 c = p.getLeft();
                 if (o != null) {
-                    return new ImmutablePair<Character, Object>(c, o);
+                    return new ImmutablePair<>(c, o);
                 } else if (c != ELEM_DELIM) {
                     sb.append(c);
                 }
             }
         }
-        return new ImmutablePair<Character, Object>(c, null);
+        return new ImmutablePair<>(c, null);
     }
 
-    private Pair<Character, Object> parseListInnerElement(BufferedReader bf, char c) throws IOException {
+    private Pair<Character, Object> parseListInnerElement(BufferedReader bf, char c) throws IOException, InstantiationException {
         StringBuilder sb = new StringBuilder();
         do {
             Pair<Character, Object> p = parseStructure(bf, c);
@@ -111,304 +123,26 @@ public class JsonParser {
             int r = bf.read();
             c = r != -1 ? (char) r : EMPTY_CHAR;
         } while (bf.ready());
-        return new ImmutablePair<Character, Object>(c, null);
-    }
-
-    private boolean inGroup(String[] groups) {
-        if (this.groups == null || this.groups.size() == 0)
-            return true;
-        if (groups == null || groups.length == 0)
-            return true;
-        return new ArrayList<String>(Arrays.asList(groups)).removeAll(this.groups);
-    }
-
-    private boolean isPrimitiveLike(Class<?> clazz) {
-        return clazz.isPrimitive() || Boolean.class.equals(clazz) || Byte.class.equals(clazz) ||
-                Short.class.equals(clazz) || Character.class.equals(clazz) ||
-                Integer.class.equals(clazz) || Long.class.equals(clazz) ||
-                Double.class.equals(clazz) || Float.class.equals(clazz) || clazz.equals(BigDecimal.class);
-    }
-
-    private Object getPrimitive(Class<?> clazz, Object value) throws InstantiationException {
-        if (value == null)
-            return null;
-        if (Byte.TYPE.equals(clazz) || Byte.class.equals(clazz)) {
-            Byte b = Byte.valueOf(String.valueOf(value));
-            if (b != null && Byte.TYPE.equals(clazz))
-                return b.byteValue();
-            return b;
-        } else if (Boolean.TYPE.equals(clazz) || Boolean.class.equals(clazz)) {
-            Boolean s = Boolean.valueOf(String.valueOf(value));
-            if (s != null && Byte.TYPE.equals(clazz))
-                return s.booleanValue();
-            return s;
-        } else if (Short.TYPE.equals(clazz) || Short.class.equals(clazz)) {
-            Short s = Short.valueOf(String.valueOf(value));
-            if (s != null && Byte.TYPE.equals(clazz))
-                return s.shortValue();
-            return s;
-        } else if (Character.TYPE.equals(clazz) || Character.class.equals(clazz)) {
-            Character c = String.valueOf(value).charAt(0);
-            if (c != null && Byte.TYPE.equals(clazz))
-                return c.charValue();
-            return c;
-        } else if (Integer.TYPE.equals(clazz) || Integer.class.equals(clazz)) {
-            Integer i = Integer.valueOf(String.valueOf(value));
-            if (i != null && Byte.TYPE.equals(clazz))
-                return i.intValue();
-            return i;
-        } else if (Long.TYPE.equals(clazz) || Long.class.equals(clazz)) {
-            Long l = Long.valueOf(String.valueOf(value));
-            if (l != null && Byte.TYPE.equals(clazz))
-                return l.longValue();
-            return l;
-        } else if (Float.TYPE.equals(clazz) || Float.class.equals(clazz)) {
-            Float f = Float.valueOf(String.valueOf(value));
-            if (f != null && Byte.TYPE.equals(clazz))
-                return f.floatValue();
-            return f;
-        } else if (Double.TYPE.equals(clazz) || Double.class.equals(clazz)) {
-            Double d = Double.valueOf(String.valueOf(value));
-            if (d != null && Byte.TYPE.equals(clazz))
-                return d.doubleValue();
-            return d;
-        } else if (BigDecimal.class.equals(clazz)) {
-            return BigDecimal.valueOf(Double.valueOf(String.valueOf(value)));
-        }
-        throw new InstantiationException("Invalid type" + clazz + " for value " + value); // should never occur
-    }
-
-    private void createFromAdapter(Map<String, Object> data, Object o, ParserAdapter<?> adapter) throws InvocationTargetException, IllegalAccessException {
-        for (MethodWrapper wrapper : adapter.getParams()) {
-            Method m = wrapper.getSetter();
-            if (m != null){
-                m.invoke(o, getValue(m.getParameterTypes()[0], data.get(wrapper.getName()), -1, ""));
-            }
-        }
-    }
-
-    private Object createClass(Map<String, Object> possible) {
-        String cl = ConfInfo.getClassProperty(); // Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
-        String className = (String)possible.get(cl);
-        if (StringUtils.isEmpty(className))
-            return possible;
-        Class<?> clazz = null;
-        try {
-            // using cache in order to avoid searching class in ClassLoader, but get it directly from cache.
-            // There is pitfall: cache could be large same as ClassLoader, if most classes will be serialized
-            clazz = ReflectionCache.get().getClass(className);
-        } catch (ClassNotFoundException e) {
-            return possible;
-        }
-
-        if (clazz == null)
-            return possible;
-
-        try {
-            if (isPrimitiveLike(clazz)) {
-                Object value = possible.get("value");
-                return getPrimitive(clazz, value);
-            }
-            if (clazz.isEnum()) {
-                return createEnum(clazz, possible);
-            }
-            ParserAdapter adapter = ConfInfo.getAdapter(clazz);
-            Object o = clazz.newInstance();
-            if (adapter != null) {
-                createFromAdapter(possible, o, adapter);
-            }
-
-            createFromAnnotation(possible, o, clazz);
-
-            return o;
-        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
-            log.debug("Failed to create class " + className + " with error: " + e.getMessage());
-        }
-        return possible;
-    }
-
-    public void createFromAnnotation(Map<String, Object> possible, Object o, Class<?> clazz) throws IllegalAccessException, InvocationTargetException {
-        Set<Method> methods = new HashSet<Method>();
-        Set<Field> fields = new HashSet<Field>();
-        fields.addAll(ReflectionCache.getFieldsByAnnotation(clazz, JsonField.class));
-        methods.addAll(ReflectionCache.getMethodsByAnnotation(clazz, CustomField.class));
-
-        Class<?> inherit = clazz;
-        while ((inherit = inherit.getSuperclass()) != null) {
-            fields.addAll(ReflectionCache.getFieldsByAnnotation(inherit, JsonField.class));
-            methods.addAll(ReflectionCache.getMethodsByAnnotation(inherit, CustomField.class));
-        }
-        for (Field f : fields) {
-            JsonField an = f.getAnnotation(JsonField.class);
-            String name = an != null && !StringUtils.isEmpty(an.name()) ? an.name() : f.getName();
-            String[] groups = an != null ? an.groups() : null;
-            if (inGroup(groups)) {
-                Object data = possible.get(name);
-                if (data != null) {
-                    f.setAccessible(true);
-                    fill(f, o, data);
-                }
-            }
-        }
-
-        for (Method m : methods) {
-            CustomField an = m.getAnnotation(CustomField.class);
-            if (m.getReturnType().equals(Void.class) && m.getParameterTypes() != null && m.getParameterTypes().length == 1) {
-                String customName = an.name();
-                String[] groups = an.groups();
-                if (inGroup(groups)) {
-                    Object data = possible.get(customName);
-                    if (data != null) {
-                        m.setAccessible(true);
-                        int dateType = -1;
-                        String format = "";
-                        if (m.isAnnotationPresent(DateField.class)) {
-                            dateType = m.getAnnotation(DateField.class).type();
-                            format = m.getAnnotation(DateField.class).format();
-                        }
-                        m.invoke(o, getValue(m.getParameterTypes()[0], data, dateType, format));
-                    }
-                }
-            }
-        }
-    }
-
-    private Object createEnum(Class<?> clazz, Map<String, Object> possible) {
-        String enumName = (String)possible.get("name");
-        return EnumUtils.getEnum((Class<? extends Enum>) clazz, enumName);
-    }
-
-    private Object getValue(Class<?> expected, Object data, int dateTimeType, String format) {
-        if (data == null)
-            return null;
-        if (expected.equals(Boolean.TYPE) || expected.equals(Boolean.class)) {
-            if (data instanceof String) {
-                String value = (String) data;
-                return !("".equals(value) || "0".equals(value) || "false".equalsIgnoreCase(value));
-            } else {
-                return data;
-            }
-        } else if (expected.isPrimitive()) {
-            String value = data instanceof String ? (String)data : String.valueOf(data);
-            if (expected.equals(Byte.TYPE)) {
-                return Byte.valueOf(value);
-            } else if (expected.equals(Short.TYPE)) {
-                return Short.valueOf(value);
-            } else if (expected.equals(Integer.TYPE)) {
-                return Integer.valueOf(value);
-            } else if (expected.equals(Long.TYPE)) {
-                return Long.valueOf(value);
-            } else if (expected.equals(Double.TYPE)) {
-                return Double.valueOf(value);
-            } else if (expected.equals(Float.TYPE)) {
-                return Float.valueOf(value);
-            } else if (expected.equals(Character.TYPE) && value.length() > 0) {
-                return value.charAt(0);
-            }
-        } else if (Date.class.isAssignableFrom(expected) && (dateTimeType == DateTransformer.TIMESTAMP_TYPE || dateTimeType == DateTransformer.STRING_TYPE)) {
-            switch (dateTimeType) {
-                case DateTransformer.TIMESTAMP_TYPE:
-                    return new Date((Long)data);
-                case DateTransformer.STRING_TYPE:
-                    try {
-                        DateFormat dt = new SimpleDateFormat(format);
-                        return dt.parse((String)data);
-                    } catch (ParseException e) {
-                        throw new IllegalArgumentException("Incompatible types for " + expected.getName(), e);
-                    }
-            }
-        } else if (expected.equals(String.class)) {
-            return StringEscapeUtils.unescapeJson((String)data);
-        } else if (expected.isArray() && data instanceof List) {
-            List<?> l = ((List) data);
-            Object ar = Array.newInstance(expected.getComponentType(), l.size());
-            System.arraycopy(l.toArray(), 0, ar, 0, l.size());
-            return ar;
-        } else if (List.class.isAssignableFrom(expected) && data instanceof List) {
-            List<?> l = ((List) data);
-            return l;
-        } else if (Set.class.isAssignableFrom(expected) && data instanceof List) {
-            List<?> l = ((List) data);
-            Set<?> s = new HashSet<>(l);
-            return s;
-        } else if (Collection.class.isAssignableFrom(expected) && data instanceof List) {
-            List<?> l = ((List) data);
-            return l;
-        } else  if (expected.isEnum()) {
-            if (data.getClass().isEnum())
-                return data;
-            else if (data instanceof String) {
-                String s = (String)data;
-                if (!StringUtils.isEmpty(s)) {
-                    return Enum.valueOf((Class<? extends Enum>)expected, s);
-                }
-                return null;
-            }
-        } else {
-            if (data.getClass().equals(Long.class)) {
-                Long val = (Long) data;
-                if (expected.equals(Byte.class)) {
-                    return val.byteValue();
-                } else if (expected.equals(Short.class)) {
-                    return val.shortValue();
-                } else if (expected.equals(Integer.class)) {
-                    return val.intValue();
-                } else if (expected.equals(Long.class)) {
-                    return val;
-                }
-            } else  if (data.getClass().equals(Double.class)) {
-                Double val = (Double) data;
-                if (expected.equals(Float.class)) {
-                    return val.floatValue();
-                } else if (expected.equals(Double.class)) {
-                    return val;
-                }
-            } else
-                return expected.cast(data);
-        }
-        return data;
-    }
-
-    private void fill(Field f, Object owner, Object data) throws IllegalArgumentException, IllegalAccessException {
-        if (data == null || (data instanceof String && "".equals(data))) {
-            data = null;
-        }
-        if (f.getType().isPrimitive() && data == null) {
-            throw new IllegalArgumentException("Incompatible types for " + f.getName());
-        }
-        if (data == null) {
-            return;
-        }
-
-        int dateType = -1;
-        String format = "";
-        if (f.isAnnotationPresent(DateField.class)) {
-            dateType = f.getAnnotation(DateField.class).type();
-            format = f.getAnnotation(DateField.class).format();
-        }
-        f.set(owner, getValue(f.getType(), data, dateType, format));
-    }
-
-    public <T> T cast(Class<T> clazz, Object value) {
-        return clazz.cast(value);
+        return new ImmutablePair<>(c, null);
     }
 
     /**
      * Method determinate if structure is complicated and tries to parse it into Array, Map, Object (if class parameter exists), String or Number
+     *
      * @param bf parser
      * @param c current character
      * @return pair of last read character and parsed object
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    private Pair<Character, Object> parseStructure(BufferedReader bf, char c) throws IOException {
+    private Pair<Character, Object> parseStructure(BufferedReader bf, char c) throws IOException, InstantiationException {
         Map<String, Object> m = null;
-        List<Object> l = null;
+        List l = null;
         StringBuilder sb = new StringBuilder();
         String pn = null;
         switch (c) {
             case START_MAP:
-                m = new HashMap<String, Object>();
+                m = new HashMap<>();
                 queue.offer(m);
                 c = parseMap(bf, m);
                 if (c == END_MAP) {
@@ -416,18 +150,18 @@ public class JsonParser {
                     String cl = ConfInfo.getClassProperty(); // Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
                     int r = bf.read();
                     if (m.containsKey(cl)) {
-                        Object o = createClass(m);
-                        return new ImmutablePair<Character, Object>(r != -1 ? (char)r : c, o);
+                        Object o = ReflectionCache.createClass(m, this.groups);
+                        return new ImmutablePair<>(r != -1 ? (char)r : c, o);
                     }
                     return new ImmutablePair<Character, Object>(r != -1 ? (char)r : c, m);
                 }
                 break;
             case START_ARRAY:
-                l = new ArrayList<Object>();
+                l = new ArrayList<>();
                 queue.offer(l);
                 c = parseList(bf, l);
                 if (c == END_ARRAY) {
-                    l = (List<Object>)queue.pollLast();
+                    l = (List)queue.pollLast();
                     int r = bf.read();
                     return new ImmutablePair<Character, Object>(r != -1 ? (char)r : c, l);
                 }
@@ -449,24 +183,25 @@ public class JsonParser {
                 c = parseNumber(bf, sb);
                 pn = sb.toString().trim();
                 Object o = pn;
-                if (pn.replaceAll("[0-9]", "").equals(""))
-                    o = Long.valueOf(pn);
-                if (pn.replaceAll("[0-9]", "").equals("."))
-                    o = Double.valueOf(pn);
-                if (pn.trim().toLowerCase().equals("false"))
-                    o = new Boolean(false);
-                if (pn.toLowerCase().trim().equals("true"))
-                    o = new Boolean(true);
-                queue.pollLast();
-                if (pn.equalsIgnoreCase("null"))
+                if ("".equals(pn.trim()))
                     return new ImmutablePair<Character, Object>(c, "");
-                return new ImmutablePair<Character, Object>(c, o);
+                if (pn.replaceAll("[0-9]", "").equals(""))
+                    o = ReflectionCache.getPrimitive(Long.class, pn);
+                if (pn.replaceAll("[0-9]", "").equals("."))
+                    o = ReflectionCache.getPrimitive(Double.class, pn);
+                if (pn.trim().toLowerCase().equals("false") || pn.trim().toLowerCase().equals("true"))
+                    o = ReflectionCache.getPrimitive(Boolean.class, pn);
+                queue.pollLast();
+                if (pn.equalsIgnoreCase("null")) {
+                    return new ImmutablePair<Character, Object>(c, "");
+                }
+                return new ImmutablePair<>(c, o);
         }
 
-        return new ImmutablePair<Character, Object>(c, null);
+        return new ImmutablePair<>(c, null);
     }
 
-    private char parseMap(BufferedReader bf, Map<String, Object> m) throws IOException {
+    private char parseMap(BufferedReader bf, Map<String, Object> m) throws IOException, InstantiationException {
         char c = SPACE_CHAR;
         int r = -1;
         while ( (r = bf.read()) != -1) {
@@ -505,7 +240,7 @@ public class JsonParser {
         return c;
     }
 
-    private char parseList(BufferedReader bf, List<Object> l) throws IOException {
+    private char parseList(BufferedReader bf, List l) throws IOException, InstantiationException {
         char c = SPACE_CHAR;
         int r = -1;
         while ((r = bf.read()) != -1) {
@@ -529,7 +264,7 @@ public class JsonParser {
         return c;
     }
 
-    private char parseNumber(BufferedReader bf, StringBuilder sb) throws IOException, IllegalArgumentException {
+    private static char parseNumber(BufferedReader bf, StringBuilder sb) throws IOException, IllegalArgumentException {
         char c = SPACE_CHAR;
         int r = -1;
         while ((r = bf.read()) != -1) {
@@ -546,12 +281,19 @@ public class JsonParser {
         return c;
     }
 
-    private char parseString (BufferedReader bf, StringBuilder sb) throws IOException, IllegalArgumentException {
+    private static char parseString (BufferedReader bf, StringBuilder sb) throws IOException, IllegalArgumentException {
         char c = SPACE_CHAR;
         char prevC = SPACE_CHAR;
         int r = -1;
         while ( (r = bf.read()) != -1 && (c = (char) r) != -1 && !(prevC != ESCAPE_CHAR && (c == CHAR_CHAR || c == STRING_CHAR))) {
-            sb.append(c);
+            if (prevC == ESCAPE_CHAR && (c == CHAR_CHAR || c == STRING_CHAR)) {
+                // do nothing
+            } else if (prevC == ESCAPE_CHAR && c == ESCAPE_CHAR) {
+                sb.append(ESCAPE_CHAR);
+            }
+            if (c != ESCAPE_CHAR) {
+                sb.append(c);
+            }
             prevC = c;
         }
         return c;
