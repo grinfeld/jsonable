@@ -608,6 +608,15 @@ public class JsonTest {
         assertSplitSimpleJson("Failed map test " + sb.toString(), "{\"num\":1,\"str\":\"Hello\"}", sb.toString());
     }
 
+    @Test public void stringWithSpacesTest() {
+        try {
+            Map<String, Object> m = new HashMap<>();
+            m.put("str", " Hello ");
+            JsonWriter.write(m, sb);
+        } catch (Exception ignore) {}
+        assertSplitSimpleJson("Failed map test " + sb.toString(), "{\"str\":\" Hello \"}", sb.toString());
+    }
+
     @Test public void stringWriteReadInputStreamTest() {
         try {
             JsonWriter.write("Hello", sb);
