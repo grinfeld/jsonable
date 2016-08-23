@@ -609,12 +609,18 @@ public class JsonTest {
     }
 
     @Test public void stringWithSpacesTest() {
+        Map<String, Object> m = new HashMap<>();
         try {
-            Map<String, Object> m = new HashMap<>();
             m.put("str", " Hello ");
             JsonWriter.write(m, sb);
         } catch (Exception ignore) {}
         assertSplitSimpleJson("Failed map test " + sb.toString(), "{\"str\":\" Hello \"}", sb.toString());
+
+        Map<String, Object> m1 = new HashMap<>();
+        try {
+            m1 = JsonReader.read(sb.toString(), Map.class);
+        } catch (Exception ignore){}
+        Assert.assertEquals(m.get("str"), m1.get("str"));
     }
 
     @Test public void stringWriteReadInputStreamTest() {

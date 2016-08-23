@@ -148,7 +148,7 @@ public class JsonParser {
                 sb = new StringBuilder();
                 queue.offer(sb);
                 c = parseString(bf, sb);
-                pn = sb.toString().trim();
+                pn = sb.toString();
                 queue.pollLast();
                 if (pn.equalsIgnoreCase("null"))
                     return new ImmutablePair<Character, Object>(c, "");
