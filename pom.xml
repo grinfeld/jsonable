@@ -6,7 +6,7 @@
 
     <groupId>com.mikerusoft</groupId>
     <artifactId>jsonable</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <packaging>jar</packaging>
     <name>Jsonable</name>
     <description>Small library to convert Java POJO to and from JSON</description>

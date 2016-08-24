@@ -222,8 +222,8 @@ public class ReflectionCache {
             if (clazz.isEnum()) {
                 return createEnum(clazz, possible);
             }
-            Object o = clazz.newInstance();
-            createSpecific(possible, o, clazz, groups);
+            Object o = ConfInfo.getFactory(clazz).newInstance(Collections.unmodifiableMap(possible));
+            createSpecific(possible, o, o.getClass(), groups);
 
             return o;
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
@@ -232,23 +232,32 @@ public class ReflectionCache {
         return possible;
     }
 
-    public static Object guessClass(Object possible, Class<?> clazz, Class<?>[] generics) throws ClassNotFoundException, NoSuchFieldException, InstantiationException {
+    public static Object guessClass(Object possible, Class<?> clazz) throws ClassNotFoundException, NoSuchFieldException, InstantiationException, IllegalAccessException {
+        if (clazz == null)
+            return possible;
+        if (possible == null)
+            return null;
         if (isPrimitiveLike(clazz)) {
             if (clazz.isAssignableFrom(possible.getClass()))
                 return possible;
             return getPrimitive(clazz, possible);
         } else if (Map.class.isAssignableFrom(clazz)) {
+            Object actual = ConfInfo.getFactory(clazz).newInstance(Collections.unmodifiableMap((Map)possible));
+            Class<?> actualClass = actual.getClass();
+
+            Collection<Invoker> invokers = ReflectionCache.get().getInvokers(actualClass);
+            // todo: add to Invoker method which return class of setter and getter
+            // todo: check if it's the same class as expected in Map. If yes, call setter, else call itself again
             for (Object entry : ((Map)possible).entrySet()) {
                 Map.Entry e = (Map.Entry)entry;
             }
 
             Method[] methods = get().getClass(clazz.getName()).getMethods();
-        } else if (List.class.isAssignableFrom(clazz)) {
-            Class<?> type = clazz.getComponentType();
-        } else if (Set.class.isAssignableFrom(clazz)) {
-            Class<?> type = clazz.getComponentType();
         } else if (clazz.isArray()) {
-
+            Class<?> compType = clazz.getComponentType();
+            if (compType != null && !compType.isPrimitive() && !compType.equals(String.class)) {
+                // todo: fill data
+            }
         }
         return possible;
     }
@@ -515,11 +524,7 @@ public class ReflectionCache {
     }
 
     public static void fill(Method m, Class[] generics, Object owner, Object data) throws IllegalArgumentException, IllegalAccessException, InstantiationException, InvocationTargetException {
-        if (data instanceof String && "".equals(data)) {
-            data = null;
-        }
-
-        if (data == null) {
+        if (data == null || data instanceof String && "".equals(data)) {
             return;
         }
 
@@ -538,13 +543,7 @@ public class ReflectionCache {
     }
 
     public static void fill(Field f, Class[] generics, Object owner, Object data) throws IllegalArgumentException, IllegalAccessException, InstantiationException {
-        if (data instanceof String && "".equals(data)) {
-            data = null;
-        }
-        if (f.getType().isPrimitive() && data == null) {
-            throw new IllegalArgumentException("Incompatible types for " + f.getName());
-        }
-        if (data == null) {
+        if (data == null || data instanceof String && "".equals(data)) {
             return;
         }
 

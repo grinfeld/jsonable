@@ -1,8 +1,6 @@
 package com.mikerusoft.jsonable.utils;
 
-import com.mikerusoft.jsonable.adapters.MethodWrapper;
-import com.mikerusoft.jsonable.adapters.ParserAdapter;
-import com.mikerusoft.jsonable.adapters.SimpleBeanAdapter;
+import com.mikerusoft.jsonable.adapters.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +35,7 @@ public class ConfInfo implements ContextData {
     private Map<Class, ParserAdapter> classAdapters = new ConcurrentHashMap<>();
     private Map<String, Boolean> packageAdapters = new ConcurrentHashMap<>();
     private Map<String, String> properties = new ConcurrentHashMap<>();
+    private Map<Class, ReadInstanceFactory> readFactories = new ConcurrentHashMap<>();
 
     public static String getClassProperty() { return StringUtils.isEmpty(get().classProperty) ? DEFAULT_CLASS_PROPERTY_VALUE : get().classProperty; }
     public static void setClassProperty(String classProperty) { get().classProperty = classProperty; }
@@ -87,6 +86,24 @@ public class ConfInfo implements ContextData {
     public static void setProperty(String name, Long value) { get().properties.put(name, value == null ? null : String.valueOf(value)); }
     public static void setProperty(String name, Boolean value) { get().properties.put(name, value == null ? null : String.valueOf(value)); }
 
+
+    public static ReadInstanceFactory getFactory(Class<?> clazz) {
+        ReadInstanceFactory i = get().readFactories.get(clazz);
+        if (i == null)
+            return new EmptyConstructorReadFactory<>(clazz);
+        return i;
+    }
+
+    public static void registerFactories(ReadInstanceFactory...factories) {
+        if (factories == null)
+            return;
+        for(ReadInstanceFactory f : factories) {
+            if (f != null) {
+                get().readFactories.put(f.getFactoryClass(), f);
+            }
+        }
+    }
+
     /**
      * Creates Adapter for specified class and its properties (see {@link ParserAdapter} for more explanations)
      * serialization
@@ -94,7 +111,7 @@ public class ConfInfo implements ContextData {
      * @param params list of bean properties
      */
     public static void registerAdapter(Class<?> clazz, PropertyPair[] params) {
-        get().classAdapters.put(clazz, new ParserAdapterBasic(clazz, params));
+        get().classAdapters.put(clazz, new ParserAdapterBasic<>(clazz, params));
     }
 
     /**
@@ -104,7 +121,7 @@ public class ConfInfo implements ContextData {
      * @param params list of bean properties
      */
     public static void registerAdapter(Class<?> clazz, String[] params) {
-        get().classAdapters.put(clazz, new ParserAdapterBasic(clazz, params));
+        get().classAdapters.put(clazz, new ParserAdapterBasic<>(clazz, params));
     }
     
     /**
