@@ -222,8 +222,8 @@ public class ReflectionCache {
             if (clazz.isEnum()) {
                 return createEnum(clazz, possible);
             }
-            Object o = clazz.newInstance();
-            createSpecific(possible, o, clazz, groups);
+            Object o = ConfInfo.getFactory(clazz).newInstance(Collections.unmodifiableMap(possible));
+            createSpecific(possible, o, o.getClass(), groups);
 
             return o;
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
@@ -232,7 +232,7 @@ public class ReflectionCache {
         return possible;
     }
 
-    public static Object guessClass(Object possible, Class<?> clazz, Class<?>[] generics) throws ClassNotFoundException, NoSuchFieldException, InstantiationException {
+    public static Object guessClass(Object possible, Class<?> clazz) throws ClassNotFoundException, NoSuchFieldException, InstantiationException {
         if (isPrimitiveLike(clazz)) {
             if (clazz.isAssignableFrom(possible.getClass()))
                 return possible;
@@ -515,11 +515,7 @@ public class ReflectionCache {
     }
 
     public static void fill(Method m, Class[] generics, Object owner, Object data) throws IllegalArgumentException, IllegalAccessException, InstantiationException, InvocationTargetException {
-        if (data instanceof String && "".equals(data)) {
-            data = null;
-        }
-
-        if (data == null) {
+        if (data == null || data instanceof String && "".equals(data)) {
             return;
         }
 
@@ -538,13 +534,7 @@ public class ReflectionCache {
     }
 
     public static void fill(Field f, Class[] generics, Object owner, Object data) throws IllegalArgumentException, IllegalAccessException, InstantiationException {
-        if (data instanceof String && "".equals(data)) {
-            data = null;
-        }
-        if (f.getType().isPrimitive() && data == null) {
-            throw new IllegalArgumentException("Incompatible types for " + f.getName());
-        }
-        if (data == null) {
+        if (data == null || data instanceof String && "".equals(data)) {
             return;
         }
 

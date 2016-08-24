@@ -1,5 +1,6 @@
 package com.mikerusoft.jsonable;
 
+import com.mikerusoft.jsonable.adapters.ReadInstanceFactory;
 import com.mikerusoft.jsonable.adapters.SimpleBeanAdapter;
 import com.mikerusoft.jsonable.annotations.*;
 import com.mikerusoft.jsonable.parser.JsonReader;
@@ -878,6 +879,37 @@ public class JsonTest {
         String result = new String(byos.toByteArray());
         Pair<SimpleObjAnnot, SimpleObjNoAnot> p1 = JsonReader.read(new ByteArrayInputStream(result.getBytes("UTF-8")), Pair.class);
         Assert.assertEquals(p, p1);
+    }
+
+    @Test
+    public void readFactoryTest() {
+        ConfInfo.setExcludeClass(false);
+        ConfInfo.registerFactories(new ReadInstanceFactory<SimpleObjAnnot, SimpleObjAnnotExtend>() {
+
+            @Override
+            public Class<SimpleObjAnnot> getFactoryClass() {
+                return SimpleObjAnnot.class;
+            }
+
+            @Override
+            public SimpleObjAnnotExtend newInstance(Map<String, Object> data) throws IllegalAccessException, InstantiationException {
+                return new SimpleObjAnnotExtend();
+            }
+        });
+        SimpleObjAnnot soa = null;
+        try {
+            soa = JsonReader.read("{\"str\":\"Hello\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnot\"}", SimpleObjAnnot.class);
+        } catch (Exception ignore){ ignore.printStackTrace(); }
+        Assert.assertNotNull(soa);
+        Assert.assertTrue(soa instanceof SimpleObjAnnotExtend);
+
+        soa = null;
+        try {
+            soa = JsonReader.read("{\"str\":\"Hello\",\"num\":1,\"extended\":\"NewValue\", \"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObjAnnot\"}", SimpleObjAnnot.class);
+        } catch (Exception ignore){}
+        Assert.assertNotNull(soa);
+        Assert.assertTrue(soa instanceof SimpleObjAnnotExtend);
+        Assert.assertEquals("NewValue", ((SimpleObjAnnotExtend)soa).extended);
     }
 
     private static void assertSplitSimpleJson(String expected, String actual) {

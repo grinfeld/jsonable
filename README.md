@@ -219,6 +219,16 @@ Here the list of all available options in *ConfInfo*:
     // serialization from other languages or you simple don't want to use word 'class'
     public static void setClassProperty(String classProperty)
 
+**Instance Factory**
+
+Sometimes we need to get some class, but actually to create another. It could be some inherited class from original, or maybe create different classes based on received data.
+For this purpose you can use InstanceFactory. Adding such Factory is easy
+    
+    ConfInfo.registerFactory(InstanceFactory...factories)
+    
+InstanceFactory is interface with 2 methods: **getClassFactory()** - it's a class which newInstance should be replaced, by some custom code and
+ newInstance(Map<String,Object> data) - this method should create new object according to data that just has been read from input. The data itself is read-only, i.e. unmodifiableMap
+  
 See more info at [API](http://www.mikerusoft.com/jsonable/)
 
 Oh, installation?

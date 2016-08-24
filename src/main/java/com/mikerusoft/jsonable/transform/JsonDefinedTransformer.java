@@ -39,7 +39,7 @@ public class JsonDefinedTransformer extends TransformerImpl {
 
         // Configuration c = ContextManager.get(Configuration.class);
         boolean includeNull = ConfInfo.isIncludeNull(); // Configuration.getBooleanProperty(c, Configuration.INCLUDE_NULL_PROPERTY, false);
-        // TODO: we need to ensure that if method or field with the same property name has been executed - don't do it again for overrided methods
+        // TODO: we need to ensure that if method or field with the same property name has been executed - don't do it again for overridden methods
         int count = 0;
 
         Collection<Invoker> invokers = ReflectionCache.get().getInvokers(clazz);
