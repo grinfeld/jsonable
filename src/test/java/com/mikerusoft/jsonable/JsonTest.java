@@ -343,7 +343,7 @@ public class JsonTest {
         try {
             JsonWriter.write(text, sb);
         } catch (Exception ignore) {}
-        assertEquals("Failed stringUnicodeTest" + sb.toString(), "\"\\u05E9\\u05DC\\u05D5\\u05DD\"", sb.toString());
+        assertEquals("Failed stringUnicodeTest" + sb.toString(), "\"" + text + "\"", sb.toString());
         String result = null;
         try {
             result = JsonReader.read(sb.toString(), String.class);

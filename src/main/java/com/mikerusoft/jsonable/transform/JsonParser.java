@@ -3,6 +3,7 @@ package com.mikerusoft.jsonable.transform;
 import com.mikerusoft.jsonable.utils.ConfInfo;
 import com.mikerusoft.jsonable.refelection.ReflectionCache;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.text.translate.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
@@ -203,7 +204,7 @@ public class JsonParser {
                     key = key.substring(1);
                 if (key.endsWith(String.valueOf(CHAR_CHAR)) || key.endsWith(String.valueOf(STRING_CHAR)))
                     key = key.substring(0, key.length() - 1);
-                key = StringEscapeUtils.unescapeJson(key);
+                key = UNESCAPE_JSON.translate(key);
                 Pair<Character, Object> p = parseRecursive(bf);
                 Object o = p.getRight();
                 c = p.getLeft();
@@ -277,7 +278,21 @@ public class JsonParser {
             }
             prevC = c;
         }
-        all.append(StringEscapeUtils.unescapeJson(sb.toString()));
+        all.append(UNESCAPE_JSON.translate(sb.toString()));
         return c;
     }
+
+    public static final CharSequenceTranslator UNESCAPE_JSON =
+    new AggregateTranslator(
+            new OctalUnescaper(),     // .between('\1', '\377'),
+            // new UnicodeUnescaper(), - we don't want unicode translator
+            new LookupTranslator(EntityArrays.JAVA_CTRL_CHARS_UNESCAPE()),
+            new LookupTranslator(
+                    new String[][] {
+                            {"\\\\", "\\"},
+                            {"\\\"", "\""},
+                            {"\\'", "'"},
+                            {"\\", ""}
+                    })
+    );
 }
