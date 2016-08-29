@@ -16,7 +16,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class StringTransformer  extends TransformerImpl {
 
-    public static final CharSequenceTranslator ESCAPE_JSON =
+    private static final CharSequenceTranslator ESCAPE_JSON =
         new AggregateTranslator(
                 new LookupTranslator(
                         new String[][] {

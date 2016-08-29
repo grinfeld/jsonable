@@ -282,8 +282,8 @@ public class JsonParser {
         return c;
     }
 
-    public static final CharSequenceTranslator UNESCAPE_JSON =
-    new AggregateTranslator(
+    private static final CharSequenceTranslator UNESCAPE_JSON =
+        new AggregateTranslator(
             new OctalUnescaper(),     // .between('\1', '\377'),
             // new UnicodeUnescaper(), - we don't want unicode translator
             new LookupTranslator(EntityArrays.JAVA_CTRL_CHARS_UNESCAPE()),
