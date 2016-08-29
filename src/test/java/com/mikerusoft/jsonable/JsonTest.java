@@ -321,6 +321,36 @@ public class JsonTest {
         assertEquals("Failed integer test " + result, "1", result);
     }
 
+
+    @Test public void mapUnicodeTest() {
+        String text = "שלום";
+        Map<String, String> m = new HashMap<>();
+        m.put(text, "1");
+        try {
+            JsonWriter.write(m, sb);
+        } catch (Exception ignore) {}
+        assertEquals("Failed stringUnicodeTest" + sb.toString(), "{\"שלום\":\"1\"}", sb.toString());
+        String result = null;
+        try {
+            m = (Map<String,String>)JsonReader.read(sb.toString(), Map.class);
+        } catch (Exception ignore) {}
+        assertEquals("Failed stringUnicodeTest" + text, text, m.keySet().iterator().next());
+        assertEquals("Failed stringUnicodeTest" + text, "1", m.get(text));
+    }
+
+    @Test public void stringUnicodeTest() {
+        String text = "שלום";
+        try {
+            JsonWriter.write(text, sb);
+        } catch (Exception ignore) {}
+        assertEquals("Failed stringUnicodeTest" + sb.toString(), "\"" + text + "\"", sb.toString());
+        String result = null;
+        try {
+            result = JsonReader.read(sb.toString(), String.class);
+        } catch (Exception ignore) {}
+        assertEquals("Failed stringUnicodeTest" + text, text, result);
+    }
+
     @Test public void stringTest() {
         try {
             JsonWriter.write("Hello", sb);

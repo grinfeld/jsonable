@@ -2,6 +2,8 @@ package com.mikerusoft.jsonable.transform;
 
 import com.mikerusoft.jsonable.utils.ConfInfo;
 import com.mikerusoft.jsonable.refelection.ReflectionCache;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.text.translate.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
@@ -202,7 +204,7 @@ public class JsonParser {
                     key = key.substring(1);
                 if (key.endsWith(String.valueOf(CHAR_CHAR)) || key.endsWith(String.valueOf(STRING_CHAR)))
                     key = key.substring(0, key.length() - 1);
-
+                key = UNESCAPE_JSON.translate(key);
                 Pair<Character, Object> p = parseRecursive(bf);
                 Object o = p.getRight();
                 c = p.getLeft();
@@ -258,14 +260,17 @@ public class JsonParser {
         return c;
     }
 
-    private static char parseString (BufferedReader bf, StringBuilder sb) throws IOException, IllegalArgumentException {
+    private static char parseString (BufferedReader bf, StringBuilder all) throws IOException, IllegalArgumentException {
         char c = SPACE_CHAR;
         char prevC = SPACE_CHAR;
         int r = -1;
+        StringBuilder sb = new StringBuilder();
         while ( (r = bf.read()) != -1 && (c = (char) r) != -1 && !(prevC != ESCAPE_CHAR && (c == CHAR_CHAR || c == STRING_CHAR))) {
             if (prevC == ESCAPE_CHAR && (c == CHAR_CHAR || c == STRING_CHAR)) {
                 // do nothing
             } else if (prevC == ESCAPE_CHAR && c == ESCAPE_CHAR) {
+                sb.append(ESCAPE_CHAR);
+            } else if (prevC == ESCAPE_CHAR && c == 'u') {
                 sb.append(ESCAPE_CHAR);
             }
             if (c != ESCAPE_CHAR) {
@@ -273,6 +278,21 @@ public class JsonParser {
             }
             prevC = c;
         }
+        all.append(UNESCAPE_JSON.translate(sb.toString()));
         return c;
     }
+
+    private static final CharSequenceTranslator UNESCAPE_JSON =
+        new AggregateTranslator(
+            new OctalUnescaper(),     // .between('\1', '\377'),
+            // new UnicodeUnescaper(), - we don't want unicode translator
+            new LookupTranslator(EntityArrays.JAVA_CTRL_CHARS_UNESCAPE()),
+            new LookupTranslator(
+                    new String[][] {
+                            {"\\\\", "\\"},
+                            {"\\\"", "\""},
+                            {"\\'", "'"},
+                            {"\\", ""}
+                    })
+    );
 }
