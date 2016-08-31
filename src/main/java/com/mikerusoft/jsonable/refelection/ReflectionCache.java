@@ -437,10 +437,20 @@ public class ReflectionCache {
         if (generic != null && generic.length > 0)
             listType = generic[0];
         for (Object v : (Iterable) data) {
-            if (listType == null)
+            if (v == null) {
+                c.add(null);
+            } else if (listType != null && !listType.isAssignableFrom(v.getClass())) {
+                if (isPrimitiveLike(listType) && isPrimitiveLike(v.getClass())) {
+                    c.add(getPrimitive(listType, v));
+                } else {
+                    c.add(null);
+                }
+
+            } else if (listType == null || listType.isAssignableFrom(v.getClass())) {
                 c.add(v);
-            else
+            } else {
                 c.add(getValue(listType, null, v));
+            }
         }
         return c;
     }
@@ -518,7 +528,11 @@ public class ReflectionCache {
                     return val;
                 }
             } else
-                return expected.cast(data);
+                try {
+                    return expected.cast(data);
+                } catch (Exception e) {
+                    throw new RuntimeException(String.valueOf(expected.getName()) + "  " + String.valueOf(data), e);
+                }
         }
         return data;
     }

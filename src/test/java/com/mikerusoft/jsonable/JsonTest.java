@@ -751,6 +751,26 @@ public class JsonTest {
     }
 
     @Test
+    public void map1Test() throws Exception {
+        String s = "{\"key1\":  \"hello\", \"key2\"  \n :    {\"key3\"    : \t   5  , \"key4\": [\t\t\"dt\", \"st\", [34, 56]   ]   }     }";
+        Map<String, Object> mobj = (Map<String, Object>)JsonReader.read(s);
+        Assert.assertNotNull(mobj);
+        Assert.assertNotNull(mobj.get("key1"));
+        Assert.assertEquals(mobj.get("key1"), "hello");
+        Assert.assertNotNull(mobj.get("key2"));
+
+        Map innerMap = ((Map)mobj.get("key2"));
+        Assert.assertNotNull(innerMap.get("key3"));
+        Assert.assertEquals( innerMap.get("key3"), 5L);
+
+        Assert.assertNotNull( innerMap.get("key4"));
+
+        Assert.assertTrue(innerMap.get("key4") instanceof List);
+        List lis = (List)innerMap.get("key4");
+        Assert.assertEquals( 3, lis.size());
+    }
+
+    @Test
     public void mapArrayTest() throws Exception {
         Map<Object, Object> m = new HashMap<>();
         Map<Object, Object> m2 = new HashMap<>();

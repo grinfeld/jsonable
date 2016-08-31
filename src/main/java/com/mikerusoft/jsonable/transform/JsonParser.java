@@ -3,6 +3,7 @@ package com.mikerusoft.jsonable.transform;
 import com.mikerusoft.jsonable.utils.ConfInfo;
 import com.mikerusoft.jsonable.refelection.ReflectionCache;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
@@ -33,6 +34,7 @@ public class JsonParser {
         SPACE_CHAR = ' ',
         TAB_CHAR = '\t',
         END_LINE = '\n',
+        END_LINE_CARET = '\r',
         EMPTY_CHAR = '\0';
 
     LinkedList<Object> queue = null;
@@ -72,7 +74,7 @@ public class JsonParser {
         int r = -1;
         while ( (r = bf.read()) != -1 ) {
             c = (char) r;
-            if (c != SPACE_CHAR && c != TAB_CHAR && c != END_LINE) {
+            if (c != SPACE_CHAR && c != TAB_CHAR && c != END_LINE && c != END_LINE_CARET && c != TAB_CHAR) {
                 Pair<Character, Object> p = parseStructure(bf, c);
                 Object o = p.getRight();
                 c = p.getLeft();
@@ -94,7 +96,7 @@ public class JsonParser {
             c = p.getLeft();
             if (o != null) {
                 return p;
-            } else if (c != ELEM_DELIM) {
+            } else if (c != ELEM_DELIM && c != SPACE_CHAR && c != TAB_CHAR && c != END_LINE && c != END_LINE_CARET && c != TAB_CHAR) {
                 if (!(sb.length() == 0 && c == EMPTY_CHAR) && c == END_LINE) // avoid empty string at the beginning
                     sb.append(c);
             }
@@ -151,7 +153,7 @@ public class JsonParser {
                 c = parseString(bf, sb);
                 pn = sb.toString();
                 queue.pollLast();
-                if (pn.equalsIgnoreCase("null"))
+                if (StringUtils.defaultString(pn).trim().equalsIgnoreCase("null"))
                     return new ImmutablePair<Character, Object>(c, "");
                 return new ImmutablePair<Character, Object>(c, pn);
             default:
@@ -170,7 +172,7 @@ public class JsonParser {
                 if (pn.trim().toLowerCase().equals("false") || pn.trim().toLowerCase().equals("true"))
                     o = ReflectionCache.getPrimitive(Boolean.class, pn);
                 queue.pollLast();
-                if (pn.equalsIgnoreCase("null")) {
+                if (StringUtils.defaultString(pn).trim().equalsIgnoreCase("null")) {
                     return new ImmutablePair<Character, Object>(c, "");
                 }
                 return new ImmutablePair<>(c, o);
@@ -186,23 +188,28 @@ public class JsonParser {
             c = (char) r;
             if (c == END_MAP) {
                 return c;
+            } else if (c == END_LINE || c == END_LINE_CARET || c == TAB_CHAR || c == SPACE_CHAR) {
+                // do nothing
             } else {
                 StringBuilder sb = new StringBuilder();
                 // searching key
                 do {
                     if (c == -1)
                         throw new IllegalArgumentException("Reached end of stream - un-parsed data");
-                    if (c != ELEM_DELIM && c != END_LINE)
+                    if (c != ELEM_DELIM && c != END_LINE && c != END_LINE_CARET && c != TAB_CHAR && c != SPACE_CHAR)
                         sb.append(c);
                 } while ((r = bf.read()) != -1 && (c = (char)r) != VALUE_DELIM);
-                String key = sb.toString().trim();
+                String key = sb.toString();
                 if (sb.length() == 1 && sb.charAt(0) == END_MAP) {
                     return END_MAP;
                 }
                 if (key.startsWith(String.valueOf(CHAR_CHAR)) || key.startsWith(String.valueOf(STRING_CHAR)))
                     key = key.substring(1);
+
                 if (key.endsWith(String.valueOf(CHAR_CHAR)) || key.endsWith(String.valueOf(STRING_CHAR)))
                     key = key.substring(0, key.length() - 1);
+                else
+                    key = key.trim();
                 key = StringEscapeUtils.unescapeJson(key);
                 Pair<Character, Object> p = parseRecursive(bf);
                 Object o = p.getRight();
@@ -225,7 +232,7 @@ public class JsonParser {
             c = (char) r;
             if (c == END_ARRAY) {
                 return c;
-            } else if (c == ELEM_DELIM || c == VALUE_DELIM) {
+            } else if (c == ELEM_DELIM || c == VALUE_DELIM || c == SPACE_CHAR || c == END_LINE || c == END_LINE_CARET || c == TAB_CHAR) {
                 // do nothing
             } else {
                 Pair<Character, Object> p = parseListInnerElement(bf, c);
@@ -253,7 +260,7 @@ public class JsonParser {
                 case ELEM_DELIM:
                     return c;
             }
-            if (c != END_LINE)
+            if (c != END_LINE && c != END_LINE_CARET && c != TAB_CHAR)
                 sb.append(c);
         }
         return c;
