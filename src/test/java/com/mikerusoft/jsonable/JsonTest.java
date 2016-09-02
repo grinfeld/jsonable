@@ -365,6 +365,13 @@ public class JsonTest {
         assertEquals("Failed integer test " + sb.toString(), "1", sb.toString());
     }
 
+    @Test public void unicodeTest() {
+        try {
+            JsonWriter.write("Привет", sb);
+        } catch (Exception ignore) {}
+        assertEquals("failed unicode test " + sb.toString(), "\"Привет\"", sb.toString());
+    }
+
     @Test public void integerWithClassTest() {
         try {
             ConfInfo.setIncludePrimitiveClass(true);
