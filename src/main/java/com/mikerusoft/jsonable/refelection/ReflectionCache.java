@@ -458,6 +458,10 @@ public class ReflectionCache {
     public static Object getValue(Class<?> expected, Class<?>[] generic, Object data, int dateTimeType, String format) throws InstantiationException {
         if (data == null)
             return null;
+        boolean hasJsonAnot = expected.getAnnotation(JsonClass.class) != null;
+        if (hasJsonAnot && expected.isAssignableFrom(data.getClass())) {
+            return expected.cast(data);
+        }
         if (expected.equals(Boolean.TYPE) || expected.equals(Boolean.class)) {
             if (data instanceof String) {
                 String value = (String) data;

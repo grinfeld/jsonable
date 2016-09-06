@@ -77,5 +77,5 @@ public class JsonDefinedTransformer extends TransformerImpl {
         return dn != null && dn.value();
     }
 
-    @Override public int matchPriority() { return Transformer.HIGH_PRIORITY; }
+    @Override public int matchPriority() { return Transformer.HIGH_PRIORITY - 1; }
 }
