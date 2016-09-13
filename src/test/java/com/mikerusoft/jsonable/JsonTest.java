@@ -463,7 +463,6 @@ public class JsonTest {
         assertEquals("Failed simple array number test " + sb.toString(), "[1,2]", sb.toString());
     }
 
-
     @Test public void simpleListStringTest() {
         try {
             JsonWriter.write(Arrays.asList("hello", "bye"), sb);
@@ -476,6 +475,15 @@ public class JsonTest {
             JsonWriter.write(Arrays.asList(1, 2), sb);
         } catch (Exception ignore) {}
         assertEquals("Failed simple array number test " + sb.toString(), "[1,2]", sb.toString());
+    }
+
+    @Test public void simpleObjectEndLineTest() {
+        try {
+            simpleObj.str = "Hello\n";
+            simpleObj.num = 1;
+            JsonWriter.write(simpleObj, sb);
+        } catch (Exception ignore) {}
+        assertSplitSimpleJson("Failed simple object test " + sb.toString(), "{\"str\":\"Hello\\n\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObj\"}", sb.toString());
     }
 
     @Test public void simpleObjectTest() {
