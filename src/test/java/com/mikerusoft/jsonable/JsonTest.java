@@ -947,6 +947,25 @@ public class JsonTest {
     }
 
     @Test
+    public void mapStartingWithNullTest() throws Exception {
+        Map t = new HashMap();
+        t.put("a", null);
+        t.put("z", "Hello");
+        JsonWriter.write(t, sb);
+        Assert.assertEquals("{\"z\":\"Hello\"}", sb.toString());
+    }
+
+    @Test
+    public void objectStartingWithNullTest() throws Exception {
+        SimpleObjAnnot t = new SimpleObjAnnot();
+        t.num = 1;
+        t.str1 = null;
+        ConfInfo.setExcludeClass(true);
+        JsonWriter.write(t, sb);
+        Assert.assertEquals("{\"num\":1}", sb.toString());
+    }
+
+    @Test
     public void readFactoryTest() {
         ConfInfo.setExcludeClass(false);
         ConfInfo.registerFactories(new ReadInstanceFactory<SimpleObjAnnot, SimpleObjAnnotExtend>() {

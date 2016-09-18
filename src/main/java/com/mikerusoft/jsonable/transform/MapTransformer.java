@@ -44,8 +44,8 @@ public class MapTransformer  extends TransformerImpl {
                 TransformerFactory.get(p).transform(p, out, groups);
                 if (i != m.size() - 1)
                     out.write(",");
-                i++;
             }
+            i++;
         }
         out.write("}");
     }
