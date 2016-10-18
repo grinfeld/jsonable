@@ -956,6 +956,18 @@ public class JsonTest {
     }
 
     @Test
+    public void multipleListTest() throws Exception {
+        String str = "[[[\"hello\", \"bye\"]], [\"1\", \"2\"]]";
+        List<?> lst = JsonReader.read(str, List.class);
+        Assert.assertNotNull(lst);
+        Assert.assertNotNull(lst.get(0));
+        Assert.assertTrue(lst.get(0) instanceof List);
+        List<?> subList = (List<?>)lst.get(0);
+        Assert.assertNotNull(subList.get(0));
+        Assert.assertTrue(subList.get(0) instanceof List);
+    }
+
+    @Test
     public void objectStartingWithNullTest() throws Exception {
         SimpleObjAnnot t = new SimpleObjAnnot();
         t.num = 1;
