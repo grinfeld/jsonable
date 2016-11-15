@@ -271,7 +271,7 @@ public class JsonParser {
         char prevC = SPACE_CHAR;
         int r = -1;
         StringBuilder sb = new StringBuilder();
-        while ( (r = bf.read()) != -1 && (c = (char) r) != -1 && !(prevC != ESCAPE_CHAR && (c == CHAR_CHAR || c == STRING_CHAR))) {
+        while ( (r = bf.read()) != -1 && (c = (char) r) != -1 && !(prevC != ESCAPE_CHAR && c == STRING_CHAR)) {
             if (prevC == ESCAPE_CHAR && (c == CHAR_CHAR || c == STRING_CHAR)) {
                 // do nothing
             } else if (prevC == ESCAPE_CHAR && c == ESCAPE_CHAR) {

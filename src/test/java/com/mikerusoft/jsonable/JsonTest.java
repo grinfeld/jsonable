@@ -358,6 +358,20 @@ public class JsonTest {
         assertEquals("Failed StringTest" + sb.toString(), "\"Hello\"", sb.toString());
     }
 
+    @Test public void stringAposTest() throws IOException {
+        Map<String, String> m = (Map<String, String>)JsonReader.read("{\"key\": \"Hel'lo\"}", Map.class);
+        assertNotNull(m);
+        assertNotNull(m.get("key"));
+        assertEquals("Failed stringAposTest" + "{\"key\": \"Hel'lo\"}", "Hel'lo", m.get("key"));
+    }
+
+    @Test public void stringAposWriteTest() throws IOException {
+        try {
+            JsonWriter.write("Hel'lo", sb);
+        } catch (Exception ignore) {}
+        assertEquals("Failed StringTest" + sb.toString(), "\"Hel'lo\"", sb.toString());;
+    }
+
     @Test public void integerTest() {
         try {
             JsonWriter.write(1, sb);
