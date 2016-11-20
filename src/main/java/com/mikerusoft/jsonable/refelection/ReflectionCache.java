@@ -278,7 +278,7 @@ public class ReflectionCache {
         if (invokers != null)
             return Collections.unmodifiableCollection(invokers);
 
-        Set<MutablePair<String, String>> setters = new HashSet<>();
+        Set<String> setters = new HashSet<>();
         Set<String> getters = new HashSet<>();
 
         Class<?> inherit = clazz;
@@ -298,7 +298,7 @@ public class ReflectionCache {
                             name = m.getName();
 
                         Method setter = m.getParameterTypes().length == 1 &&
-                                setters.add(new MutablePair<>(name, m.getParameterTypes()[0].getName())) ? m : null;
+                                setters.add(name) ? m : null;
                         String setterName = setter != null ? name : null;
 
                         Method getter = m.getParameterTypes().length == 0 && getters.add(name) ? m : null;
@@ -315,7 +315,7 @@ public class ReflectionCache {
                         if ("".equals(name.trim()))
                             name = f.getName();
                         FieldInvoker i = new FieldInvoker(name, f);
-                        boolean enableSetter = setters.add(new MutablePair<>(name, f.getClass().getName()));
+                        boolean enableSetter = setters.add(name);
                         boolean enableGetter = getters.add(name);
                         if ( enableSetter || enableGetter ) {
                             if (!enableSetter)
@@ -333,7 +333,7 @@ public class ReflectionCache {
                     for (MethodWrapper mw : adapter.getParams()) {
 
                         Method setter = mw != null && mw.getSetter() != null && mw.getSetter().getParameterTypes().length == 1 &&
-                                setters.add(new MutablePair<>(mw.getName(), mw.getSetter().getParameterTypes()[0].getName())) ? mw.getSetter() : null;
+                                setters.add(mw.getName()) ? mw.getSetter() : null;
                         String setterName = setter != null ? mw.getName() : null;
 
                         Method getter = mw != null && getters.add(mw.getName()) ? mw.getGetter() : null;

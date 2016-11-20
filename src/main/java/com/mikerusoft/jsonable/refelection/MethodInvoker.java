@@ -41,8 +41,8 @@ public class MethodInvoker implements Invoker {
     @Override
     public void set(Object o, Object param) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         Class<?>[] generic = null;
-        if (setter.getReturnType().getComponentType() != null) {
-            generic = new Class<?>[] { setter.getReturnType().getComponentType() };
+        if (setter.getParameterTypes()[0] != null) {
+            generic = new Class<?>[] { setter.getParameterTypes()[0] };
         }
         ReflectionCache.fill(setter, generic, o, param);
     }
