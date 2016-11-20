@@ -7,11 +7,11 @@ import com.mikerusoft.jsonable.annotations.DateField;
 import com.mikerusoft.jsonable.annotations.JsonClass;
 import com.mikerusoft.jsonable.annotations.JsonField;
 import com.mikerusoft.jsonable.transform.DateTransformer;
-import com.mikerusoft.jsonable.transform.JsonParser;
 import com.mikerusoft.jsonable.utils.ConfInfo;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -53,25 +53,26 @@ public class ReflectionCache {
         return instance;
     }
 
-    Map<String, Class<?>> classes;
-    Map<Class<?>, Set<Invoker>> invokers;
+    private Map<String, Class<?>> classes;
+    private Map<Class<?>, Set<Invoker>> invokers;
 
     private ReflectionCache() {
         classes = new ConcurrentHashMap<>();
         invokers = new ConcurrentHashMap<>();
     }
 
-    /**
+    /*
      * Private helper method.
      *
      * @param connection the connection to the jar
      * @param pckgname the package name to search for
      * @param classes the current ArrayList of all classes. This method will simply add new classes.
      * @param _interface interface to bring its sub classes
+     * @param <T> class to be added
      * @throws ClassNotFoundException if a file isn't loaded but still is in the jar file
      * @throws IOException if it can't correctly read from the jar file.
      */
-    public static <T> void checkJarFile(JarURLConnection connection, String pckgname, List<Class<T>> classes, Class<T> _interface)
+    private static <T> void checkJarFile(JarURLConnection connection, String pckgname, List<Class<T>> classes, Class<T> _interface)
             throws ClassNotFoundException, IOException {
         final JarFile jarFile = connection.getJarFile();
         final Enumeration<JarEntry> entries = jarFile.entries();
@@ -98,14 +99,16 @@ public class ReflectionCache {
      * @param directory The directory to start with
      * @param pckgname The package name to search for. Will be needed for getting the Class object.
      * @param classes if a file isn't loaded but still is in the directory
-     * @throws ClassNotFoundException
+     * @param <T> class to be added
+     * @throws ClassNotFoundException if class not found
      */
-    public static <T> void checkDirectory(File directory, String pckgname, List<Class<T>> classes, Class<T> _interface) throws ClassNotFoundException {
+    private static <T> void checkDirectory(File directory, String pckgname, List<Class<T>> classes, Class<T> _interface) throws ClassNotFoundException {
         File tmpDirectory;
 
         if (directory.exists() && directory.isDirectory()) {
             final String[] files = directory.list();
-
+            if (files == null || files.length <= 0)
+                return;
             for (final String file : files) {
                 if (file.endsWith(".class")) {
                     try {
@@ -178,7 +181,7 @@ public class ReflectionCache {
         return new ArrayList<>(Arrays.asList(groups)).removeAll(Arrays.asList(allGroups));
     }
 
-    public static boolean inGroup(String[] groups, List<String> allGroups) {
+    private static boolean inGroup(String[] groups, List<String> allGroups) {
         if (allGroups == null || allGroups.size() == 0)
             return true;
         if (groups == null || groups.length == 0)
@@ -186,7 +189,7 @@ public class ReflectionCache {
         return new ArrayList<>(Arrays.asList(groups)).removeAll(allGroups);
     }
 
-    public static void createSpecific(Map<String, Object> possible, Object o, Class<?> clazz, List<String> groups) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+    private static void createSpecific(Map<String, Object> possible, Object o, Class<?> clazz, List<String> groups) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         Collection<Invoker> invokers = get().getInvokers(clazz);
         for (Invoker i : invokers) {
             if (i.setEnabled()) {
@@ -275,11 +278,12 @@ public class ReflectionCache {
         if (invokers != null)
             return Collections.unmodifiableCollection(invokers);
 
-        Set<String> setters = new HashSet<>();
+        Set<MutablePair<String, String>> setters = new HashSet<>();
         Set<String> getters = new HashSet<>();
 
         Class<?> inherit = clazz;
         invokers = new HashSet<>();
+
         do {
             ParserAdapter<?> adapter = ConfInfo.getAdapter(inherit);
             if (inherit.getAnnotation(JsonClass.class) != null || adapter != null) {
@@ -287,16 +291,36 @@ public class ReflectionCache {
                 Field[] fields = inherit.getDeclaredFields();
                 Method[] methods = inherit.getDeclaredMethods();
 
+                for (Method m : methods) {
+                    if (m.getAnnotation(CustomField.class) != null) {
+                        String name = m.getAnnotation(CustomField.class).name();
+                        if ("".equals(name.trim()))
+                            name = m.getName();
+
+                        Method setter = m.getParameterTypes().length == 1 &&
+                                setters.add(new MutablePair<>(name, m.getParameterTypes()[0].getName())) ? m : null;
+                        String setterName = setter != null ? name : null;
+
+                        Method getter = m.getParameterTypes().length == 0 && getters.add(name) ? m : null;
+                        String getterName = getter != null ? name : null;
+
+                        if (getter != null || setter != null)
+                            invokers.add(new MethodInvoker(setterName, setter, getterName, getter));
+                    }
+                }
+
                 for (Field f : fields) {
                     if (f.getAnnotation(JsonField.class) != null) {
                         String name = f.getAnnotation(JsonField.class).name();
                         if ("".equals(name.trim()))
                             name = f.getName();
                         FieldInvoker i = new FieldInvoker(name, f);
-                        if ( !(setters.contains(name) && getters.contains(name)) ) {
-                            if (!setters.add(name))
+                        boolean enableSetter = setters.add(new MutablePair<>(name, f.getClass().getName()));
+                        boolean enableGetter = getters.add(name);
+                        if ( enableSetter || enableGetter ) {
+                            if (!enableSetter)
                                 i.setEnabled(false);
-                            if (!getters.add(name))
+                            if (!enableGetter)
                                 i.getEnabled(false);
 
                             invokers.add(i);
@@ -307,27 +331,14 @@ public class ReflectionCache {
 
                 if (adapter != null) {
                     for (MethodWrapper mw : adapter.getParams()) {
-                        invokers.add(new MethodInvoker(mw.getName(), mw.getSetter() ,mw.getName(), mw.getGetter()));
-                    }
-                }
 
-                for (Method m : methods) {
-                    if (m.getAnnotation(CustomField.class) != null) {
-                        String name = m.getAnnotation(CustomField.class).name();
-                        if ("".equals(name.trim()))
-                            name = m.getName();
-                        Method setter = m.getParameterTypes().length == 1 ? m : null;
-                        Method getter = m.getParameterTypes().length == 0 ? m : null;
-                        String setterName = m.getParameterTypes().length == 1 ? name : null;
-                        String getterName = m.getParameterTypes().length == 0 ? name : null;
-                        if (!setters.add(setterName)) {
-                            setter = null;
-                            setterName = null;
-                        }
-                        if (!getters.add(getterName)) {
-                            getter = null;
-                            getterName = null;
-                        }
+                        Method setter = mw != null && mw.getSetter() != null && mw.getSetter().getParameterTypes().length == 1 &&
+                                setters.add(new MutablePair<>(mw.getName(), mw.getSetter().getParameterTypes()[0].getName())) ? mw.getSetter() : null;
+                        String setterName = setter != null ? mw.getName() : null;
+
+                        Method getter = mw != null && getters.add(mw.getName()) ? mw.getGetter() : null;
+                        String getterName = getter != null ? mw.getName() : null;
+
                         if (getter != null || setter != null)
                             invokers.add(new MethodInvoker(setterName, setter, getterName, getter));
                     }
@@ -343,7 +354,7 @@ public class ReflectionCache {
         return Collections.unmodifiableCollection(invokers);
     }
 
-    protected void putClass(Class<?> clazz) { classes.put(clazz.getName(), clazz); }
+    private void putClass(Class<?> clazz) { classes.put(clazz.getName(), clazz); }
 
     public Class<?> getClass(String className) throws ClassNotFoundException {
         Class<?> clazz = classes.get(className);
@@ -403,7 +414,7 @@ public class ReflectionCache {
         throw new InstantiationException("Invalid type" + clazz + " for value " + value); // should never occur
     }
 
-    public static boolean isPrimitiveLike(Class<?> clazz) {
+    private static boolean isPrimitiveLike(Class<?> clazz) {
         return clazz.isPrimitive() || Boolean.class.equals(clazz) || Byte.class.equals(clazz) ||
                 Short.class.equals(clazz) || Character.class.equals(clazz) ||
                 Integer.class.equals(clazz) || Long.class.equals(clazz) ||
@@ -441,11 +452,11 @@ public class ReflectionCache {
         return new ArrayList<T>();
     }
 
-    public static Object getValue(Class<?> expected, Class<?>[] generic, Object data) throws InstantiationException {
+    private static Object getValue(Class<?> expected, Class<?>[] generic, Object data) throws InstantiationException {
         return getValue(expected, generic, data, -1, "");
     }
 
-    public static Object getCollectionValueFromList(Class<?> expected, Class<?>[] generic, Object data) throws InstantiationException {
+    private static Object getCollectionValueFromList(Class<?> expected, Class<?>[] generic, Object data) throws InstantiationException {
         Collection c = null;
         if ((Collection.class.isAssignableFrom(expected) || List.class.isAssignableFrom(expected))) {
             c = createList(data.getClass());
@@ -475,7 +486,7 @@ public class ReflectionCache {
         return c;
     }
 
-    public static Object getValue(Class<?> expected, Class<?>[] generic, Object data, int dateTimeType, String format) throws InstantiationException {
+    private static Object getValue(Class<?> expected, Class<?>[] generic, Object data, int dateTimeType, String format) throws InstantiationException {
         if (data == null)
             return null;
         boolean hasJsonAnot = expected.getAnnotation(JsonClass.class) != null;
@@ -577,7 +588,8 @@ public class ReflectionCache {
         if (owner == null)
             throw new IllegalArgumentException("Trying to invoke setter " + m.getName() + " for value " + String.valueOf(value) + " for Object which is null");
         m.setAccessible(true);
-        m.invoke(owner, value);
+        if (value == null || isAssignableFrom(m.getParameterTypes()[0], value.getClass()))
+            m.invoke(owner, value);
     }
 
     public static void fill(Field f, Class[] generics, Object owner, Object data) throws IllegalArgumentException, IllegalAccessException, InstantiationException {
@@ -607,6 +619,32 @@ public class ReflectionCache {
         if (owner == null)
             throw new IllegalArgumentException("Trying to set field " + f.getName() + " for value " + String.valueOf(value) + " for Object which is null");
         f.setAccessible(true);
-        f.set(owner, value);
+        if (value == null || isAssignableFrom(f.getType(), value.getClass()))
+            f.set(owner, value);
+    }
+
+    private static boolean isAssignableFrom(Class<?> clazzSource, Class<?> clazzDest) {
+        return getObjectWrappers(clazzSource).isAssignableFrom(getObjectWrappers(clazzDest));
+    }
+
+    private static Class<?> getObjectWrappers(Class<?> clazz) {
+        if (Byte.TYPE.equals(clazz) || Byte.class.equals(clazz)) {
+            return Byte.class;
+        } else if (Boolean.TYPE.equals(clazz)) {
+            return Boolean.class;
+        } else if (Short.TYPE.equals(clazz)) {
+            return Short.class;
+        } else if (Character.TYPE.equals(clazz)) {
+            return Character.class;
+        } else if (Integer.TYPE.equals(clazz)) {
+            return Integer.class;
+        } else if (Long.TYPE.equals(clazz)) {
+            return Long.class;
+        } else if (Float.TYPE.equals(clazz)) {
+            return Float.class;
+        } else if (Double.TYPE.equals(clazz)) {
+            return Double.class;
+        }
+        return clazz;
     }
 }

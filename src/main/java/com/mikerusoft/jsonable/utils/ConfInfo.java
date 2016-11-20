@@ -128,6 +128,7 @@ public class ConfInfo implements ContextData {
      * Creates Adapter for specified class and its properties (see {@link ParserAdapter} for more explanations)
      * serialization
      * @param adapter custom implementation of adapter
+     * @param <T> adapter type
      */
     public static <T> void registerAdapter(ParserAdapter<T> adapter) {
         get().classAdapters.put(adapter.getClazz(), adapter);
@@ -137,7 +138,7 @@ public class ConfInfo implements ContextData {
      * registers package to read classes for serialization in the same way as {@link SimpleBeanAdapter}
      * @param packageName package to check classes
      */
-    public static <T> void registerAdapter(String packageName) {
+    public static void registerAdapter(String packageName) {
         get().packageAdapters.put(packageName, true);
     }
 
