@@ -243,7 +243,7 @@ Maven
     <dependency>
         <groupId>com.mikerusoft</groupId>
         <artifactId>jsonable</artifactId>
-        <version>1.2.8</version>
+        <version>1.2.9</version>
     </dependency>
 
 Bugs, changes requests

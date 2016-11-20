@@ -275,6 +275,8 @@ public class ReflectionCache {
         if (invokers != null)
             return Collections.unmodifiableCollection(invokers);
 
+        Set<String> setters = new HashSet<>();
+        Set<String> getters = new HashSet<>();
 
         Class<?> inherit = clazz;
         invokers = new HashSet<>();
@@ -290,7 +292,16 @@ public class ReflectionCache {
                         String name = f.getAnnotation(JsonField.class).name();
                         if ("".equals(name.trim()))
                             name = f.getName();
-                        invokers.add(new FieldInvoker(name, f));
+                        FieldInvoker i = new FieldInvoker(name, f);
+                        if ( !(setters.contains(name) && getters.contains(name)) ) {
+                            if (!setters.add(name))
+                                i.setEnabled(false);
+                            if (!getters.add(name))
+                                i.getEnabled(false);
+
+                            invokers.add(i);
+                        }
+
                     }
                 }
 
@@ -309,7 +320,16 @@ public class ReflectionCache {
                         Method getter = m.getParameterTypes().length == 0 ? m : null;
                         String setterName = m.getParameterTypes().length == 1 ? name : null;
                         String getterName = m.getParameterTypes().length == 0 ? name : null;
-                        invokers.add(new MethodInvoker(setterName, setter, getterName, getter));
+                        if (!setters.add(setterName)) {
+                            setter = null;
+                            setterName = null;
+                        }
+                        if (!getters.add(getterName)) {
+                            getter = null;
+                            getterName = null;
+                        }
+                        if (getter != null || setter != null)
+                            invokers.add(new MethodInvoker(setterName, setter, getterName, getter));
                     }
                 }
             }

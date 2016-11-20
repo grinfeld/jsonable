@@ -14,6 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 public class FieldInvoker implements Invoker {
     Field field;
     String name;
+    boolean setEnabled = true;
+    boolean getEnabled = true;
 
     public FieldInvoker(String name, Field field) {
         this.field = field;
@@ -37,14 +39,13 @@ public class FieldInvoker implements Invoker {
     }
 
     @Override
-    public boolean setEnabled() {
-        return true;
-    }
+    public boolean setEnabled() { return setEnabled; }
 
     @Override
-    public boolean getEnabled() {
-        return true;
-    }
+    public boolean getEnabled() { return getEnabled; }
+
+    public void setEnabled(boolean setEnabled) { this.setEnabled = setEnabled; }
+    public void getEnabled(boolean getEnabled) { this.getEnabled = getEnabled; }
 
     @Override
     public String getSetterName() { return name; }
