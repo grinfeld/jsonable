@@ -165,12 +165,15 @@ public class JsonParser {
                 Object o = pn;
                 if ("".equals(pn.trim()))
                     return new ImmutablePair<Character, Object>(c, "");
+                if (pn.length() > 1 && (pn.startsWith("-") || pn.startsWith("+")))
+                    pn = pn.substring(1);
                 if (pn.replaceAll("[0-9]", "").equals(""))
-                    o = ReflectionCache.getPrimitive(Long.class, pn);
+                    o = ReflectionCache.getPrimitive(Long.class, sb.toString().trim());
+                // !pn.startsWith(".") && !pn.endsWith(".") -> it's possible to write double and float numbers without leading zero
                 if (pn.replaceAll("[0-9]", "").equals("."))
-                    o = ReflectionCache.getPrimitive(Double.class, pn);
+                    o = ReflectionCache.getPrimitive(Double.class, sb.toString().trim());
                 if (pn.trim().toLowerCase().equals("false") || pn.trim().toLowerCase().equals("true"))
-                    o = ReflectionCache.getPrimitive(Boolean.class, pn);
+                    o = ReflectionCache.getPrimitive(Boolean.class, sb.toString().trim());
                 queue.pollLast();
                 if (StringUtils.defaultString(pn).trim().equalsIgnoreCase("null")) {
                     return new ImmutablePair<Character, Object>(c, "");

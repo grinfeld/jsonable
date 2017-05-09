@@ -886,6 +886,27 @@ public class JsonTest {
     }
 
     @Test
+    public void numbersWithValidCharactersTest() throws Exception {
+        String str = "{\"num\":-10}";
+        Object result = JsonReader.read(str);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result instanceof Map);
+        Map<Object, Object> map = (Map<Object, Object>)result;
+        Assert.assertNotNull(map.get("num"));
+        Assert.assertTrue(map.get("num") instanceof Long);
+        Assert.assertEquals(-10L, map.get("num"));
+
+        str = "{\"num\":+10}";
+        result = JsonReader.read(str);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result instanceof Map);
+        map = (Map<Object, Object>)result;
+        Assert.assertNotNull(map.get("num"));
+        Assert.assertTrue(map.get("num") instanceof Long);
+        Assert.assertEquals(10L, map.get("num"));
+    }
+
+    @Test
     public void simpleAdapterTest() throws Exception {
         ConfInfo.registerAdapter(SimpleObjNoAnot.class, new String[] {"str", "num", "bool"});
         simpleNoAnot.bool = true;
