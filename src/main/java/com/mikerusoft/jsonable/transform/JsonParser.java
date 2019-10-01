@@ -37,8 +37,9 @@ public class JsonParser {
         END_LINE_CARET = '\r',
         EMPTY_CHAR = '\0';
 
-    LinkedList<Object> queue = null;
-    List<String> groups;
+    private LinkedList<Object> queue = null;
+    private List<String> groups;
+
     public static JsonParser get(String...groups) {
         return new JsonParser(groups);
     }
@@ -50,8 +51,10 @@ public class JsonParser {
 
     public <T> T parse(BufferedReader bf, Class<T> clazz) throws IOException, IllegalArgumentException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchFieldException {
         Pair<Character, Object> resp = parseRecursive(bf);
-        if (resp != null && resp.getRight() != null) {
-            return (T)resp.getRight();
+        if (resp.getRight() != null) {
+            @SuppressWarnings("unchecked")
+            T value = (T) resp.getRight();
+            return value;
             /*if (ConfInfo.isExcludeClass() && clazz != null) {
                 ret = ReflectionCache.guessClass(ret, clazz);
             }
@@ -60,13 +63,10 @@ public class JsonParser {
         return null;
     }
 
-
     /**
      * From this method starts our recursion
      * @param bf parser
      * @return returns Pair of last read character and parsed object
-     * @throws IOException
-     * @throws IllegalArgumentException
      */
     private Pair<Character, Object> parseRecursive(BufferedReader bf) throws IOException, InstantiationException {
         StringBuilder sb = new StringBuilder();
@@ -74,7 +74,7 @@ public class JsonParser {
         int r = -1;
         while ( (r = bf.read()) != -1 ) {
             c = (char) r;
-            if (c != SPACE_CHAR && c != TAB_CHAR && c != END_LINE && c != END_LINE_CARET && c != TAB_CHAR) {
+            if (c != SPACE_CHAR && c != TAB_CHAR && c != END_LINE && c != END_LINE_CARET) {
                 Pair<Character, Object> p = parseStructure(bf, c);
                 Object o = p.getRight();
                 c = p.getLeft();
@@ -89,16 +89,14 @@ public class JsonParser {
     }
 
     private Pair<Character, Object> parseListInnerElement(BufferedReader bf, char c) throws IOException, InstantiationException {
-        StringBuilder sb = new StringBuilder();
         do {
             Pair<Character, Object> p = parseStructure(bf, c);
             Object o = p.getRight();
             c = p.getLeft();
             if (o != null) {
                 return p;
-            } else if (c != ELEM_DELIM && c != SPACE_CHAR && c != TAB_CHAR && c != END_LINE && c != END_LINE_CARET && c != TAB_CHAR) {
-                if (!(sb.length() == 0 && c == EMPTY_CHAR) && c == END_LINE) // avoid empty string at the beginning
-                    sb.append(c);
+            } else if (c != ELEM_DELIM && c != SPACE_CHAR && c != TAB_CHAR && c != END_LINE && c != END_LINE_CARET) {
+                // avoid empty string at the beginning
             }
             int r = bf.read();
             c = r != -1 ? (char) r : EMPTY_CHAR;
@@ -112,8 +110,6 @@ public class JsonParser {
      * @param bf parser
      * @param c current character
      * @return pair of last read character and parsed object
-     * @throws IOException
-     * @throws IllegalArgumentException
      */
     private Pair<Character, Object> parseStructure(BufferedReader bf, char c) throws IOException, InstantiationException {
         Map<String, Object> m = null;
@@ -127,6 +123,9 @@ public class JsonParser {
                 c = parseMap(bf, m);
                 if (c == END_MAP) {
                     m = (Map<String,Object>)queue.pollLast();
+                    if (m == null) {
+                        throw new NullPointerException("Ooops, something went wrong with queue");
+                    }
                     String cl = ConfInfo.getClassProperty(); // Configuration.getStringProperty(ContextManager.get(Configuration.class), Configuration.CLASS_PROPERTY, Configuration.DEFAULT_CLASS_PROPERTY_VALUE);
                     int r = bf.read();
                     if (m.containsKey(cl)) {
