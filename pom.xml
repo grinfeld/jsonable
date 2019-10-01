@@ -6,7 +6,7 @@
 
     <groupId>com.mikerusoft</groupId>
     <artifactId>jsonable</artifactId>
-    <version>1.2.11</version>
+    <version>1.2.12</version>
     <packaging>jar</packaging>
     <name>Jsonable</name>
     <description>Small library to convert Java POJO to and from JSON</description>
@@ -28,6 +28,10 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>

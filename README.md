@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/grinfeld/jsonable.svg?branch=master)](https://travis-ci.org/grinfeld/jsonable)
+[![Code Quality: Java](https://img.shields.io/lgtm/grade/java/g/grinfeld/jsonable.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/grinfeld/jsonable/context:java)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/grinfeld/jsonable.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/grinfeld/jsonable/alerts)
 
 jsonable
 ========

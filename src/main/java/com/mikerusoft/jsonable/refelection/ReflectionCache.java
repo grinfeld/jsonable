@@ -380,32 +380,32 @@ public class ReflectionCache {
             return s;
         } else if (Short.TYPE.equals(clazz) || Short.class.equals(clazz)) {
             Short s = Short.valueOf(String.valueOf(value));
-            if (s != null && Byte.TYPE.equals(clazz))
+            if (Short.TYPE.equals(clazz))
                 return s.shortValue();
             return s;
         } else if (Character.TYPE.equals(clazz) || Character.class.equals(clazz)) {
             Character c = String.valueOf(value).charAt(0);
-            if (c != null && Byte.TYPE.equals(clazz))
+            if (c != null && Character.TYPE.equals(clazz))
                 return c.charValue();
             return c;
         } else if (Integer.TYPE.equals(clazz) || Integer.class.equals(clazz)) {
             Integer i = Integer.valueOf(String.valueOf(value));
-            if (i != null && Byte.TYPE.equals(clazz))
+            if (i != null && Integer.TYPE.equals(clazz))
                 return i.intValue();
             return i;
         } else if (Long.TYPE.equals(clazz) || Long.class.equals(clazz)) {
             Long l = Long.valueOf(String.valueOf(value));
-            if (l != null && Byte.TYPE.equals(clazz))
+            if (l != null && Long.TYPE.equals(clazz))
                 return l.longValue();
             return l;
         } else if (Float.TYPE.equals(clazz) || Float.class.equals(clazz)) {
             Float f = Float.valueOf(String.valueOf(value));
-            if (f != null && Byte.TYPE.equals(clazz))
+            if (f != null && Float.TYPE.equals(clazz))
                 return f.floatValue();
             return f;
         } else if (Double.TYPE.equals(clazz) || Double.class.equals(clazz)) {
             Double d = Double.valueOf(String.valueOf(value));
-            if (d != null && Byte.TYPE.equals(clazz))
+            if (d != null && Double.TYPE.equals(clazz))
                 return d.doubleValue();
             return d;
         } else if (BigDecimal.class.equals(clazz)) {
