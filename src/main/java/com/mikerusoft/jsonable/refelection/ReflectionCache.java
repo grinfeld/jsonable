@@ -40,7 +40,7 @@ public class ReflectionCache {
 
     private static Log log = LogFactory.getLog(ReflectionCache.class);
 
-    private static volatile ReflectionCache instance;
+    private static ReflectionCache instance;
     private static final Object lock = new Object();
 
     public static ReflectionCache get() {
