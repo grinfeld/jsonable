@@ -31,6 +31,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <lang3.version>3.9</lang3.version>
+        <source.plugin.version>3.1.0</source.plugin.version>
+        <javadoc.plugin.version>3.1.1</javadoc.plugin.version>
+        <javadoc.compiler.version>3.8.1</javadoc.compiler.version>
     </properties>
     <dependencies>
         <dependency>
@@ -48,7 +52,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.3.2</version>
+            <version>${lang3.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
@@ -61,7 +65,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>${javadoc.compiler.version}</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
@@ -70,7 +74,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>${source.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -83,7 +87,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
+                <version>${javadoc.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>javadoc</id>
