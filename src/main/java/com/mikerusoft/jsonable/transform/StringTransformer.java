@@ -21,8 +21,7 @@ public class StringTransformer  extends TransformerImpl {
                 new LookupTranslator(
                         new String[][] {
                                 {"\"", "\\\""},
-                                {"\\", "\\\\"},
-                                {"/", "\\/"}
+                                {"\\", "\\\\"}
                         }),
                 // JavaUnicodeEscaper.outsideOf(32, 0x7f), - we don't want unicode
                 new LookupTranslator(EntityArrays.JAVA_CTRL_CHARS_ESCAPE())

@@ -358,6 +358,15 @@ public class JsonTest {
         assertEquals("Failed StringTest" + sb.toString(), "\"Hello\"", sb.toString());
     }
 
+    @Test public void stringUrlTest() throws Exception {
+        try {
+            simpleObj.str = "http://myurl.com";
+            simpleObj.num = 1;
+            JsonWriter.write(simpleObj, sb);
+        } catch (Exception ignore) {}
+        assertSplitSimpleJson("Failed simple object test " + sb.toString(), "{\"str\":\"http://myurl.com\",\"num\":1,\"class\":\"com.mikerusoft.jsonable.JsonTest$SimpleObj\"}", sb.toString());
+    }
+
     @Test public void stringAposTest() throws IOException {
         Map<String, String> m = (Map<String, String>)JsonReader.read("{\"key\": \"Hel'lo\"}", Map.class);
         assertNotNull(m);
